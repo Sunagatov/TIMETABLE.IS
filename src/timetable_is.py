@@ -1,8 +1,10 @@
 import telegram
 from timetable_is import Timetable
 
+
 # Create a Telegram bot
 bot = telegram.Bot(YOUR_BOT_TOKEN)
+
 
 class TimetableHandler:
     def __init__(self):
@@ -22,6 +24,7 @@ class TimetableHandler:
 
 timetable_handler = TimetableHandler()
 
+
 # Define a command handler for the `/timetable` command
 @bot.message_handler(commands=['timetable'])
 def timetable_command(message):
@@ -33,6 +36,7 @@ def timetable_command(message):
 
     # Send the timetable to the user
     bot.send_message(message.chat.id, timetable)
+
 
 # Define a command handler for the `/create_timetable` command
 @bot.message_handler(commands=['create_timetable'])
@@ -46,6 +50,7 @@ def create_timetable_command(message):
     # Send a confirmation message to the user
     bot.send_message(message.chat.id, "Timetable created successfully.")
 
+
 # Define a command handler for the `/edit_timetable` command
 @bot.message_handler(commands=['edit_timetable'])
 def edit_timetable_command(message):
@@ -57,6 +62,7 @@ def edit_timetable_command(message):
 
     # Send a confirmation message to the user
     bot.send_message(message.chat.id, "Timetable edited successfully.")
+
 
 # Define a command handler for the `/delete_timetable` command
 @bot.message_handler(commands=['delete_timetable'])
