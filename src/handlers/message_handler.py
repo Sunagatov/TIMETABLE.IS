@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from .base_handler import BaseHandler
 from keyboards import KeyboardBuilder
 from message_formatter import MessageFormatter
+from config import logger
 
 class MessageHandler(BaseHandler):
     def __init__(self, timezone_service, user_state_manager):
@@ -46,7 +47,8 @@ class MessageHandler(BaseHandler):
                 reply_markup=keyboard,
                 parse_mode=None
             )
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to get time for {city}: {e}")
             keyboard = KeyboardBuilder.time_selection_menu()
             await update.message.reply_text(
                 MessageFormatter.city_not_found(city),
@@ -64,5 +66,6 @@ class MessageHandler(BaseHandler):
                 reply_markup=keyboard,
                 parse_mode=None
             )
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to compare {city1} and {city2}: {e}")
             await update.message.reply_text(MessageFormatter.comparison_error(), parse_mode=None)

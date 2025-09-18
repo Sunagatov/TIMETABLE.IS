@@ -14,6 +14,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Suppress verbose third-party logs
+logging.getLogger('httpx').setLevel(logging.WARNING)
+
 # Validate token
 if not BOT_TOKEN:
     logger.error("BOT_TOKEN environment variable not set")

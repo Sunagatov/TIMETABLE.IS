@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime
+from config import logger
 
 class TimezoneService:
     def __init__(self):
@@ -111,6 +112,7 @@ class TimezoneService:
             if city_lower in known_city or known_city in city_lower:
                 return pytz.timezone(tz)
         
+        logger.warning(f"Unknown city requested: {city}")
         raise ValueError(f"Unknown city: {city}")
     
     def get_current_time(self, city: str):
@@ -118,8 +120,12 @@ class TimezoneService:
         return datetime.now(timezone)
     
     def compare_times(self, city1: str, city2: str):
-        tz1 = self.get_timezone(city1)
-        tz2 = self.get_timezone(city2)
+        try:
+            tz1 = self.get_timezone(city1)
+            tz2 = self.get_timezone(city2)
+        except ValueError as e:
+            logger.warning(f"Time comparison failed: {e}")
+            raise
         
         now = datetime.now(pytz.UTC)
         time1 = now.astimezone(tz1)

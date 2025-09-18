@@ -20,13 +20,14 @@ class TimeBot:
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handlers.handle_message))
     
     async def _error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        logger.error(f"Exception while handling update: {context.error}")
+        logger.error(f"Bot error: {context.error}", exc_info=context.error)
     
     def run(self):
-        logger.info("Starting TimeBot...")
+        logger.info("TimeBot started")
         try:
             self.app.run_polling(allowed_updates=None, drop_pending_updates=True)
         except KeyboardInterrupt:
-            logger.info("Bot stopped by user")
+            logger.info("Bot stopped")
         except Exception as e:
-            logger.error(f"Bot error: {e}")
+            logger.error(f"Bot startup failed: {e}", exc_info=True)
+            raise
