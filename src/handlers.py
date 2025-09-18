@@ -65,10 +65,9 @@ class BotHandlers:
             if state['action'] == 'compare_waiting_first':
                 state['city1'] = text
                 state['action'] = 'compare_waiting_second'
-                cities = self.timezone_service.get_popular_cities()
-                keyboard = KeyboardBuilder.popular_cities(cities)
+                keyboard = KeyboardBuilder.time_selection_menu()
                 await update.message.reply_text(
-                    MessageFormatter.select_second_city(text),
+                    f"⏰ First city: {text}\nSelect second city:",
                     reply_markup=keyboard,
                     parse_mode=None
                 )
@@ -91,20 +90,18 @@ class BotHandlers:
         user_id = update.effective_user.id
         
         if data == "get_time":
-            cities = self.timezone_service.get_popular_cities()
-            keyboard = KeyboardBuilder.popular_cities(cities)
+            keyboard = KeyboardBuilder.time_selection_menu()
             await query.edit_message_text(
-                MessageFormatter.select_city(),
+                "🕐 Get Time - Choose an option:",
                 reply_markup=keyboard,
                 parse_mode=None
             )
         
         elif data == "compare_time":
             self.user_states[user_id] = {'action': 'compare_waiting_first'}
-            cities = self.timezone_service.get_popular_cities()
-            keyboard = KeyboardBuilder.popular_cities(cities)
+            keyboard = KeyboardBuilder.time_selection_menu()
             await query.edit_message_text(
-                MessageFormatter.select_first_city(),
+                "⏰ Compare Times - Select first city:",
                 reply_markup=keyboard,
                 parse_mode=None
             )
@@ -113,7 +110,15 @@ class BotHandlers:
             cities = self.timezone_service.get_popular_cities()
             keyboard = KeyboardBuilder.popular_cities(cities)
             await query.edit_message_text(
-                MessageFormatter.popular_cities_header(),
+                "🌟 Popular Cities:",
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
+        elif data == "main_menu":
+            keyboard = KeyboardBuilder.main_menu()
+            await query.edit_message_text(
+                MessageFormatter.welcome_message(),
                 reply_markup=keyboard,
                 parse_mode=None
             )
@@ -122,7 +127,7 @@ class BotHandlers:
             continents = self.timezone_service.get_continents()
             keyboard = KeyboardBuilder.continents(continents)
             await query.edit_message_text(
-                MessageFormatter.select_continent(),
+                "🗺️ Select Continent:",
                 reply_markup=keyboard,
                 parse_mode=None
             )
@@ -154,7 +159,7 @@ class BotHandlers:
             cities = self.timezone_service.get_cities(continent, country)
             keyboard = KeyboardBuilder.cities(cities, continent, country)
             await query.edit_message_text(
-                MessageFormatter.select_city_from_country(country),
+                f"🏙️ Cities in {country}:",
                 reply_markup=keyboard,
                 parse_mode=None
             )
@@ -165,7 +170,7 @@ class BotHandlers:
             cities = self.timezone_service.get_cities(continent, country)
             keyboard = KeyboardBuilder.cities(cities, continent, country, page)
             await query.edit_message_text(
-                MessageFormatter.select_city_from_country(country),
+                f"🏙️ Cities in {country}:",
                 reply_markup=keyboard,
                 parse_mode=None
             )
@@ -179,10 +184,9 @@ class BotHandlers:
                 if state['action'] == 'compare_waiting_first':
                     state['city1'] = city
                     state['action'] = 'compare_waiting_second'
-                    cities = self.timezone_service.get_popular_cities()
-                    keyboard = KeyboardBuilder.popular_cities(cities)
+                    keyboard = KeyboardBuilder.time_selection_menu()
                     await query.edit_message_text(
-                        MessageFormatter.select_second_city(city),
+                        f"⏰ First city: {city}\nSelect second city:",
                         reply_markup=keyboard,
                         parse_mode=None
                     )
@@ -207,8 +211,7 @@ class BotHandlers:
                 parse_mode=None
             )
         except Exception:
-            cities = self.timezone_service.get_popular_cities()
-            keyboard = KeyboardBuilder.popular_cities(cities)
+            keyboard = KeyboardBuilder.time_selection_menu()
             await update.message.reply_text(
                 MessageFormatter.city_not_found(city),
                 reply_markup=keyboard,
@@ -226,8 +229,7 @@ class BotHandlers:
                 parse_mode=None
             )
         except Exception:
-            cities = self.timezone_service.get_popular_cities()
-            keyboard = KeyboardBuilder.popular_cities(cities)
+            keyboard = KeyboardBuilder.time_selection_menu()
             await query.edit_message_text(
                 MessageFormatter.city_not_found(city),
                 reply_markup=keyboard,

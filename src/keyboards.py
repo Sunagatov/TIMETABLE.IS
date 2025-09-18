@@ -5,9 +5,16 @@ class KeyboardBuilder:
     def main_menu():
         keyboard = [
             [InlineKeyboardButton("🕐 Get Time", callback_data="get_time")],
-            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")],
-            [InlineKeyboardButton("🌍 Popular Cities", callback_data="popular_cities")],
-            [InlineKeyboardButton("🗺️ Browse by Continent", callback_data="continents")]
+            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def time_selection_menu():
+        keyboard = [
+            [InlineKeyboardButton("🌟 Popular Cities", callback_data="popular_cities")],
+            [InlineKeyboardButton("🗺️ Browse by Continent", callback_data="continents")],
+            [InlineKeyboardButton("🔙 Back to Main", callback_data="main_menu")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -19,14 +26,14 @@ class KeyboardBuilder:
                 InlineKeyboardButton(city, callback_data=f"city_{city.replace(' ', '_')}")
                 for city in row
             ])
+        keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="get_time")])
         return InlineKeyboardMarkup(keyboard)
     
     @staticmethod
     def time_actions():
         keyboard = [
             [InlineKeyboardButton("🔄 Another City", callback_data="get_time")],
-            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")],
-            [InlineKeyboardButton("🗺️ Browse Continents", callback_data="continents")]
+            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -34,7 +41,7 @@ class KeyboardBuilder:
     def compare_actions():
         keyboard = [
             [InlineKeyboardButton("🔄 Compare Again", callback_data="compare_time")],
-            [InlineKeyboardButton("🕐 Get Time", callback_data="get_time")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -54,7 +61,7 @@ class KeyboardBuilder:
         countries_page, has_more = KeyboardBuilder._paginate(countries, page)
         
         for country in countries_page:
-            keyboard.append([InlineKeyboardButton(country, callback_data=f"country_{continent}_{country}_{page}")])
+            keyboard.append([InlineKeyboardButton(country, callback_data=f"country_{continent}_{country}")])
         
         nav_row = []
         if page > 0:
