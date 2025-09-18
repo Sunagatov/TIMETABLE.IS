@@ -1,7 +1,9 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from timezone_service import TimezoneService
-from handlers import CommandHandler, CallbackHandler, MessageHandler
+from .command_handler import CommandHandler
+from .callback_handler import CallbackHandler
+from .message_handler import MessageHandler
 from state import UserStateManager
 
 class BotHandlers:
