@@ -1,8 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from .base_handler import BaseHandler
-from keyboards import KeyboardBuilder
-from message_formatter import MessageFormatter
+from ui import KeyboardBuilder, MessageFormatter
 
 class CommandHandler(BaseHandler):
     def __init__(self, timezone_service):

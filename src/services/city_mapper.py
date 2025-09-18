@@ -1,8 +1,4 @@
-import pytz
-from datetime import datetime
-from config import logger
-
-class TimezoneService:
+class CityMapper:
     def __init__(self):
         self.cities_by_continent = {
             "Europe": {
@@ -102,52 +98,16 @@ class TimezoneService:
             "auckland": "Pacific/Auckland", "wellington": "Pacific/Auckland"
         }
     
-    def get_timezone(self, city: str):
+    def get_timezone_name(self, city: str) -> str:
         city_lower = city.lower()
         if city_lower in self.city_timezones:
-            return pytz.timezone(self.city_timezones[city_lower])
+            return self.city_timezones[city_lower]
         
-        # Try partial matches
         for known_city, tz in self.city_timezones.items():
             if city_lower in known_city or known_city in city_lower:
-                return pytz.timezone(tz)
+                return tz
         
-        logger.warning(f"Unknown city requested: {city}")
         raise ValueError(f"Unknown city: {city}")
-    
-    def get_current_time(self, city: str):
-        timezone = self.get_timezone(city)
-        return datetime.now(timezone)
-    
-    def compare_times(self, city1: str, city2: str):
-        try:
-            tz1 = self.get_timezone(city1)
-            tz2 = self.get_timezone(city2)
-        except ValueError as e:
-            logger.warning(f"Time comparison failed: {e}")
-            raise
-        
-        now = datetime.now(pytz.UTC)
-        time1 = now.astimezone(tz1)
-        time2 = now.astimezone(tz2)
-        
-        diff_hours = (time2.utcoffset() - time1.utcoffset()).total_seconds() / 3600
-        
-        return {
-            'city1': city1,
-            'city2': city2,
-            'time1': time1,
-            'time2': time2,
-            'diff_hours': diff_hours
-        }
-    
-    def get_popular_cities(self):
-        return [
-            ["London", "New York", "Tokyo"],
-            ["Paris", "Sydney", "Dubai"],
-            ["Moscow", "Singapore", "Mumbai"],
-            ["Berlin", "Los Angeles", "Beijing"]
-        ]
     
     def get_continents(self):
         return list(self.cities_by_continent.keys())
@@ -158,7 +118,10 @@ class TimezoneService:
     def get_cities(self, continent, country):
         return self.cities_by_continent.get(continent, {}).get(country, [])
     
-    def paginate_items(self, items, page=0, per_page=6):
-        start = page * per_page
-        end = start + per_page
-        return items[start:end], len(items) > end
+    def get_popular_cities(self):
+        return [
+            ["London", "New York", "Tokyo"],
+            ["Paris", "Sydney", "Dubai"],
+            ["Moscow", "Singapore", "Mumbai"],
+            ["Berlin", "Los Angeles", "Beijing"]
+        ]

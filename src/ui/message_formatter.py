@@ -60,21 +60,9 @@ class MessageFormatter:
         return f"✅ First city: {first_city}\n⏰ Now select second city:"
     
     @staticmethod
-    def popular_cities_header():
-        return "🌍 Popular Cities - Click to get time:"
-    
-    @staticmethod
     def comparison_error():
         return "❌ Could not find one or both cities. Please try again."
     
     @staticmethod
-    def select_continent():
-        return "🗺️ Select a continent:"
-    
-    @staticmethod
     def select_country(continent):
         return f"🌍 {continent} - Select a country:"
-    
-    @staticmethod
-    def select_city_from_country(country):
-        return f"🏙️ {country} - Select a city:"
