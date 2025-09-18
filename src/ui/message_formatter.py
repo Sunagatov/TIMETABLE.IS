@@ -2,8 +2,9 @@ class MessageFormatter:
     @staticmethod
     def welcome_message():
         return (
-            "🕐 Welcome to TimeBot!\n\n"
-            "Choose an option below or type a city name:"
+            "🌍 Welcome to TimeBot!\n\n"
+            "Get current time for any city worldwide or compare times between cities.\n\n"
+            "Choose an option below or simply type a city name:"
         )
     
     @staticmethod

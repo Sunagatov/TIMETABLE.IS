@@ -2,13 +2,13 @@ class CityMapper:
     def __init__(self):
         self.cities_by_continent = {
             "Europe": {
+                "Russia": ["Moscow", "St Petersburg"],
                 "United Kingdom": ["London", "Edinburgh", "Manchester"],
                 "France": ["Paris", "Lyon", "Marseille"],
                 "Germany": ["Berlin", "Munich", "Hamburg"],
                 "Italy": ["Rome", "Milan", "Naples"],
                 "Spain": ["Madrid", "Barcelona", "Valencia"],
                 "Netherlands": ["Amsterdam", "Rotterdam"],
-                "Russia": ["Moscow", "St Petersburg"],
                 "Turkey": ["Istanbul", "Ankara"]
             },
             "Asia": {
