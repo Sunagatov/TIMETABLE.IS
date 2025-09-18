@@ -6,7 +6,8 @@ class KeyboardBuilder:
         keyboard = [
             [InlineKeyboardButton("🕐 Get Time", callback_data="get_time")],
             [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")],
-            [InlineKeyboardButton("🌍 Popular Cities", callback_data="popular_cities")]
+            [InlineKeyboardButton("🌍 Popular Cities", callback_data="popular_cities")],
+            [InlineKeyboardButton("🗺️ Browse by Continent", callback_data="continents")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -24,7 +25,8 @@ class KeyboardBuilder:
     def time_actions():
         keyboard = [
             [InlineKeyboardButton("🔄 Another City", callback_data="get_time")],
-            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")]
+            [InlineKeyboardButton("⏰ Compare Times", callback_data="compare_time")],
+            [InlineKeyboardButton("🗺️ Browse Continents", callback_data="continents")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -35,3 +37,61 @@ class KeyboardBuilder:
             [InlineKeyboardButton("🕐 Get Time", callback_data="get_time")]
         ]
         return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def continents(continents):
+        keyboard = []
+        for continent in continents:
+            emoji = {"Europe": "🇪🇺", "Asia": "🌏", "North America": "🌎", 
+                    "South America": "🌎", "Africa": "🌍", "Oceania": "🌏"}.get(continent, "🌍")
+            keyboard.append([InlineKeyboardButton(f"{emoji} {continent}", callback_data=f"continent_{continent}")])
+        keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="get_time")])
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def countries(countries, continent, page=0):
+        keyboard = []
+        countries_page, has_more = KeyboardBuilder._paginate(countries, page)
+        
+        for country in countries_page:
+            keyboard.append([InlineKeyboardButton(country, callback_data=f"country_{continent}_{country}_{page}")])
+        
+        nav_row = []
+        if page > 0:
+            nav_row.append(InlineKeyboardButton("⬅️", callback_data=f"countries_{continent}_{page-1}"))
+        if has_more:
+            nav_row.append(InlineKeyboardButton("➡️", callback_data=f"countries_{continent}_{page+1}"))
+        if nav_row:
+            keyboard.append(nav_row)
+        
+        keyboard.append([InlineKeyboardButton("🔙 Continents", callback_data="continents")])
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def cities(cities, continent, country, page=0):
+        keyboard = []
+        cities_page, has_more = KeyboardBuilder._paginate(cities, page)
+        
+        row = []
+        for i, city in enumerate(cities_page):
+            row.append(InlineKeyboardButton(city, callback_data=f"city_{city.replace(' ', '_')}"))
+            if len(row) == 2 or i == len(cities_page) - 1:
+                keyboard.append(row)
+                row = []
+        
+        nav_row = []
+        if page > 0:
+            nav_row.append(InlineKeyboardButton("⬅️", callback_data=f"cities_{continent}_{country}_{page-1}"))
+        if has_more:
+            nav_row.append(InlineKeyboardButton("➡️", callback_data=f"cities_{continent}_{country}_{page+1}"))
+        if nav_row:
+            keyboard.append(nav_row)
+        
+        keyboard.append([InlineKeyboardButton("🔙 Countries", callback_data=f"continent_{continent}")])
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def _paginate(items, page, per_page=6):
+        start = page * per_page
+        end = start + per_page
+        return items[start:end], len(items) > end

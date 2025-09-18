@@ -3,55 +3,102 @@ from datetime import datetime
 
 class TimezoneService:
     def __init__(self):
+        self.cities_by_continent = {
+            "Europe": {
+                "United Kingdom": ["London", "Edinburgh", "Manchester"],
+                "France": ["Paris", "Lyon", "Marseille"],
+                "Germany": ["Berlin", "Munich", "Hamburg"],
+                "Italy": ["Rome", "Milan", "Naples"],
+                "Spain": ["Madrid", "Barcelona", "Valencia"],
+                "Netherlands": ["Amsterdam", "Rotterdam"],
+                "Russia": ["Moscow", "St Petersburg"],
+                "Turkey": ["Istanbul", "Ankara"]
+            },
+            "Asia": {
+                "Japan": ["Tokyo", "Osaka", "Kyoto"],
+                "China": ["Beijing", "Shanghai", "Guangzhou"],
+                "India": ["Mumbai", "Delhi", "Bangalore"],
+                "UAE": ["Dubai", "Abu Dhabi"],
+                "Singapore": ["Singapore"],
+                "South Korea": ["Seoul", "Busan"],
+                "Thailand": ["Bangkok", "Phuket"],
+                "Indonesia": ["Jakarta", "Bali"],
+                "Philippines": ["Manila", "Cebu"],
+                "Malaysia": ["Kuala Lumpur", "Penang"],
+                "Saudi Arabia": ["Riyadh", "Jeddah"],
+                "Israel": ["Tel Aviv", "Jerusalem"]
+            },
+            "North America": {
+                "USA": ["New York", "Los Angeles", "Chicago", "San Francisco", "Denver", "Phoenix"],
+                "Canada": ["Toronto", "Vancouver", "Montreal"],
+                "Mexico": ["Mexico City", "Guadalajara"]
+            },
+            "South America": {
+                "Brazil": ["Sao Paulo", "Rio de Janeiro", "Brasilia"],
+                "Argentina": ["Buenos Aires", "Cordoba"],
+                "Peru": ["Lima", "Cusco"],
+                "Colombia": ["Bogota", "Medellin"],
+                "Venezuela": ["Caracas"],
+                "Chile": ["Santiago", "Valparaiso"]
+            },
+            "Africa": {
+                "Egypt": ["Cairo", "Alexandria"],
+                "Nigeria": ["Lagos", "Abuja"],
+                "South Africa": ["Johannesburg", "Cape Town"],
+                "Kenya": ["Nairobi", "Mombasa"],
+                "Morocco": ["Casablanca", "Rabat"],
+                "Algeria": ["Algiers"],
+                "Tunisia": ["Tunis"],
+                "Ethiopia": ["Addis Ababa"]
+            },
+            "Oceania": {
+                "Australia": ["Sydney", "Melbourne", "Brisbane"],
+                "New Zealand": ["Auckland", "Wellington"]
+            }
+        }
+        
         self.city_timezones = {
-            "london": "Europe/London",
-            "new york": "America/New_York",
-            "tokyo": "Asia/Tokyo",
-            "paris": "Europe/Paris",
-            "moscow": "Europe/Moscow",
-            "sydney": "Australia/Sydney",
-            "los angeles": "America/Los_Angeles",
-            "dubai": "Asia/Dubai",
+            "london": "Europe/London", "edinburgh": "Europe/London", "manchester": "Europe/London",
+            "paris": "Europe/Paris", "lyon": "Europe/Paris", "marseille": "Europe/Paris",
+            "berlin": "Europe/Berlin", "munich": "Europe/Berlin", "hamburg": "Europe/Berlin",
+            "rome": "Europe/Rome", "milan": "Europe/Rome", "naples": "Europe/Rome",
+            "madrid": "Europe/Madrid", "barcelona": "Europe/Madrid", "valencia": "Europe/Madrid",
+            "amsterdam": "Europe/Amsterdam", "rotterdam": "Europe/Amsterdam",
+            "moscow": "Europe/Moscow", "st petersburg": "Europe/Moscow",
+            "istanbul": "Europe/Istanbul", "ankara": "Europe/Istanbul",
+            "tokyo": "Asia/Tokyo", "osaka": "Asia/Tokyo", "kyoto": "Asia/Tokyo",
+            "beijing": "Asia/Shanghai", "shanghai": "Asia/Shanghai", "guangzhou": "Asia/Shanghai",
+            "mumbai": "Asia/Kolkata", "delhi": "Asia/Kolkata", "bangalore": "Asia/Kolkata",
+            "dubai": "Asia/Dubai", "abu dhabi": "Asia/Dubai",
             "singapore": "Asia/Singapore",
-            "hong kong": "Asia/Hong_Kong",
-            "berlin": "Europe/Berlin",
-            "rome": "Europe/Rome",
-            "madrid": "Europe/Madrid",
-            "amsterdam": "Europe/Amsterdam",
-            "istanbul": "Europe/Istanbul",
-            "cairo": "Africa/Cairo",
-            "mumbai": "Asia/Kolkata",
-            "delhi": "Asia/Kolkata",
-            "beijing": "Asia/Shanghai",
-            "seoul": "Asia/Seoul",
-            "bangkok": "Asia/Bangkok",
-            "jakarta": "Asia/Jakarta",
-            "manila": "Asia/Manila",
-            "kuala lumpur": "Asia/Kuala_Lumpur",
-            "riyadh": "Asia/Riyadh",
-            "tel aviv": "Asia/Jerusalem",
-            "vancouver": "America/Vancouver",
-            "toronto": "America/Toronto",
-            "chicago": "America/Chicago",
-            "denver": "America/Denver",
-            "phoenix": "America/Phoenix",
-            "san francisco": "America/Los_Angeles",
-            "mexico city": "America/Mexico_City",
-            "sao paulo": "America/Sao_Paulo",
-            "buenos aires": "America/Argentina/Buenos_Aires",
-            "lima": "America/Lima",
-            "bogota": "America/Bogota",
+            "seoul": "Asia/Seoul", "busan": "Asia/Seoul",
+            "bangkok": "Asia/Bangkok", "phuket": "Asia/Bangkok",
+            "jakarta": "Asia/Jakarta", "bali": "Asia/Makassar",
+            "manila": "Asia/Manila", "cebu": "Asia/Manila",
+            "kuala lumpur": "Asia/Kuala_Lumpur", "penang": "Asia/Kuala_Lumpur",
+            "riyadh": "Asia/Riyadh", "jeddah": "Asia/Riyadh",
+            "tel aviv": "Asia/Jerusalem", "jerusalem": "Asia/Jerusalem",
+            "new york": "America/New_York", "los angeles": "America/Los_Angeles",
+            "chicago": "America/Chicago", "san francisco": "America/Los_Angeles",
+            "denver": "America/Denver", "phoenix": "America/Phoenix",
+            "toronto": "America/Toronto", "vancouver": "America/Vancouver", "montreal": "America/Toronto",
+            "mexico city": "America/Mexico_City", "guadalajara": "America/Mexico_City",
+            "sao paulo": "America/Sao_Paulo", "rio de janeiro": "America/Sao_Paulo", "brasilia": "America/Sao_Paulo",
+            "buenos aires": "America/Argentina/Buenos_Aires", "cordoba": "America/Argentina/Buenos_Aires",
+            "lima": "America/Lima", "cusco": "America/Lima",
+            "bogota": "America/Bogota", "medellin": "America/Bogota",
             "caracas": "America/Caracas",
-            "santiago": "America/Santiago",
-            "rio de janeiro": "America/Sao_Paulo",
-            "lagos": "Africa/Lagos",
-            "johannesburg": "Africa/Johannesburg",
-            "nairobi": "Africa/Nairobi",
-            "casablanca": "Africa/Casablanca",
+            "santiago": "America/Santiago", "valparaiso": "America/Santiago",
+            "cairo": "Africa/Cairo", "alexandria": "Africa/Cairo",
+            "lagos": "Africa/Lagos", "abuja": "Africa/Lagos",
+            "johannesburg": "Africa/Johannesburg", "cape town": "Africa/Johannesburg",
+            "nairobi": "Africa/Nairobi", "mombasa": "Africa/Nairobi",
+            "casablanca": "Africa/Casablanca", "rabat": "Africa/Casablanca",
             "algiers": "Africa/Algiers",
             "tunis": "Africa/Tunis",
             "addis ababa": "Africa/Addis_Ababa",
-            "cape town": "Africa/Johannesburg"
+            "sydney": "Australia/Sydney", "melbourne": "Australia/Melbourne", "brisbane": "Australia/Brisbane",
+            "auckland": "Pacific/Auckland", "wellington": "Pacific/Auckland"
         }
     
     def get_timezone(self, city: str):
@@ -95,3 +142,17 @@ class TimezoneService:
             ["Moscow", "Singapore", "Mumbai"],
             ["Berlin", "Los Angeles", "Beijing"]
         ]
+    
+    def get_continents(self):
+        return list(self.cities_by_continent.keys())
+    
+    def get_countries(self, continent):
+        return list(self.cities_by_continent.get(continent, {}).keys())
+    
+    def get_cities(self, continent, country):
+        return self.cities_by_continent.get(continent, {}).get(country, [])
+    
+    def paginate_items(self, items, page=0, per_page=6):
+        start = page * per_page
+        end = start + per_page
+        return items[start:end], len(items) > end

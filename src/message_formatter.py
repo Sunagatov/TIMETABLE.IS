@@ -66,3 +66,15 @@ class MessageFormatter:
     @staticmethod
     def comparison_error():
         return "❌ Could not find one or both cities. Please try again."
+    
+    @staticmethod
+    def select_continent():
+        return "🗺️ Select a continent:"
+    
+    @staticmethod
+    def select_country(continent):
+        return f"🌍 {continent} - Select a country:"
+    
+    @staticmethod
+    def select_city_from_country(country):
+        return f"🏙️ {country} - Select a city:"

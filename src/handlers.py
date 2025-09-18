@@ -118,6 +118,58 @@ class BotHandlers:
                 parse_mode=None
             )
         
+        elif data == "continents":
+            continents = self.timezone_service.get_continents()
+            keyboard = KeyboardBuilder.continents(continents)
+            await query.edit_message_text(
+                MessageFormatter.select_continent(),
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
+        elif data.startswith("continent_"):
+            continent = data[10:]
+            countries = self.timezone_service.get_countries(continent)
+            keyboard = KeyboardBuilder.countries(countries, continent)
+            await query.edit_message_text(
+                MessageFormatter.select_country(continent),
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
+        elif data.startswith("countries_"):
+            parts = data.split("_")
+            continent, page = parts[1], int(parts[2])
+            countries = self.timezone_service.get_countries(continent)
+            keyboard = KeyboardBuilder.countries(countries, continent, page)
+            await query.edit_message_text(
+                MessageFormatter.select_country(continent),
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
+        elif data.startswith("country_"):
+            parts = data.split("_")
+            continent, country = parts[1], parts[2]
+            cities = self.timezone_service.get_cities(continent, country)
+            keyboard = KeyboardBuilder.cities(cities, continent, country)
+            await query.edit_message_text(
+                MessageFormatter.select_city_from_country(country),
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
+        elif data.startswith("cities_"):
+            parts = data.split("_")
+            continent, country, page = parts[1], parts[2], int(parts[3])
+            cities = self.timezone_service.get_cities(continent, country)
+            keyboard = KeyboardBuilder.cities(cities, continent, country, page)
+            await query.edit_message_text(
+                MessageFormatter.select_city_from_country(country),
+                reply_markup=keyboard,
+                parse_mode=None
+            )
+        
         elif data.startswith("city_"):
             city = data[5:].replace("_", " ")
             
