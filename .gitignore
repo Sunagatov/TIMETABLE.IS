@@ -1,9 +1,6 @@
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Python
+##############################
+## Python
+##############################
 __pycache__/
 *.py[cod]
 *.pyo
@@ -25,40 +22,83 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+##############################
+## Virtual environments
+##############################
 venv/
 env/
 ENV/
 .venv/
 
-# IDE
+##############################
+## IDE
+##############################
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+##############################
+## Amazon Q
+##############################
+.amazonq/
 
-# Logs
-*.log
+##############################
+## OS X
+##############################
+.DS_Store
+/.env.local
+local.env
+
+##############################
+## Logs
+##############################
+**/*.log
 logs/
 
-# Database
+##############################
+## Database
+##############################
 *.db
 *.sqlite
 *.sqlite3
 
-# Temporary files
+##############################
+## Temporary files
+##############################
 *.tmp
 *.temp
-
-# Setup scripts
 setup.sh
+
+##############################
+## Deployment (private)
+##############################
+deploy.sh
+setup-server.sh
+DEPLOYMENT.md
+QUICKSTART.md
+
+##############################
+## Docker
+##############################
+docker-compose.override.yml
+
+##############################
+## Testing
+##############################
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+##############################
+## Linting
+##############################
+.mypy_cache/
+.ruff_cache/
+
+##############################
+## Environment - PRODUCTION ONLY
+##############################
+.env.prod

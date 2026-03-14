@@ -1,4 +1,4 @@
-import pytz
+from zoneinfo import ZoneInfo
 from datetime import datetime
 from config import logger
 from .city_mapper import CityMapper
@@ -10,7 +10,7 @@ class TimezoneService:
     def get_timezone(self, city: str):
         try:
             timezone_name = self.city_mapper.get_timezone_name(city)
-            return pytz.timezone(timezone_name)
+            return ZoneInfo(timezone_name)
         except ValueError:
             logger.warning(f"Unknown city requested: {city}")
             raise
@@ -27,7 +27,7 @@ class TimezoneService:
             logger.warning(f"Time comparison failed: {e}")
             raise
         
-        now = datetime.now(pytz.UTC)
+        now = datetime.now(ZoneInfo("UTC"))
         time1 = now.astimezone(tz1)
         time2 = now.astimezone(tz2)
         

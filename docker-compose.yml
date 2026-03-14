@@ -1,0 +1,23 @@
+networks:
+  timetable-network:
+    name: timetable-network
+
+services:
+
+  # ── Telegram Bot ───────────────────────────────────────────────────────────
+
+  timetable-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: timetable-bot:${DOCKER_IMAGE_TAG:-latest}
+    container_name: timetable-bot
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - timetable-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
