@@ -1,51 +1,80 @@
 # Scope and Boundaries
 
-## In Scope
+## In scope now
 
-### Core domain
-- topic management
-- word management
-- hierarchical topic structure
-- topic-based browsing
-- progress/knowledge-level tracking
-- soft delete and restore for topics and words
+### Authentication and session
+- single-password login
+- session check endpoint
+- logout
+- CSRF verification on protected routes
 
-### Productivity workflows
-- word search
-- filtering by topic
-- workbook import/export
-- bulk API-based word creation
-- AI topic suggestion for a word
-- AI curation export/import workflows
-- smart review queue generation and completion
-- analytics/stats collection and reporting
+### Topics
+- list topics
+- get topic by id
+- create topic
+- update topic
+- soft delete topic
+- topic sidebar stats
+- topic audit
+- topic split-plan generation
 
-### Security and access
-- single-owner password login
-- backend session cookie
-- CSRF protection for session-authenticated routes
-- API key protection for agent/bulk endpoint
+### Words
+- list words
+- filter by topic
+- search by keyword
+- get word by id
+- create word
+- update word
+- soft delete word
+- XLSX import/export
+- AI review export/import
+- bulk API-key-based word import
+- AI topic suggestion
+- AI curation export/import
 
-## Explicitly Out of Scope
+### Smart review
+- get or create active queue
+- refresh queue
+- complete queue item
+- per-level quotas
+- cooldown logic
+- TTL-based queue lifecycle
+- topic cap balancing
 
-- multi-user roles and permissions
-- public registration
-- OAuth/social login
-- user-generated communities
-- cloud sync across multiple accounts
-- audio pronunciation features
+### Trash
+- list deleted words
+- list deleted topics
+- restore deleted word
+- restore deleted topic
+- purge trash
+
+### Stats
+- overview metrics
+- level counts
+- topic progress stats
+- daily activity
+- usage summary
+- retention summary
+- efficiency summary
+- consistency summary
+- queue summary
+- usage event recording
+
+## Explicitly out of scope unless stated otherwise
+
+- multi-user accounts
+- sign-up flows
+- social features
+- payments
+- collaborative learning
 - spaced repetition engine beyond current smart-review rules
-- generic CMS features
-- marketplace/content publishing
+- arbitrary file imports beyond supported formats
+- real-time sync across multiple clients
+- native mobile apps
+- public API beyond current internal/personal surfaces
 
-## Boundary Clarifications
+## Boundary rules for AI agents
 
-### AI boundary
-AI is a helper for suggestion, enrichment, and curation-oriented workflows.
-AI must not silently own source-of-truth decisions without explicit import/approval behavior.
-
-### Frontend boundary
-The repo currently contains only a frontend placeholder. Requirements in this pack define the intended frontend behavior so AI agents can build it without inventing product rules.
-
-### Backend boundary
-The backend is the current source of truth for domain behavior and must remain the primary reference for business rules until docs and code are fully aligned.
+Agents must not invent new product capabilities unless:
+- they are already visible in code/config
+- or they are explicitly requested in a separate requirements change

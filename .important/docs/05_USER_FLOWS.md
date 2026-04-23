@@ -1,80 +1,71 @@
 # User Flows
 
-## Flow 1 — capture voice note
+## Flow 1 — Login
+1. User opens frontend.
+2. Frontend checks session.
+3. If unauthenticated, login screen is shown.
+4. User submits password.
+5. Backend validates password.
+6. Backend sets session cookie.
+7. Backend returns CSRF token.
+8. Frontend stores CSRF token for protected requests.
 
-1. User opens Telegram bot.
-2. User records and sends a voice message.
-3. Bot validates sender user ID.
-4. Backend creates a new item and generates Memora ID.
-5. Bot replies:
-   - accepted
-   - processing asynchronously
-   - Memora ID
-6. Backend retrieves the Telegram file.
-7. Backend transcribes the voice message.
-8. Backend stores raw transcript.
-9. Backend calls AI cleanup/classification pipeline.
-10. Backend stores AI output.
-11. Item is placed in **Needs Review**.
-12. User later opens web app and reviews the item.
+## Flow 2 — Browse topics and words
+1. User loads app.
+2. Frontend fetches sidebar stats and topics.
+3. User chooses a topic.
+4. Frontend fetches words for topic or with search filter.
+5. User browses word details.
 
-## Flow 2 — capture text note
+## Flow 3 — Create/update word
+1. User opens word form.
+2. User provides word fields and topic selection.
+3. Frontend sends request with session + CSRF.
+4. Backend validates topics and domain rules.
+5. Backend persists word.
+6. Frontend shows updated result.
 
-1. User opens Telegram bot.
-2. User sends a text message.
-3. Bot validates sender user ID.
-4. Backend creates a new item and generates Memora ID.
-5. Bot replies with accepted + asynchronous + Memora ID.
-6. Backend stores raw input text.
-7. Backend calls AI cleanup/classification pipeline.
-8. Backend stores AI output.
-9. Item is placed in **Needs Review**.
-10. User later reviews it in web app.
+## Flow 4 — Soft-delete and restore
+1. User deletes word or topic.
+2. Backend soft-deletes record.
+3. Record disappears from active list.
+4. User opens trash page.
+5. User restores item.
+6. Backend validates restore constraints.
+7. Restored item reappears in active lists.
 
-## Flow 3 — approve item as is
+## Flow 5 — Smart review
+1. User opens smart review page.
+2. Frontend requests active queue.
+3. Backend returns active queue or generates new one.
+4. User marks items complete one by one.
+5. Backend updates queue item and completed count.
+6. If queue is complete/invalid/expired, a new queue is generated on next retrieval.
 
-1. User opens web app.
-2. Default page shows **Needs Review**.
-3. User opens an item.
-4. User compares AI output and current values.
-5. User clicks **Approve**.
-6. Item status becomes `HUMAN_APPROVED`.
-7. Item appears in the main approved list.
+## Flow 6 — AI topic suggestion
+1. User or agent submits term + translation.
+2. Backend calls configured AI endpoint.
+3. Backend validates response against existing topic set.
+4. Backend returns suggested topic or integration/domain error.
 
-## Flow 4 — edit then approve
+## Flow 7 — AI review export/import
+1. User exports topic words for AI review.
+2. External AI enriches or updates payload.
+3. User imports reviewed payload.
+4. Backend validates payload and applies changes.
+5. Response summarizes imported results.
 
-1. User opens item in **Needs Review**.
-2. User edits fields such as:
-   - title
-   - cleaned text
-   - type
-   - category path
-   - priority
-3. User clicks **Approve**.
-4. Item status becomes `HUMAN_EDITED_APPROVED`.
-5. Item joins the main approved list.
+## Flow 8 — AI curation workflow
+1. User exports topic curation page.
+2. External AI prepares structured operations.
+3. User imports curation payload.
+4. Backend validates operations.
+5. Backend creates topics / updates words / reassigns topics as requested.
+6. Response summarizes created/updated/reassigned results.
 
-## Flow 5 — reject item
-
-1. User opens item in **Needs Review**.
-2. User decides it should not enter the approved knowledge base.
-3. User clicks **Reject**.
-4. Item status becomes `REJECTED`.
-5. Item remains in the system but not in main approved list.
-
-## Flow 6 — delete item
-
-1. User opens item from review or approved area.
-2. User clicks **Delete**.
-3. Item moves to trash-like deleted state.
-4. Item no longer appears in the default approved list.
-
-## Flow 7 — processing failure
-
-1. User sends voice or text message.
-2. Bot accepts message and returns Memora ID.
-3. Processing fails at a defined stage.
-4. Backend records failure details.
-5. Item moves to **Failures** area.
-6. Bot sends failure notification with useful details.
-7. User later retries or edits from the web app.
+## Flow 9 — Topic refinement
+1. User opens topic audit.
+2. User identifies broad or suspicious topics.
+3. User requests split plan for a topic.
+4. Backend returns proposed subtopics and word grouping suggestions.
+5. Human decides what to apply manually.

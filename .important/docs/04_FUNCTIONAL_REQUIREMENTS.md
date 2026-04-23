@@ -1,268 +1,111 @@
 # Functional Requirements
 
 ## FR-01 Authentication
+The system shall support single-owner login using a password-based endpoint.
 
-The system shall support password-based login for a single owner account.
-
+## FR-02 Session lifecycle
 The system shall expose:
-- `POST /auth/login`
-- `POST /auth/logout`
-- `GET /auth/session`
+- login
+- logout
+- session status retrieval
 
-Successful login shall create a session cookie and return a CSRF token.
+Protected routes shall require valid session and CSRF verification unless explicitly excluded.
 
-## FR-02 Route Protection
+## FR-03 Topic listing
+The system shall return all active/non-deleted topics through the topics list API.
 
-Session-authenticated routes shall require:
-- valid session
-- valid CSRF proof
+## FR-04 Topic retrieval
+The system shall return a single topic by id or 404 if not found.
 
-The agent/bulk import route shall use API-key auth via header instead of session auth.
+## FR-05 Topic creation
+The system shall support topic creation with:
+- name
+- optional description
+- optional parent topic
+- active flag
 
-## FR-03 Topic Listing
-
-The system shall list all topics.
-
-The response shall include at least:
-- id
+## FR-06 Topic update
+The system shall support topic updates including:
 - name
 - slug
 - description
-- parent_topic_id
-- is_active
-- deleted_at
-- created_at
-- updated_at
+- parent topic
+- active flag
 
-## FR-04 Topic CRUD
+The update contract shall reject explicit nulls for fields that must be omitted rather than nulled.
 
-The system shall support:
-- create topic
-- get topic by id
-- update topic
-- soft-delete topic
+## FR-07 Topic deletion
+The system shall soft-delete topics. Topic deletion shall fail if active child-topic constraints are violated.
 
-## FR-05 Topic Hierarchy
+## FR-08 Topic sidebar stats
+The system shall expose per-topic counts/progress data for sidebar rendering.
 
-Topics shall support parent-child hierarchy through `parent_topic_id`.
+## FR-09 Topic audit
+The system shall expose a topic audit report with broadness signals and review recommendations.
 
-The backend shall reject invalid parent assignments.
+## FR-10 Topic split plan
+The system shall expose a split-plan workflow that proposes subtopics and candidate word assignments.
 
-## FR-06 Topic Integrity
+## FR-11 Word listing
+The system shall list words with optional filtering by topic and optional keyword search.
 
-Deleting a topic shall be blocked when the topic has active child topics.
+## FR-12 Word retrieval
+The system shall return a single word by id or 404 if not found.
 
-## FR-07 Topic Sidebar Stats
+## FR-13 Word creation
+The system shall support word creation with required topic assignment and lexical metadata.
 
-The system shall provide sidebar statistics including:
-- total active words
-- topic-specific word counts
-- topic-specific progress values
+## FR-14 Word update
+The system shall support partial word updates including topic reassignment and progress updates.
 
-## FR-08 Topic Audit
+## FR-15 Word deletion
+The system shall soft-delete words.
 
-The system shall provide a topic audit endpoint that identifies broad or suspicious topics and explains why they may require review.
+## FR-16 XLSX export
+The system shall export words to XLSX format.
 
-## FR-09 Topic Split Planning
+## FR-17 XLSX import
+The system shall import words from XLSX format and report created/updated/skipped counts.
 
-The system shall provide a split-plan workflow for a topic.
+## FR-18 AI review export/import
+The system shall support topic-scoped export for AI review and structured import of AI-reviewed payloads.
 
-The split plan shall include:
-- whether split is recommended
-- reasons
-- proposed subtopics
-- sample terms
-- confidence
-- unassigned word ids
+## FR-19 AI topic suggestion
+The system shall support AI topic suggestion for a given term/translation pair.
 
-## FR-10 Word Listing
+## FR-20 API-key bulk import
+The system shall support agent-oriented bulk word creation guarded by an API key.
 
-The system shall list words with optional filters:
-- topic_id
-- search text
+## FR-21 Smart review queue retrieval
+The system shall return the current active smart review queue or generate one when needed.
 
-## FR-11 Word CRUD
+## FR-22 Smart review queue refresh
+The system shall regenerate a fresh queue on explicit refresh.
 
-The system shall support:
-- create word
-- get word by id
-- update word
-- soft-delete word
+## FR-23 Smart review completion
+The system shall mark queue items complete and update queue counters.
 
-## FR-12 Word Multi-Topic Membership
+## FR-24 Trash listing
+The system shall list deleted words and deleted topics separately.
 
-A word may belong to multiple topics.
+## FR-25 Restore
+The system shall restore deleted words/topics when domain constraints allow.
 
-Word create and update flows shall support `topic_ids`.
+## FR-26 Trash purge
+The system shall hard-delete trashed records on purge according to force or retention rules.
 
-## FR-13 Word Data Model
+## FR-27 Stats retrieval
+The system shall return a comprehensive stats payload for learning, usage, and queue metrics.
 
-A word shall support at least these fields:
-- term
-- past_simple
-- past_participle
-- translations
-- translation_entries
-- part_of_speech
-- knowledge_level
-- countability
-- pattern
-- example
-- example_entries
-- notes
-- is_active
+## FR-28 Usage recording
+The system shall record usage events through a dedicated endpoint.
 
-## FR-14 Word Enrichment Status
-
-The system shall compute and expose:
-- example_count
-- example_target_count
-- example_status
-- needs_example_enrichment
-
-## FR-15 Duplicate Prevention
-
-The backend shall prevent duplicate word creation in conflicting topic contexts and return explicit conflict errors.
-
-## FR-16 Workbook Export
-
-The system shall export words to `.xlsx`.
-
-## FR-17 Workbook Import
-
-The system shall import words from `.xlsx`.
-
-The import result shall report at least:
-- created count
-- updated count
-- skipped count
-- per-sheet summary
-
-## FR-18 AI Topic Suggestion
-
-The system shall provide AI-assisted topic suggestion for a word+translation pair.
-
-The suggestion must resolve to an existing topic name.
-
-## FR-19 AI Topic Suggestion Failure Modes
-
-The system shall surface explicit failure classes for:
-- AI not configured
-- no topics available
-- AI returned unknown topic
-- malformed AI response
-- timeout
-- transport/API failure
-
-## FR-20 Agent/Bulk Import
-
-The system shall provide an API-key-protected bulk word import endpoint.
-
-The flow shall:
-- create or reuse a topic by name
-- insert words
-- skip duplicates
-- report added/skipped counts and terms
-
-## FR-21 Smart Review Availability
-
-The system shall expose a Smart Review queue endpoint.
-
-If Smart Review is disabled, the endpoint shall return a clear unavailable error.
-
-## FR-22 Smart Review Queue Retrieval
-
-The system shall return an active queue or generate one when needed.
-
-The queue response shall include:
-- queue metadata
-- item completion state
-- embedded word data
-
-## FR-23 Smart Review Refresh
-
-The system shall support discarding the current active queue and generating a fresh queue.
-
-## FR-24 Smart Review Completion
-
-The system shall support marking individual queue items as completed.
-
-## FR-25 Trash Listing
-
-The system shall provide separate trash listings for:
-- deleted words
-- deleted topics
-
-## FR-26 Restore Operations
-
-The system shall support:
-- restore deleted word
-- restore deleted topic
-
-The restore flow shall validate domain constraints before restoring.
-
-## FR-27 Trash Purge
-
-The system shall support hard purge of trashed data.
-
-It shall support:
-- retention-based purge
-- force purge
-
-## FR-28 Statistics Retrieval
-
-The system shall provide a stats endpoint covering:
-- vocabulary overview
-- level distribution
-- topic stats
-- daily activity
-- usage summary
-- retention summary
-- efficiency summary
-- consistency summary
-- queue summary
-- words added by month
-
-## FR-29 Usage Tracking
-
-The system shall accept usage-event posts from the frontend.
-
-## FR-30 AI Curation Topic Listing
-
-The system shall list topics for AI curation with pagination.
-
-## FR-31 AI Curation Topic Export
-
-The system shall export topic words for AI curation in:
-- full mode
-- lean mode
-
-Lean mode is intended for external AI enrichment workflows.
-
-## FR-32 AI Curation Import
-
-The system shall accept structured AI curation import payloads for:
+## FR-29 AI curation export/import
+The system shall support AI-curation export/import for topic-wide maintenance workflows including:
 - topic creation
-- word update
 - word creation
-- word reassign
+- word update
+- topic reassignment
 
-The import shall support:
-- dry run
-- strict mode
-- import result summary
-
-## FR-33 Frontend Requirements Baseline
-
-The future frontend shall support all product surfaces implied by the backend:
-- auth/login shell
-- topic tree browsing
-- topic CRUD screens
-- word CRUD screens
-- search/filter
-- smart review
-- trash/restore
-- stats dashboards
-- workbook import/export
-- AI topic suggestion
-- AI curation workflows
+## FR-30 Error semantics
+The system shall use explicit HTTP status codes and clear error messages for common domain and integration failures.

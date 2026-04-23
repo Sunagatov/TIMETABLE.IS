@@ -1,6 +1,6 @@
 # Configuration and Environment
 
-## Core application
+## Core app config
 - `APP_HOST`
 - `APP_PORT`
 - `APP_DEBUG`
@@ -12,7 +12,7 @@
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
 
-## Owner auth / security
+## Auth/security
 - `APP_PASSWORD`
 - `SECRET_KEY`
 - `COOKIE_MAX_AGE`
@@ -21,7 +21,7 @@
 - `COOKIE_SAMESITE`
 - `API_KEY`
 
-## Smart Review
+## Smart review
 - `SMART_REVIEW_ENABLED`
 - `SMART_REVIEW_LEVEL_1_COUNT`
 - `SMART_REVIEW_LEVEL_2_COUNT`
@@ -40,11 +40,10 @@
 - `OPENAI_BASE_URL`
 - `OPENAI_MODEL`
 
-## CORS
-- `CORS_ALLOWED_ORIGINS` behavior must remain documented and environment-driven.
+## Frontend build-time config
+- `VITE_API_BASE_URL`
+- `VITE_PAGE_SIZES`
+- `VITE_DEFAULT_PAGE_SIZE`
 
-## Documentation requirement
-Every env var above must have:
-- default or required status
-- purpose
-- production guidance where relevant
+## Important requirement for AI agents
+Agents must preserve config-driven behavior. Hardcoding these values into business logic is not acceptable.

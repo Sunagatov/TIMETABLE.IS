@@ -1,49 +1,41 @@
 # Domain Glossary
 
 ## Topic
-A named vocabulary grouping. Topics may form a hierarchy through `parent_topic_id`.
-
-## Root Topic
-A topic with no parent.
-
-## Child Topic
-A topic whose `parent_topic_id` points to another topic.
+A category-like grouping for words. Topics may be nested using `parent_topic_id`. Topics have name, slug, optional description, active flag, and soft-delete state.
 
 ## Word
-A vocabulary record that can belong to one or more topics.
+The main study unit. A word can belong to multiple topics and includes lexical metadata, examples, translations, notes, and a knowledge level.
 
-## Knowledge Level
-An integer from 1 to 5 representing current familiarity/study state.
+## Knowledge level
+A numeric learning-progress indicator in range 1..5.
 
-## Parked Word
-A word at knowledge level 5. In current backend constraints, level 5 represents a rare/strange word excluded from Smart Review.
+Current domain meaning:
+- 1..4 = active study levels
+- 5 = parked / excluded from smart review
 
-## Active Item
-A topic or word with `deleted_at = null` and `is_active = true`.
+## Smart review queue
+A generated study queue with items selected from the vocabulary set according to configured level quotas, cooldown rules, TTL, and topic balancing.
 
-## Deleted Item
-A topic or word soft-deleted by setting `deleted_at`.
+## Queue item
+A word selected into a specific smart review queue with order position and completion state.
 
 ## Trash
-The recoverable area for soft-deleted topics and words.
+Soft-deleted storage state for topics and words. Trash supports listing, restore, and purge.
 
-## Smart Review Queue
-A generated queue of words selected by configured rules for focused review.
+## AI topic suggestion
+A workflow where AI maps a word candidate to an existing topic name.
 
-## Queue Item
-A single word entry inside a Smart Review queue, with completion state and position.
+## AI review export/import
+A workflow for exporting topic words for AI-assisted review/enrichment and importing the reviewed payload back.
 
-## Topic Suggestion
-An AI-assisted feature that maps a word + translation to one of the existing topics.
+## AI curation export/import
+A broader workflow for topic export/import that can create topics, create words, update words, and reassign topics.
 
-## AI Curation Export
-A structured export of topic words for external AI-assisted enrichment and later re-import.
+## Sidebar stats
+Aggregated stats used to render topic counts and topic progress in the navigation/sidebar experience.
 
-## Workbook Import/Export
-Excel `.xlsx` based import/export flow for vocabulary data.
+## Progress
+Weighted/computed representation of learning state for a topic or the whole vocabulary set.
 
-## Sidebar Stats
-Topic-related aggregated counts used by the UI sidebar.
-
-## Usage Event
-A recorded frontend usage/activity signal used to compute productivity and engagement metrics.
+## Usage event
+A tracked frontend activity record used for usage-based stats, session summaries, and consistency metrics.
