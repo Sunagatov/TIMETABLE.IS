@@ -1,66 +1,111 @@
-# CLAUDE.md
+# Claude CLI entrypoint for Lexora
 
-## What this repo is
+Start with `AGENTS.md`.
 
-Memora is a **product repo**, not an ops repo.
+Do not start by scanning the whole repository.
 
-It stores:
+---
 
-- backend source
-- frontend source
-- telegram-bot source
-- product and engineering docs
-- AI-agent guidance
+## Default loading sequence
 
-It does **not** store deployment or infrastructure concerns.
+### If task is broad or vague
 
-## Token discipline
+1. `AGENTS.md`
+2. `.claude/generated/request-routing.md`
 
-To save time and tokens:
+### Then route by task type
 
-- do not scan the whole repo by default
-- start from `AGENTS.md`
-- then open only the nearest scoped file
-- then read only the exact docs needed for the task
-- then read only the target implementation files
+- backend task -> `backend/AGENTS.md`
+- frontend task -> `frontend/AGENTS.md`
+- AI curation or enrichment -> `docs/ai/ai-curation-workflow.md`
+- architecture question -> `docs/ai/architecture.md`
+- API question -> `docs/ai/api-surface.md`
+- token/cost optimisation -> `docs/ai/ai-cost-reduction-backlog.md`
+- prompt/context discipline -> `docs/ai/context-budget-rules.md`
 
-## First places to look
+---
 
-### Repo-level
+## Hard rule
 
-- `AGENTS.md`
-- `.claude/generated/request-routing.md`
-- `.claude/generated/app-surfaces.md`
-- `.claude/generated/entrypoints.md`
-- `.claude/generated/validation-quick-reference.md`
+Read only the smallest relevant context.
 
-### Backend work
+For most tasks, that means:
 
+- one repo-level file
+- one scoped file
+- only the exact feature files involved
+- 1–3 shared files at most if required
+
+---
+
+## Claude-specific working style for Lexora
+
+Prefer:
+
+- exact paths
+- focused diffs
+- concrete bug/fix statements
+- stable contracts preserved
+- token efficiency
+- minimal file touch surface
+
+Avoid:
+
+- repeating full repository summaries
+- speculative large refactors
+- scanning unrelated folders
+- touching auth/CSRF/session plumbing unless the task requires it
+- changing both frontend and backend for a tiny one-sided task
+
+---
+
+## Common task routing shortcuts
+
+### Login/auth issue
+Read:
 - `backend/AGENTS.md`
+- backend auth files
+- `frontend/src/shared/http.ts`
+- login feature files
 
-### Frontend work
+### Topic CRUD issue
+Read:
+- backend topics files
+- relevant topic UI files
 
-- `frontend/AGENTS.md`
+### Word editing or study issue
+Read:
+- backend words files
+- `frontend/src/features/words/*`
+- relevant study page files
 
-### Telegram bot work
+### Smart review issue
+Read:
+- smart review backend files
+- smart review frontend files
 
-- `telegram-bot/AGENTS.md`
+### AI topic suggestion issue
+Read:
+- `backend/AGENTS.md`
+- `docs/ai/ai-cost-reduction-backlog.md`
+- `backend/app/features/words/suggest_service.py`
 
-## Claude-style working rules
+### Topic enrichment / split work
+Read:
+- `docs/ai/ai-curation-workflow.md`
+- `docs/ai/example-style-guide.md`
+- exact backend curation files only
 
-- prefer continuity over novelty
-- keep diffs small and scoped
-- do not widen scope because it seems useful
-- keep code and docs aligned
-- preserve backend/client separation
-- do not add deployment files here
-- avoid whole-repo rereads after the first pass
+---
 
-## Validation rule
+## Output preference
 
-After edits, run the **smallest matching validation** instead of broad repo-wide checks.
+A good Claude response for Lexora usually includes:
 
-## If the task is ambiguous
+- what file(s) matter
+- what exact change is proposed
+- what contract must stay stable
+- what small validation to run
+- what regression risk to watch
 
-Read the narrowest relevant product docs and preserve current repo direction.
-Do not invent new product behavior silently.
+That is the default expectation.

@@ -1,8 +1,8 @@
-# Lexora — Product Overview
+# Memora — Product Overview
 
 ## Product summary
 
-Lexora is a personal English vocabulary learning application focused on:
+Memora is a personal English vocabulary learning application focused on:
 
 - topic-based organization of vocabulary
 - fast browsing and search
@@ -38,11 +38,11 @@ Each word is a rich record, not just a term + translation pair. A word may inclu
 
 ### 3. Smart review
 
-The user does not want to manually assemble every review list. Lexora generates a queue using configured per-level quotas, cooldown logic, topic balancing, and queue TTL.
+The user does not want to manually assemble every review list. Memora generates a queue using configured per-level quotas, cooldown logic, topic balancing, and queue TTL.
 
 ### 4. Maintenance and curation
 
-Lexora is not only a learning UI. It is also a vocabulary database maintenance tool. It supports:
+Memora is not only a learning UI. It is also a vocabulary database maintenance tool. It supports:
 
 - XLSX import/export
 - AI review export/import
@@ -61,4 +61,4 @@ Lexora is not only a learning UI. It is also a vocabulary database maintenance t
 
 ## Product owner reality
 
-Lexora is currently a personal project, not a multi-user SaaS. Requirements should optimize for correctness, clarity, and maintainability rather than premature generalization.
+Memora is currently a personal project, not a multi-user SaaS. Requirements should optimize for correctness, clarity, and maintainability rather than premature generalization.

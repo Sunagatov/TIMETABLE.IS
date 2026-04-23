@@ -1,6 +1,6 @@
 # Sources and Code Grounds
 
-This pack was grounded in the current Lexora repository surfaces, especially:
+This pack was grounded in the current Memora repository surfaces, especially:
 
 - root README
 - Docker Compose and backend configuration

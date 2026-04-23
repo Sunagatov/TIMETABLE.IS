@@ -1,6 +1,6 @@
-# Lexora Requirements Pack
+# Memora Requirements Pack
 
-This archive is a replacement-ready documentation pack for the **Lexora** project.
+This archive is a replacement-ready documentation pack for the **Memora** project.
 
 It is written to reduce ambiguity for:
 - Codex CLI

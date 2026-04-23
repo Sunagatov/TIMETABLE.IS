@@ -31,7 +31,7 @@ Use SOLID when it improves clarity. Do not use it to justify unnecessary indirec
 
 ## AI-agent specific guidance
 
-AI agents working on Lexora should:
+AI agents working on Memora should:
 - inspect current contracts before modifying them
 - avoid inventing new product scope
 - avoid silently changing domain semantics

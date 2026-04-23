@@ -2,7 +2,7 @@
 
 ## Auth model
 
-Lexora is currently a single-owner application.
+Memora is currently a single-owner application.
 
 ## Login
 - user submits password

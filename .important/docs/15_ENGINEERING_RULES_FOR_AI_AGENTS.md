@@ -10,7 +10,7 @@ Help coding agents work with fewer assumptions, fewer clarifying questions, and 
 Prefer clear, direct implementations over abstract, future-proofed complexity.
 
 ### YAGNI
-Do not introduce frameworks, layers, or abstractions that are not justified by current Lexora behavior.
+Do not introduce frameworks, layers, or abstractions that are not justified by current Memora behavior.
 
 ### Preserve existing product rules
 Do not silently remove or weaken domain rules already present in code.
@@ -44,7 +44,7 @@ Trash and restore rules exist to protect data integrity.
 ### 7. Do not guess frontend behavior
 Frontend must follow backend contracts, not re-interpret them.
 
-## Definition of good change for Lexora
+## Definition of good change for Memora
 A good implementation change:
 - reduces ambiguity
 - preserves business rules

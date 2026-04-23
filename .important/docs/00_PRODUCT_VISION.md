@@ -1,8 +1,8 @@
-# Lexora — Product Vision
+# Memora — Product Vision
 
 ## Product Summary
 
-Lexora is a personal English vocabulary learning system focused on topic-based study, fast review, practical progress tracking, and low-friction data curation.
+Memora is a personal English vocabulary learning system focused on topic-based study, fast review, practical progress tracking, and low-friction data curation.
 
 The product combines:
 
@@ -13,7 +13,7 @@ The product combines:
 
 ## Core Product Promise
 
-Lexora should help the user:
+Memora should help the user:
 
 - organize vocabulary by topic hierarchy
 - create, update, import, export, and review words efficiently
@@ -24,7 +24,7 @@ Lexora should help the user:
 
 ## Primary Product Shape
 
-Lexora is not a generic language-learning social app.
+Memora is not a generic language-learning social app.
 
 It is a **single-user, owner-operated vocabulary workspace** with strong CRUD, review, import/export, and observability features.
 

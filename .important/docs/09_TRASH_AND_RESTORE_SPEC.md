@@ -2,7 +2,7 @@
 
 ## Deletion model
 
-Lexora uses soft delete for words and topics.
+Memora uses soft delete for words and topics.
 
 ## Deleted word behavior
 A deleted word:
