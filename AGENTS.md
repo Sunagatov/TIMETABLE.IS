@@ -1,66 +1,86 @@
 # Memora — Agent Instructions
 
-Memora is a private, single-user system for capturing thoughts through a Telegram bot, processing them asynchronously, and reviewing/searching them in a web app.
+Memora is a private, single-user product repo for capturing thoughts through a Telegram bot, processing them asynchronously, and reviewing/searching them in a web app.
 
-This repository should stay easy for both **Claude CLI** and **Codex CLI** to continue without rereading unnecessary files.
+This file is the **primary entrypoint** for Claude CLI and Codex CLI.
 
-## Read order for low-token work
+## Token discipline
 
-1. Read this file.
-2. Read `CLAUDE.md` or `CODEX.md` only if the current agent needs extra repo-level guidance.
-3. Read `.claude/generated/request-routing.md` if it exists.
+To save time and tokens:
+
+1. Read this file first.
+2. Read `CLAUDE.md` or `CODEX.md` only if the current agent needs repo-level mode guidance.
+3. Read `.claude/generated/request-routing.md` if the task is still ambiguous.
 4. Read only the nearest scoped file:
-   - `backend/AGENTS.md` for backend work
-   - `frontend/AGENTS.md` for frontend work
-   - `telegram-bot/AGENTS.md` for bot work
-5. Read only the exact docs required by the task:
-   - `docs/00_PRODUCT_VISION.md`
-   - `docs/01_SCOPE_AND_MVP.md`
-   - `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-   - `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
-   - `docs/06_DOMAIN_MODEL.md`
-   - `docs/07_PROCESSING_PIPELINE.md`
-   - `docs/08_ERROR_HANDLING_AND_RETRY.md`
-   - `docs/09_REVIEW_WORKFLOW.md`
-   - `docs/10_AI_BEHAVIOR_RULES.md`
-   - `docs/13_ENGINEERING_PRINCIPLES.md`
-   - `docs/16_IMPLEMENTATION_ORDER.md`
-6. Read only the files directly touched by the task.
+   - `backend/AGENTS.md`
+   - `frontend/AGENTS.md`
+   - `telegram-bot/AGENTS.md`
+5. Read only the exact product docs needed by the task.
+6. Read only the exact implementation files directly touched by the task.
 
 Do **not** scan the whole repo by default.
 
 ## Repo shape
 
-- `backend/` — source of truth, business logic, persistence, auth/session, review workflow
-- `frontend/` — web UI for login, review, failures, approved items, search/filter/sort
-- `telegram-bot/` — thin adapter that forwards accepted messages to backend
-- `docs/` — product/source-of-truth docs
-- `.claude/generated/` — compact routing aids to save tokens
+- `backend/` — source of truth, business rules, persistence, auth/session, item workflow
+- `frontend/` — login, Needs Review, Failures, approved items, edit/review UI
+- `telegram-bot/` — thin transport adapter that forwards accepted messages to backend
+- `docs/` — source of truth for product scope and behavior
+- `.claude/generated/` — cheap routing aids for low-token work
 
-## Important rules
+## Current V1 boundaries that must stay strict
 
-- Telegram is a client adapter, not the place for core business logic.
-- Keep backend reusable by future clients.
-- Preserve the review-first trust model.
-- Do not invent V1 features outside the docs.
-- Do not add deployment/infrastructure material to this repo.
-- Prefer simple, boring code over clever abstractions.
-- Run the **smallest relevant validation** first.
-
-## Hard V1 boundaries
-
-Do not add these in V1 unless the user explicitly changes scope:
+Do not silently introduce these in V1:
 
 - multi-user support
+- signup/user management
 - labels
 - semantic search
-- question-answering workflow
+- question-answering flow
 - AI-created new categories
 - regeneration workflows
 - Memora-managed audio storage
 - mobile app
 - public sharing
+- deployment/infrastructure concerns in this repo
+
+## Important invariants
+
+- Telegram is a client adapter, not the place for core business logic.
+- Backend must remain reusable by future clients.
+- One Telegram message becomes exactly one item in V1.
+- Fresh AI-processed items must remain separate from approved items until human review.
+- Approved items, review items, and failed items are distinct concepts.
+- Type and category are distinct concepts.
+- Prefer simple, boring code over broad refactors or abstraction-heavy designs.
+
+## Read only the docs that match the task
+
+Common high-value docs:
+
+- `docs/01_SCOPE_AND_MVP.md`
+- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/06_DOMAIN_MODEL.md`
+- `docs/07_PROCESSING_PIPELINE.md`
+- `docs/08_ERROR_HANDLING_AND_RETRY.md`
+- `docs/09_REVIEW_WORKFLOW.md`
+- `docs/10_AI_BEHAVIOR_RULES.md`
+- `docs/13_ENGINEERING_PRINCIPLES.md`
+- `docs/16_IMPLEMENTATION_ORDER.md`
+
+Do not reread the whole docs tree if one or two files are enough.
+
+## Validation rule
+
+After edits, run the **smallest relevant validation first**.
+
+Examples:
+- backend-only → targeted backend validation
+- frontend-only → targeted frontend validation
+- telegram-bot-only → smallest bot validation
+- cross-cutting contract change → validate the affected surfaces only
 
 ## If docs and code conflict
 
-Docs win unless the user explicitly changed the requirement later.
+Product docs win unless the user explicitly changed the requirement later.

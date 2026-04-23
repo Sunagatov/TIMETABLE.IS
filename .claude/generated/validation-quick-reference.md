@@ -1,26 +1,34 @@
 # Validation Quick Reference
 
-## Rule
+Use the smallest relevant validation first.
 
-Run the smallest relevant validation first.
-
-## Backend work
+## Backend change
 
 Prefer:
 - targeted backend test
-- narrow app startup check
+- narrow startup check
+- feature-focused validation
 
-## Frontend work
+Avoid broad repo scans first.
+
+## Frontend change
 
 Prefer:
 - targeted frontend test
 - build
+- route/page-focused validation
 
-## Bot work
+Avoid unrelated frontend scans first.
+
+## Telegram bot change
 
 Prefer:
-- smallest possible bot-side validation
+- smallest bot-side validation
+- focused config/startup check
 
-## Broad work
+## Cross-cutting contract change
 
-Only use broader validation when the task itself is broad.
+Validate only the affected surfaces:
+- backend + frontend if API contract changed
+- backend + bot if ingestion contract changed
+- all three only if the task truly crosses all three

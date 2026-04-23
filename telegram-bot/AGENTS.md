@@ -14,14 +14,25 @@ It should:
 
 It should not own core business logic.
 
-## Read order
+## Current stack
+
+- Python
+- python-telegram-bot
+- httpx
+
+## Read order for bot work
 
 1. `AGENTS.md`
 2. `docs/03_FUNCTIONAL_REQUIREMENTS.md`
 3. `docs/07_PROCESSING_PIPELINE.md`
 4. `docs/08_ERROR_HANDLING_AND_RETRY.md`
 5. `docs/13_ENGINEERING_PRINCIPLES.md`
-6. then only the exact bot files needed by the task
+6. current bot entrypoints:
+   - `telegram-bot/src/memora_bot/main.py`
+   - `telegram-bot/src/memora_bot/config.py`
+7. then only the exact bot files needed by the task
+
+Do **not** scan the whole repo or the whole backend/frontend when a bot-only change is enough.
 
 ## Bot invariants
 

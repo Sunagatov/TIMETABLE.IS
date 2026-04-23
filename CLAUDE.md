@@ -1,60 +1,47 @@
 # CLAUDE.md
 
-## What this repo is
+## Purpose
 
-Memora is a product repo, not an ops repo.
+Help Claude CLI work in Memora with low ambiguity and low token waste.
 
-It stores:
+## How to start
 
-- backend source
-- frontend source
-- telegram-bot source
-- product and engineering docs
-- AI-agent guidance
+1. Read `AGENTS.md`.
+2. Read `.claude/generated/request-routing.md` if task scope is unclear.
+3. Read the nearest scoped file:
+   - `backend/AGENTS.md`
+   - `frontend/AGENTS.md`
+   - `telegram-bot/AGENTS.md`
+4. Read only the exact product docs needed by the task.
+5. Read only the exact implementation files you will touch.
 
-It does **not** store deployment or infra concerns.
+Do **not** scan the whole repo unless the task is explicitly a broad audit.
 
-## Token discipline
+## Claude-specific guidance
 
-To save time and tokens:
+- prefer continuity over redesign
+- preserve the repo’s existing direction unless the requirement changes
+- keep diffs narrow and easy to review
+- summarize assumptions before coding when a task is ambiguous
+- prefer explicit transitions and straightforward code paths
+- do not import ops/deployment habits from Vault into this app repo
 
-- do not scan the whole repo by default
-- start from `AGENTS.md`
-- then open only the nearest scoped file
-- then read only the exact docs needed for the task
-- then read only the target implementation files
+## Current repo rules
 
-## First places to look
+- Memora is a product repo, not an ops repo.
+- Deployment and infra belong elsewhere.
+- Telegram is only one adapter.
+- Backend owns business rules.
+- Review-first trust model is central to the product.
 
-### Repo-level
+## When changing behavior
 
-- `AGENTS.md`
-- `README.md`
-- `docs/01_SCOPE_AND_MVP.md`
+Before making a behavioral change, check:
 - `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/13_ENGINEERING_PRINCIPLES.md`
-
-### Backend work
-
-- `backend/AGENTS.md`
-
-### Frontend work
-
-- `frontend/AGENTS.md`
-
-### Telegram bot work
-
-- `telegram-bot/AGENTS.md`
-
-## Important repo rules
-
-- preserve backend/client separation
-- avoid repo-wide scans unless the task explicitly needs them
-- keep diffs small and scoped
-- prefer minimal changes over broad refactors
-- do not add deployment files here
-- keep code and docs aligned
+- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/09_REVIEW_WORKFLOW.md`
+- `docs/10_AI_BEHAVIOR_RULES.md`
 
 ## Validation rule
 
-After edits, run the **smallest matching validation** instead of broad repo-wide checks.
+Run the smallest matching validation first instead of broad repo-wide checks.

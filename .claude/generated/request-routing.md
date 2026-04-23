@@ -1,42 +1,63 @@
-# Request Routing (cheap mode)
+# Request Routing — Cheap Mode
 
-Use this as a token-saving starting point.
+Use this file before scanning the repo when you need a low-token routing decision.
 
 ## If the task is about backend behavior
 
 Read:
-
 - `backend/AGENTS.md`
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/06_DOMAIN_MODEL.md`
-- `docs/07_PROCESSING_PIPELINE.md`
-- `docs/08_ERROR_HANDLING_AND_RETRY.md`
+- exact matching product docs
+- exact backend files
 
-## If the task is about frontend behavior
+Examples:
+- item lifecycle
+- review workflow
+- failures/retries
+- auth/session
+- category logic
+- AI orchestration
+- ingestion endpoints
+
+## If the task is about UI/screens
 
 Read:
-
 - `frontend/AGENTS.md`
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/09_REVIEW_WORKFLOW.md`
+- exact matching product docs
+- exact frontend files
 
-## If the task is about Telegram bot behavior
+Examples:
+- Needs Review page
+- Failures page
+- approved list
+- item detail/edit
+- login flow
+- sidebar/filter/sort
+
+## If the task is about Telegram ingestion/messages
 
 Read:
-
 - `telegram-bot/AGENTS.md`
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
 - `docs/07_PROCESSING_PIPELINE.md`
 - `docs/08_ERROR_HANDLING_AND_RETRY.md`
+- exact bot files only
 
-## If the task is about scope or product behavior
+## If the task is about overall product behavior
 
-Read:
-
+Start with:
+- `AGENTS.md`
 - `docs/01_SCOPE_AND_MVP.md`
 - `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
 
-## Rule
+## If the task is unclear
 
-Do not scan the full repo first.
+Read only:
+- `AGENTS.md`
+- nearest scoped file
+- one or two exact docs
+Then narrow the task before reading code.
+
+## Never do this by default
+
+- do not scan the whole repo
+- do not read the full docs tree for a small change
+- do not read frontend + backend + bot together unless the task truly crosses all three

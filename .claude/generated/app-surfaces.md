@@ -1,32 +1,55 @@
 # App Surfaces
 
-## backend/
+## Backend surface
 
-Source of truth:
+Role:
+- source of truth
 - business logic
-- item lifecycle
-- review workflow
-- failure handling
-- category tree
+- persistence
 - auth/session
-- API contracts
+- review/failure/approval rules
+- category management
+- AI orchestration
 
-## frontend/
+Initial entrypoints:
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/MemoraBackendApplication.kt`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/web/`
+- `backend/src/main/resources/application.yml`
 
-UI:
+## Frontend surface
+
+Role:
 - login
-- Needs Review
-- Failures
+- review queues
 - approved list
-- detail/edit/review
+- item details/editing
 - search/filter/sort
-- sidebar category tree
+- category tree/sidebar
 
-## telegram-bot/
+Initial entrypoints:
+- `frontend/src/main.tsx`
+- `frontend/src/App.tsx`
+- `frontend/src/pages/NeedsReviewPage.tsx`
 
-Thin adapter:
+## Telegram bot surface
+
+Role:
 - receive Telegram updates
-- validate owner
+- validate sender
 - forward to backend
-- send immediate ack
-- send failure notifications
+- send ack/failure messages
+
+Initial entrypoints:
+- `telegram-bot/src/memora_bot/main.py`
+- `telegram-bot/src/memora_bot/config.py`
+
+## Shared source of truth
+
+Behavior comes from:
+- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/06_DOMAIN_MODEL.md`
+- `docs/07_PROCESSING_PIPELINE.md`
+- `docs/08_ERROR_HANDLING_AND_RETRY.md`
+- `docs/09_REVIEW_WORKFLOW.md`
+- `docs/10_AI_BEHAVIOR_RULES.md`
