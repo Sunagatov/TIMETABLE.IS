@@ -21,7 +21,7 @@ class TelegramCaptureService(
     fun ingest(request: TelegramIngestRequest): MemoraItem {
         val now = Instant.now()
         val internalId = UUID.randomUUID().toString()
-        val mindraftId = "MDR-${'$'}{now.epochSecond}-${'$'}{internalId.take(8)}"
+        val mindraftId = "MDR-${now.epochSecond}-${internalId.take(8)}"
 
         val isVoice = request.voice != null
         val rawInputText = request.text?.takeIf { it.isNotBlank() }
