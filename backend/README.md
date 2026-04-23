@@ -1,20 +1,31 @@
 # Backend
 
-The backend is the source of truth for Memora.
+This folder owns Memora business logic and persistence.
 
-## Responsibilities
+## Role
 
-- Persist items and processing metadata
-- Expose review/search/edit APIs
-- Run async processing orchestration
-- Enforce authentication and authorization for the single-user web app
-- Keep business logic reusable for future clients
+The backend is the source of truth.
 
-## Non-responsibilities
+It must remain client-agnostic and reusable by future clients beyond Telegram.
 
-- Direct Telegram UX logic
-- Frontend presentation logic
+## Suggested stack
 
-## Suggested future stack
+- Kotlin
+- Spring Boot
+- PostgreSQL (later during implementation)
+- session-based auth
 
-Use the requirements docs first before choosing the concrete stack.
+## Proposed package direction
+
+```text
+com.sunagatov.memora.backend
+  app
+  domain
+  application
+  infrastructure
+  web
+```
+
+## Important rule
+
+Do not let Telegram-specific logic leak into domain/application layers.

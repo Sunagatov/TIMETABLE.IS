@@ -1,43 +1,48 @@
-# Memora — Agent Instructions
-# AI Agent Guidelines
+# AGENTS.md
 
-These rules apply to Claude CLI, Codex CLI, ChatGPT, and human contributors.
+This file exists to make work in this repository easier for AI coding agents and humans.
 
-## Core principles
+## Goal
 
-- Prefer **clarity over cleverness**
-- Follow **KISS** and **YAGNI**
-- Apply **SOLID pragmatically**, not dogmatically
-- Avoid over-engineering, especially in V1
-- Keep business logic independent from delivery adapters like Telegram
+Implement Memora V1 MVP with minimal ambiguity and minimal over-engineering.
 
-## File size guidance
+## Required reading order before making changes
 
-- Prefer files under ~350 lines where practical
-- Split only when it improves clarity
-- Avoid fragmentation into tiny files with no value
+1. `docs/00_PRODUCT_VISION.md`
+2. `docs/01_SCOPE_AND_MVP.md`
+3. `docs/03_FUNCTIONAL_REQUIREMENTS.md`
+4. `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
+5. `docs/06_DOMAIN_MODEL.md`
+6. `docs/07_PROCESSING_PIPELINE.md`
+7. `docs/08_ERROR_HANDLING_AND_RETRY.md`
+8. `docs/09_REVIEW_WORKFLOW.md`
+9. `docs/10_AI_BEHAVIOR_RULES.md`
+10. `docs/13_ENGINEERING_PRINCIPLES.md`
+11. `docs/16_IMPLEMENTATION_ORDER.md`
 
-## Architecture guidance
+## Hard rules
 
-- Backend is the source of truth
-- Telegram bot is a thin adapter
-- Frontend is a client of backend APIs only
-- Core use cases must remain reusable by future clients (mobile, desktop, CLI)
+- Do not invent features outside the docs.
+- Do not introduce Docker or deployment files in this repository.
+- Do not couple backend business logic to Telegram transport details.
+- Do not build for multi-user in V1.
+- Do not add labels, semantic search, question answering, regeneration flows, or AI-created categories in V1.
+- Keep code boring and explicit.
+- Prefer straightforward application services/use cases over abstraction-heavy designs.
+- Prefer small files where practical. Aim for roughly under 350 LOC if possible.
+- Preserve terminology from the docs.
 
-## Documentation-first rule
+## Architecture expectation
 
-Before implementing a major feature, read the relevant docs in `docs/` and update them if assumptions change.
+- `backend/` owns business logic and persistence contracts.
+- `telegram-bot/` is a thin adapter/client to backend APIs.
+- `frontend/` is the review/search/edit UI.
+- `docs/` is the source of truth for requirements and scope.
 
-## V1 restraint
+## If requirements and code conflict
 
-Do not add speculative abstractions for:
+The docs win unless the user explicitly changed the requirement later in chat.
 
-- multi-user support
-- public sharing
-- advanced semantic search
-- labels
-- question-answering workflow
-- audio object storage
-- category suggestion approval flows
+## How to implement incrementally
 
-unless the docs are explicitly updated first.
+Follow `docs/16_IMPLEMENTATION_ORDER.md`.

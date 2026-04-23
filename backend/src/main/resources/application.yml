@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: memora-backend
+
+server:
+  port: ${BACKEND_PORT:8080}
+
+memora:
+  auth:
+    session-days: ${BACKEND_SESSION_DAYS:30}
+  categories:
+    default-path: ${DEFAULT_CATEGORY_PATH:Default/General/Inbox}

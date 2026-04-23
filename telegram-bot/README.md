@@ -1,17 +1,17 @@
 # Telegram Bot
 
-The Telegram bot is a thin adapter.
+This folder contains the Memora Telegram bot adapter.
 
-## Responsibilities
+## Role
 
-- Accept updates only from the configured Telegram user ID
-- Verify webhook secret
-- Forward accepted messages to backend
-- Return immediate acknowledgement with a stable Memora item ID
-- Return failure notifications with useful processing context
+The bot is intentionally thin.
 
-## Non-responsibilities
+It should:
 
-- Core business logic
-- Direct DB ownership
-- Approval/review state management
+- receive Telegram updates
+- validate sender user ID
+- forward accepted input to backend
+- send immediate acknowledgement
+- send failure notifications when backend requests them
+
+It should not own core business logic.

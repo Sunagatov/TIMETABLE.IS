@@ -1,13 +1,17 @@
 # Frontend
 
-The frontend is the main review/search/edit surface for Memora V1.
+This folder contains the Memora web UI.
 
-## Responsibilities
+## V1 responsibilities
 
-- Login screen
-- Needs Review queue
-- Failures queue
-- Approved items list
-- Filters, sorting, search
-- Category tree sidebar
-- Edit and approve flows
+- password login screen
+- Needs Review page
+- Failures page
+- approved list
+- item detail and edit flow
+- search / filter / sort
+- category sidebar
+
+## Important rule
+
+UI should reflect the review-first trust model.

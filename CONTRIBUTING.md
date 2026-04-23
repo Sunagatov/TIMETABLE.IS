@@ -1,15 +1,31 @@
 # Contributing
 
-## Workflow
+## Working approach
 
-1. Read `docs/` before implementing
-2. Keep changes small and focused
-3. Prefer boring, maintainable solutions
-4. Update docs if behavior changes
+This repository is intentionally structured to be comfortable for both humans and AI coding agents.
 
-## Implementation standards
+## Principles
 
-- Add tests where meaningful
-- Keep naming simple and explicit
-- Avoid framework-heavy magic when plain code is clearer
-- Preserve separation between domain logic and adapters
+- read docs first
+- keep changes scoped
+- keep naming explicit
+- preserve backend/client boundaries
+- do not add out-of-scope features
+
+## Commit style
+
+Prefer commit messages like:
+
+- `docs: refine v1 review workflow`
+- `backend: add item status transitions`
+- `frontend: add needs review page shell`
+- `telegram-bot: forward accepted message to backend`
+
+## Pull request expectations
+
+A change is better when it is:
+
+- small
+- understandable
+- traceable to requirements
+- easy to review
