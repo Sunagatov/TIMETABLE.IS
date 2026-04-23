@@ -1,51 +1,7 @@
-:root {
-  font-family: Inter, system-ui, sans-serif;
-  color: #111827;
-  background: #f8fafc;
-}
+@import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-.page {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: 100vh;
-}
-
-.sidebar {
-  border-right: 1px solid #e5e7eb;
-  padding: 24px;
-  background: #ffffff;
-}
-
-.content {
-  padding: 24px;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.controls {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.controls input {
-  flex: 1;
-  padding: 10px 12px;
-}
-
-.placeholder-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
+html,
+body,
+#root {
+  min-height: 100%;
 }

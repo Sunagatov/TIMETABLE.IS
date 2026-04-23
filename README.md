@@ -1,6 +1,6 @@
 # Memora
 
-**Memora** is a personal thought-capture and review system built around:
+**Memora** is a private, single-user thought-capture and review system built around:
 
 - Telegram-first capture
 - asynchronous backend processing
@@ -10,7 +10,7 @@
 
 This repository is the **application source monorepo** for Memora.
 
-It is not the production deployment source of truth.
+It is **not** the production deployment source of truth.
 
 ## Source-of-truth split
 
@@ -50,29 +50,9 @@ Important Vault docs for Memora operations:
 
 - `backend/` — Kotlin + Spring Boot backend and source-of-truth business logic
 - `frontend/` — React + TypeScript web UI
-- `telegram-bot/` — thin Telegram adapter
+- `telegram-bot/` — Kotlin-based thin Telegram adapter
 - `docs/requirements/` — product requirements and project contracts
 - `docs/ai/` — compact context for Claude CLI, Codex CLI, and human maintainers
-
-## Product direction
-
-Memora is not a generic note-taking app.
-
-It is a **private, single-user capture-and-review system** designed to help the user:
-
-- get thoughts out of the head quickly
-- capture them via Telegram voice or text
-- process them asynchronously
-- review AI output before trusting it
-- retrieve approved items later in the web app
-
-## Core implementation stance
-
-- backend is source of truth
-- Telegram is an adapter, not the center of the architecture
-- AI output is useful but not trusted blindly
-- approved knowledge base is separate from unreviewed/failure queues
-- simplicity, clarity, and maintainability matter more than cleverness
 
 ## Read order
 
@@ -95,30 +75,27 @@ Do not start by scanning the whole repository.
 ## Stack at a glance
 
 ### Backend
-- Kotlin 2.0.x
-- Java 21
-- Spring Boot 3.4.x
+
+- Kotlin 2.3.10
+- Java 25 (LTS)
+- Spring Boot 4.0.5
 - Spring Security
-- validation
+- MongoDB support
+- Gradle Kotlin DSL
 
 ### Frontend
-- React 18
-- TypeScript 5
-- Vite 6
+
+- React 19.2.1
+- TypeScript 6.0.2
+- Vite 8.0.8
+- TanStack Query 5.99.1
+- React Hook Form 7.73.0
+- Zod 4.3.6
+- Tailwind CSS 4.2.2
 
 ### Telegram bot
-- Python-based thin adapter
-- forwards accepted messages to backend
-- should remain transport-focused
 
-## Current repository purpose
-
-The repository is still early-stage.
-
-These docs exist to prevent AI agents and humans from:
-
-- carrying over stale Lexora assumptions
-- coupling backend to Telegram
-- guessing deployment/runtime truth from source files
-- over-engineering initial V1
-- wasting tokens on avoidable repo-wide scans
+- Kotlin 2.3.10
+- Java 25
+- TelegramBots 9.2.0
+- thin adapter that forwards accepted messages to backend

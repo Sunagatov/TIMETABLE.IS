@@ -1,53 +1,33 @@
-# Repo Map (Compact)
-
-This is a working map, not a full file listing.
+# Repo Map
 
 ## Root
 
-- `README.md`
-- `AGENTS.md`
-- `CLAUDE.md`
-- `CODEX.md`
-- `.claude/generated/request-routing.md`
-- `backend/`
-- `frontend/`
-- `telegram-bot/`
-- `docs/requirements/`
-- `docs/ai/`
+- `README.md` — source-of-truth split + repository purpose
+- `AGENTS.md` — global repo rules for humans and AI
+- `CLAUDE.md` — Claude CLI repo guidance
+- `CODEX.md` — Codex CLI repo guidance
 
-## Backend
+## docs/requirements
 
-Start here for backend work:
-- `backend/build.gradle.kts`
-- `backend/README.md`
-- `backend/AGENTS.md`
+Product and engineering truth for V1.
 
-## Frontend
+## docs/ai
 
-Start here for frontend work:
-- `frontend/package.json`
-- `frontend/README.md`
-- `frontend/AGENTS.md`
+Compact AI continuation context.
 
-## Telegram bot
+## backend
 
-Start here for bot work:
-- `telegram-bot/README.md`
-- `telegram-bot/AGENTS.md`
-- `telegram-bot/src/memora_bot/main.py`
+Spring Boot application source of truth.
 
-## Requirements docs
+## frontend
 
-Main behavior source:
-- `docs/requirements/README.md`
-- `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/requirements/05_NON_FUNCTIONAL_REQUIREMENTS.md`
+React review/search/edit UI.
 
-## AI context docs
+## telegram-bot
 
-Main compressed context:
-- `docs/ai/architecture.md`
-- `docs/ai/request-routing-guide.md`
-- `docs/ai/token-budget-rules.md`
-- `docs/ai/invariants.md`
-- `docs/ai/env-runtime-reference.md`
+Thin Kotlin Telegram adapter.
+
+## Important mental model
+
+Backend owns business logic.  
+Frontend and Telegram bot are clients/adapters.

@@ -1,39 +1,17 @@
-# OS
 .DS_Store
 Thumbs.db
-
-# IDEs
 .idea/
 .vscode/
 *.iml
-
-# Env
 .env
 .env.local
 .env.*.local
-
-# Logs
-*.log
-logs/
-
-# Node
 node_modules/
 dist/
 coverage/
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-
-# Java / Kotlin / Gradle
 .gradle/
 build/
 out/
-
-# Misc
+logs/
 tmp/
 temp/

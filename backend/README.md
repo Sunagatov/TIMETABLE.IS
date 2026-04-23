@@ -1,45 +1,41 @@
 # Backend
 
-This folder owns Memora backend business logic and persistence.
+Kotlin + Spring Boot backend for Memora.
 
-## Role
+## Current intent
 
-The backend is the **source of truth** for Memora.
+This backend is the source of truth for:
 
-It must stay reusable by future clients beyond Telegram.
+- auth/session handling
+- item ingestion
+- review/failure queues
+- approved knowledge base
+- category tree operations
 
-## Confirmed stack
+## Local run
 
-- Kotlin
-- Spring Boot
-- Spring Validation
-- Spring Security
-- Java 21
+Prerequisites:
 
-## Backend responsibility boundaries
+- Java 25
+- Gradle available locally
 
-The backend owns:
+Run:
 
-- item creation and persistence
-- asynchronous processing orchestration
-- AI integration/orchestration
-- review workflow state
-- failure tracking
-- retry behavior
-- category management
-- search/filter/sort support
-- session-based web auth
+```bash
+cd backend
+gradle bootRun
+```
 
-The backend must not be shaped around Telegram-specific assumptions.
+By default it starts on:
 
-## Important architectural rule
+- `http://localhost:8080`
 
-Do not let Telegram-specific logic leak into domain/application layers.
+Health endpoint:
 
-Telegram is only one input adapter.
+- `GET /api/health`
 
-## Read next
+## Notes
 
-- `backend/AGENTS.md`
-- `docs/requirements/`
-- `docs/ai/architecture.md`
+The initial starter uses in-memory storage to keep local startup simple.
+
+MongoDB support is already included in the stack decision and dependency set, but full persistence can be added in the next implementation step without changing the product contract.

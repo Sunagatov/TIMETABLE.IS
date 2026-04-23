@@ -1,38 +1,36 @@
 # Frontend
 
-This folder contains the Memora web UI.
+React + TypeScript + Vite frontend for Memora.
 
-## Role
+## Current purpose
 
-The web UI is the main surface for:
+Provide the review-first UI for Memora V1.
 
-- login
-- Needs Review
-- Failures
-- approved list
-- item detail and editing
-- search / filter / sort
-- category tree browsing
-- category management
+## Included stack
 
-## V1 product rule
+- React 19.2.1
+- TypeScript 6.0.2
+- Vite 8.0.8
+- TanStack Query 5.99.1
+- React Hook Form 7.73.0
+- Zod 4.3.6
+- Tailwind CSS 4.2.2
 
-The frontend must reflect the **review-first trust model**.
+## Local run
 
-Fresh AI output does not automatically belong in the trusted approved list.
+Prerequisites:
 
-## Frontend responsibility boundaries
+- Node.js installed
+- npm available
 
-The frontend should:
+Run:
 
-- render backend state clearly
-- expose review actions
-- preserve state separation between approved/review/failure areas
-- stay thin in business rules
-- consume backend contracts rather than re-implementing logic in ad hoc ways
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Read next
+Default URL:
 
-- `frontend/AGENTS.md`
-- `docs/requirements/`
-- `docs/ai/architecture.md`
+- `http://localhost:5173`
