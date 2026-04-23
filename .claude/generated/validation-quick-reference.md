@@ -1,34 +1,31 @@
-# Validation Quick Reference
+# Validation quick reference — Memora
 
 Use the smallest relevant validation first.
 
-## Backend change
+## Backend-only change
 
-Prefer:
+Prefer one of:
+
 - targeted backend test
 - narrow startup check
 - feature-focused validation
 
-Avoid broad repo scans first.
+## Frontend-only change
 
-## Frontend change
+Prefer one of:
 
-Prefer:
 - targeted frontend test
-- build
+- `npm run build`
 - route/page-focused validation
 
-Avoid unrelated frontend scans first.
+## Telegram bot-only change
 
-## Telegram bot change
+Prefer one of:
 
-Prefer:
-- smallest bot-side validation
-- focused config/startup check
+- import/startup check
+- narrow bot-side behavior check
 
-## Cross-cutting contract change
+## Cross-cutting change
 
-Validate only the affected surfaces:
-- backend + frontend if API contract changed
-- backend + bot if ingestion contract changed
-- all three only if the task truly crosses all three
+Validate only the touched surfaces first.
+Do not jump straight to broad full-project scans unless the task itself is broad.

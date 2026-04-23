@@ -1,55 +1,47 @@
-# App Surfaces
+# App surfaces — Memora
 
-## Backend surface
+This is a cheap routing note for Claude CLI / Codex CLI.
 
-Role:
-- source of truth
+## backend/
+
+Owns:
+
 - business logic
-- persistence
-- auth/session
-- review/failure/approval rules
-- category management
+- item lifecycle
+- review workflow
+- failures and retries
+- session/auth behavior
+- search/filter/sort contracts
 - AI orchestration
+- bot-facing ingestion endpoints
 
-Initial entrypoints:
-- `backend/src/main/kotlin/com/sunagatov/memora/backend/MemoraBackendApplication.kt`
-- `backend/src/main/kotlin/com/sunagatov/memora/backend/web/`
-- `backend/src/main/resources/application.yml`
+## frontend/
 
-## Frontend surface
+Owns:
 
-Role:
-- login
-- review queues
-- approved list
-- item details/editing
-- search/filter/sort
-- category tree/sidebar
+- login UI
+- Needs Review
+- Failures
+- approved items list
+- item detail/edit/review
+- category management UI
+- search/filter/sort UI
+- category tree sidebar
 
-Initial entrypoints:
-- `frontend/src/main.tsx`
-- `frontend/src/App.tsx`
-- `frontend/src/pages/NeedsReviewPage.tsx`
+## telegram-bot/
 
-## Telegram bot surface
+Owns:
 
-Role:
-- receive Telegram updates
-- validate sender
-- forward to backend
-- send ack/failure messages
+- Telegram update handling
+- sender validation
+- forwarding accepted input to backend
+- ack and failure messages
 
-Initial entrypoints:
-- `telegram-bot/src/memora_bot/main.py`
-- `telegram-bot/src/memora_bot/config.py`
+## Not owned here
 
-## Shared source of truth
+- deployment
+- Docker / infra
+- monitoring / ops
+- production secrets workflow
 
-Behavior comes from:
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/06_DOMAIN_MODEL.md`
-- `docs/07_PROCESSING_PIPELINE.md`
-- `docs/08_ERROR_HANDLING_AND_RETRY.md`
-- `docs/09_REVIEW_WORKFLOW.md`
-- `docs/10_AI_BEHAVIOR_RULES.md`
+Those belong outside this repo.

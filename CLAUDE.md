@@ -1,47 +1,66 @@
 # CLAUDE.md
 
-## Purpose
+## What this repo is
 
-Help Claude CLI work in Memora with low ambiguity and low token waste.
+Memora is a **product repo**, not an ops repo.
 
-## How to start
+It stores:
 
-1. Read `AGENTS.md`.
-2. Read `.claude/generated/request-routing.md` if task scope is unclear.
-3. Read the nearest scoped file:
-   - `backend/AGENTS.md`
-   - `frontend/AGENTS.md`
-   - `telegram-bot/AGENTS.md`
-4. Read only the exact product docs needed by the task.
-5. Read only the exact implementation files you will touch.
+- backend source
+- frontend source
+- telegram-bot source
+- product and engineering docs
+- AI-agent guidance
 
-Do **not** scan the whole repo unless the task is explicitly a broad audit.
+It does **not** store deployment or infrastructure concerns.
 
-## Claude-specific guidance
+## Token discipline
 
-- prefer continuity over redesign
-- preserve the repo’s existing direction unless the requirement changes
-- keep diffs narrow and easy to review
-- summarize assumptions before coding when a task is ambiguous
-- prefer explicit transitions and straightforward code paths
-- do not import ops/deployment habits from Vault into this app repo
+To save time and tokens:
 
-## Current repo rules
+- do not scan the whole repo by default
+- start from `AGENTS.md`
+- then open only the nearest scoped file
+- then read only the exact docs needed for the task
+- then read only the target implementation files
 
-- Memora is a product repo, not an ops repo.
-- Deployment and infra belong elsewhere.
-- Telegram is only one adapter.
-- Backend owns business rules.
-- Review-first trust model is central to the product.
+## First places to look
 
-## When changing behavior
+### Repo-level
 
-Before making a behavioral change, check:
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/09_REVIEW_WORKFLOW.md`
-- `docs/10_AI_BEHAVIOR_RULES.md`
+- `AGENTS.md`
+- `.claude/generated/request-routing.md`
+- `.claude/generated/app-surfaces.md`
+- `.claude/generated/entrypoints.md`
+- `.claude/generated/validation-quick-reference.md`
+
+### Backend work
+
+- `backend/AGENTS.md`
+
+### Frontend work
+
+- `frontend/AGENTS.md`
+
+### Telegram bot work
+
+- `telegram-bot/AGENTS.md`
+
+## Claude-style working rules
+
+- prefer continuity over novelty
+- keep diffs small and scoped
+- do not widen scope because it seems useful
+- keep code and docs aligned
+- preserve backend/client separation
+- do not add deployment files here
+- avoid whole-repo rereads after the first pass
 
 ## Validation rule
 
-Run the smallest matching validation first instead of broad repo-wide checks.
+After edits, run the **smallest matching validation** instead of broad repo-wide checks.
+
+## If the task is ambiguous
+
+Read the narrowest relevant product docs and preserve current repo direction.
+Do not invent new product behavior silently.

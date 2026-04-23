@@ -1,63 +1,47 @@
-# Request Routing — Cheap Mode
+# Request routing — Memora
 
-Use this file before scanning the repo when you need a low-token routing decision.
+Use this file before scanning the repo.
 
-## If the task is about backend behavior
-
-Read:
-- `backend/AGENTS.md`
-- exact matching product docs
-- exact backend files
-
-Examples:
-- item lifecycle
-- review workflow
-- failures/retries
-- auth/session
-- category logic
-- AI orchestration
-- ingestion endpoints
-
-## If the task is about UI/screens
+## If the task is backend-only
 
 Read:
-- `frontend/AGENTS.md`
-- exact matching product docs
-- exact frontend files
 
-Examples:
-- Needs Review page
-- Failures page
-- approved list
-- item detail/edit
-- login flow
-- sidebar/filter/sort
+1. `backend/AGENTS.md`
+2. exact relevant docs
+3. exact backend files touched by the change
 
-## If the task is about Telegram ingestion/messages
+Skip frontend and telegram-bot unless integration requires them.
+
+## If the task is frontend-only
 
 Read:
-- `telegram-bot/AGENTS.md`
-- `docs/07_PROCESSING_PIPELINE.md`
-- `docs/08_ERROR_HANDLING_AND_RETRY.md`
-- exact bot files only
 
-## If the task is about overall product behavior
+1. `frontend/AGENTS.md`
+2. exact relevant docs
+3. exact frontend files touched by the change
 
-Start with:
-- `AGENTS.md`
-- `docs/01_SCOPE_AND_MVP.md`
-- `docs/03_FUNCTIONAL_REQUIREMENTS.md`
+Skip backend and telegram-bot unless contract changes require them.
+
+## If the task is telegram-bot-only
+
+Read:
+
+1. `telegram-bot/AGENTS.md`
+2. exact relevant docs
+3. exact bot files touched by the change
+
+Skip backend/frontend internals unless the API contract is changing.
+
+## If the task is cross-cutting
+
+Read:
+
+1. `AGENTS.md`
+2. all relevant scoped `AGENTS.md` files
+3. only the exact shared docs needed
+4. only the exact files touched
 
 ## If the task is unclear
 
-Read only:
-- `AGENTS.md`
-- nearest scoped file
-- one or two exact docs
-Then narrow the task before reading code.
-
-## Never do this by default
-
-- do not scan the whole repo
-- do not read the full docs tree for a small change
-- do not read frontend + backend + bot together unless the task truly crosses all three
+Start from the narrowest likely scope.
+Do not do a whole-repo scan first.

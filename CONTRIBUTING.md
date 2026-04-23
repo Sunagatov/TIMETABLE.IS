@@ -16,13 +16,13 @@ This repository should stay easy for:
 - no over-engineering
 - preserve backend/client separation
 - preserve V1 scope
-- prefer local clarity over global cleverness
+- keep the next agent's continuation easy
 
 ## Preferred commit message style
 
-- `docs: clarify item status contract`
-- `backend: add item status enum`
-- `frontend: add needs review page shell`
+- `docs: tighten agent read order`
+- `backend: add item status transition`
+- `frontend: add needs review shell`
 - `telegram-bot: forward accepted text message to backend`
 
 ## Before considering a change done
@@ -33,4 +33,14 @@ Check:
 - is it still in V1 scope?
 - did it avoid unnecessary abstractions?
 - is it easy for the next AI agent to continue?
-- did it touch only the necessary files?
+- did it use the smallest relevant validation?
+
+## PR / review mindset
+
+A good change here is:
+
+- clear
+- scoped
+- easy to trace
+- easy to continue
+- not wider than requested
