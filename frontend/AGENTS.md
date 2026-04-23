@@ -1,131 +1,117 @@
-# Frontend instructions — Lexora
+# Frontend instructions — Memora
 
 This file is the scoped operating contract for frontend work.
 
----
-
 ## Frontend stack
 
-- React 19
+Confirmed from repository files:
+
+- React 18
 - TypeScript 5
 - Vite 6
-- React Router 6
-- React Query 5
-- Vitest
 
----
+## Frontend role
+
+The frontend is the review/search/edit UI for Memora.
+
+It is not the source of truth for product rules.
+
+It should express backend state clearly, not invent its own parallel business logic.
 
 ## Read order for frontend tasks
 
 ### Start with
 
-- `frontend/src/app/router.tsx`
-- `frontend/src/shared/http.ts`
+- `frontend/package.json`
+- `docs/requirements/README.md`
+- exact relevant requirement file(s)
 
 ### Then
 
-Read only the relevant feature files for the task.
+Read only the exact relevant frontend files for the task.
 
-Confirmed screens / flows include:
+If architecture or invariants matter, read:
+- `docs/ai/architecture.md`
+- `docs/ai/invariants.md`
 
-- login
-- smart review
-- topic study
-- word page
-- word edit page
-- trash
-- stats
+## Core frontend responsibilities in V1
 
----
+- password login screen
+- Needs Review page
+- Failures page
+- approved list
+- item detail page or edit view
+- search / filter / sort
+- category tree sidebar
+- category management
 
-## Shared frontend contracts
+## Frontend invariants
 
-### HTTP contract
+### Review-first invariants
 
-Most API calls should go through `frontend/src/shared/http.ts`.
+- unreviewed items are not the same as approved items
+- approved list must remain separate by default
+- Needs Review must stay explicit
+- Failures must stay explicit
 
-Important behavior already centralized there:
+### Data model invariants
 
-- base URL normalization
-- JSON content type defaults
-- CSRF header injection
-- `credentials: 'include'`
-- normalized API error handling
+- type and category are different concepts
+- category tree has exactly 3 levels in V1
+- V1 type enum is:
+  - `IDEA`
+  - `THOUGHT`
+  - `REMINDER`
+  - `OTHER`
+- original AI output and latest human version must both remain visible
 
-Do not duplicate this logic across feature files.
+### Editing invariants
 
-### Routing contract
-
-Keep route changes aligned with `frontend/src/app/router.tsx`.
-
-Confirmed current routes include:
-
-- `/login`
-- `/smart-review`
-- `/topics/:topicSlug`
-- `/words/:wordId`
-- `/words/:wordId/edit`
-- `/trash`
-- `/stats`
-
-If root-route behavior changes, keep it aligned with the faster current product direction rather than reintroducing a slow landing screen without evidence.
-
----
+- approved items can still be edited later
+- human edits do not automatically send items back into review in V1
+- category deletion must be forbidden if category is not empty
 
 ## UI/UX guardrails
 
-- keep study flow fast
-- keep friction low
-- avoid global state when local feature state is enough
-- preserve mobile drawer / sidebar behavior
-- keep filters, pagination, and quick-add behavior coherent
-- do not degrade the dashboard/study experience by accident during unrelated edits
+- keep the interface fast and clear
+- reduce friction in review flows
+- do not hide critical state transitions
+- do not blur approved vs review/failure states
+- prefer clarity over decorative complexity
+- keep filters and sorting easy to understand
+- make category hierarchy readable
 
----
+## Product boundaries to respect
 
-## Frontend correctness invariants
+Do not accidentally add into V1:
 
-- when active words or topics change, invalidate caches that drive stats, smart review, and trash
-- Smart Review should not render progress/counts from stale shared data while new data is loading
-- mobile study drawer state should reset on route enter/exit
-- pagination params should be normalized/clamped back into the URL instead of allowing UI/URL drift
-- many-to-many topic membership must stay visible in editing flows
-- topic tree hierarchy must remain visible when parent topics exist
+- labels
+- question-answering workflow
+- regeneration features
+- new-category approval workflow
+- audio playback/download
+- view-count sorting
 
----
+If the UI needs placeholders for future features, make that explicit and non-active.
 
-## Topic and word editing notes
+## Production/runtime boundary
 
-- word edit mode supports multiple topic memberships; do not collapse it back to single-topic semantics
-- topic lists may render as a hierarchy/tree
-- subtopics are still topics, not a separate entity type
-- broad umbrella topics should stay visible when child topics exist
-- prefer clarity over dense UI complexity
+Frontend source docs here should not become fake deployment documentation.
 
----
+If the task is about prod domains, ports, app.yaml, containers, runtime topology, or deployment workflows, read Vault docs instead.
 
 ## Change strategy
 
 When working on frontend:
 
-- keep changes feature-local when possible
-- avoid unrelated style cleanup
-- avoid introducing new state layers unless justified
-- preserve shared helper usage
-- update route-aware UX carefully
-- prefer small, reversible changes
-
----
+- keep changes feature-local
+- do not invent extra state layers unless required
+- avoid broad UI redesigns without explicit product reason
+- preserve route and page intent
+- keep requirements and UI behavior aligned
 
 ## Validation
 
-Use the smallest relevant validation first.
-
-```bash
-cd frontend
-npm test
-npm run lint
-npm run build
-```
-
-For narrow work, targeted tests plus build are usually enough.
+Use the smallest relevant validation first:
+- targeted build
+- exact frontend validation needed by the task

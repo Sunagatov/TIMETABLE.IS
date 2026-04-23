@@ -1,70 +1,110 @@
-# Lexora — Repository Agent Instructions
+# Memora — Repository Agent Instructions
 
-This file is the **main operating contract** for coding agents working in Lexora.
+This file is the **main working contract** for coding agents and humans in the Memora repository.
 
-If you only read one file before starting, read this one.
+If only one file is read before starting work, it should be this file.
 
----
+## What Memora is
 
-## What Lexora is
+Memora is a private, single-user capture-and-review system.
 
-Lexora is a personal English vocabulary learning app with:
+The current V1 product direction is:
 
-- topic-based study
-- word and topic CRUD
-- smart review queues
-- stats and trash flows
-- AI-assisted topic suggestion
-- AI-assisted curation/import workflows
+- capture via Telegram voice and text
+- asynchronous processing
+- review-first trust model
+- web-based review, editing, and retrieval
+- strict separation between approved items and unreviewed/failed items
 
-It is a **monorepo** with backend, frontend, and compact AI/helper docs.
+## What this file is for
 
----
+This file exists to reduce:
 
-## Primary goal of this file
+- token waste
+- repo-wide scanning
+- stale assumptions
+- accidental coupling
+- “Lexora template” carry-over mistakes
 
-Reduce token usage and reduce accidental repo-wide scanning.
-
-This file tells the agent:
+It defines:
 
 - what to read first
 - what not to read by default
 - which contracts are stable
-- how to keep changes small and safe
+- where production/deployment truth lives
+- how to keep changes narrow and safe
 
----
+## Absolute naming rule
+
+This project is **Memora**.
+
+Agents must not describe it as Lexora or Mindraft.
+
+If any stale file still contains those names, treat that as documentation debt to be fixed, not as product truth.
 
 ## Default read order
 
 ### Always
 
-1. Read `AGENTS.md`
-2. Read `.claude/generated/request-routing.md` if the task is still broad
-3. Read the smallest scoped file:
+1. `AGENTS.md`
+2. `.claude/generated/request-routing.md` if the task is still broad
+3. `docs/requirements/README.md`
+4. the smallest relevant scoped file:
    - backend task -> `backend/AGENTS.md`
    - frontend task -> `frontend/AGENTS.md`
-   - AI curation task -> `docs/ai/ai-curation-workflow.md`
-   - architecture/API question -> `docs/ai/architecture.md` and `docs/ai/api-surface.md`
+   - telegram-bot task -> `telegram-bot/AGENTS.md`
 
 ### Then
 
 Read only:
 
-- the exact files to change
-- at most 1–3 shared helpers if truly needed
+- exact files to change
+- 0–3 small supporting files if truly necessary
+- exact requirement/AI notes relevant to the task
 
 ### Do not do this by default
 
-- do not scan the entire repository
-- do not open both frontend and backend unless the task crosses that boundary
-- do not re-read large docs if a compact summary file already answers the question
+- do not scan the whole repo
+- do not read all three modules for a one-sided task
+- do not carry Lexora assumptions into Memora
+- do not infer deployment truth from source repo files
 
----
+## Source-of-truth boundaries
+
+### Application source-of-truth
+This repository:
+- source code
+- requirements
+- architecture
+- implementation guidance
+
+### Production/deployment source-of-truth
+Vault repository:
+- `/Users/zufar/IdeaProjects/Vault`
+- `Sunagatov/Vault`
+- `apps/memora/**`
+
+When a task touches:
+- prod deployment
+- runtime/container topology
+- server ports/domains
+- env contracts
+- app.yaml / docker-compose in production
+- deploy/rollback/recovery workflows
+
+read Vault docs first, not Memora source docs.
+
+Start with:
+
+- `apps/memora/README.md`
+- `apps/memora/AI_AGENT_GUIDE.md`
+- `apps/memora/CHANGE_MAP.md`
+- `apps/memora/PORTS_AND_RUNTIME.md`
+- `apps/memora/ENV_CONTRACT.md`
 
 ## Project shape
 
 ### Root
-
 - `README.md`
 - `AGENTS.md`
 - `CLAUDE.md`
@@ -72,206 +112,123 @@ Read only:
 - `.claude/generated/request-routing.md`
 - `backend/`
 - `frontend/`
+- `telegram-bot/`
+- `docs/requirements/`
 - `docs/ai/`
-- `docker-compose.yml` or compose file used by the project
 
 ### Backend
-
-FastAPI application with DB/auth/business logic.
-
-Confirmed feature groups:
-
-- `auth`
-- `health`
-- `topics`
-- `words`
-- `smart_review`
-- `trash`
-- `stats`
+Kotlin + Spring Boot source-of-truth backend.
 
 ### Frontend
+React + TypeScript web UI.
 
-React application with route-driven study and editing flows.
+### Telegram bot
+Thin Python-based Telegram adapter.
 
 ### Docs
-
-`docs/ai/` contains compressed context specifically meant to save agent tokens.
-
----
+- `docs/requirements/` = product requirements, constraints, scope
+- `docs/ai/` = token-saving summaries for AI agents and humans
 
 ## Hard operating rules
 
 ### 1. Narrow context first
+Repository context is expensive.
 
-Repository context is expensive.  
-Assume most tasks need:
-
-- 1 routing file
-- 1 scoped agent file
-- 3–8 code files
-- 0–3 shared helpers
+Most tasks should need:
+- 1 repo-level file
+- 1 scoped file
+- a handful of exact source files
+- 0–2 compact docs
 
 ### 2. Minimal diffs first
-
 Prefer the smallest change that solves the real problem.
 
 ### 3. Preserve stable contracts
-
 Do not casually change:
+- backend client-agnostic boundary
+- review-first trust model
+- separation of approved vs unreviewed/failed items
+- one Telegram message = one item
+- exact three-level category model
+- type/category separation
+- “Telegram is thin” rule
+- source-vs-Vault boundary
 
-- session-cookie auth shape
-- CSRF header flow
-- shared frontend HTTP helper behavior
-- feature boundaries unless justified
-- import payload semantics
-- many-to-many word-topic behavior
-- topic hierarchy semantics
+### 4. KISS and YAGNI first
+Memora is early-stage.
+Do not introduce abstractions for imagined future scale unless a real current requirement demands them.
 
-### 4. Prefer deterministic logic before LLM logic
+### 5. Telegram is not the backend
+Telegram bot must stay transport-focused.
+Business logic belongs in backend use cases/services.
 
-If a problem can be solved with deterministic code, caching, filtering, validation, or shortlisting, do that first.
+### 6. Production truth is not here
+If the task is operational or deployment-related, read Vault.
 
-### 5. Prod work must be evidence-based
+## Stable Memora invariants
 
-If a task touches prod data or prod workflow:
+### Product invariants
+- single-user system in V1
+- Telegram bot accepts only configured owner user ID
+- one message becomes one item
+- processing is asynchronous
+- fresh processed items must not automatically join approved list
+- review happens in web app
+- main list contains only human-approved items by default
+- dedicated Needs Review and Failures areas must exist
 
-- inspect current prod state first
-- use Vault-managed secrets/workflows
-- keep changes reversible
-- prefer rename-in-place when IDs must stay stable
+### Content invariants
+- V1 type enum:
+  - `IDEA`
+  - `THOUGHT`
+  - `REMINDER`
+  - `OTHER`
+- category tree is exactly 3 levels
+- if AI is uncertain about type -> `OTHER`
+- if AI is uncertain about category -> default category path
+- approved items can still be edited later
+- original AI output and latest human version must both remain visible
 
----
+### Architecture invariants
+- backend is source of truth
+- future clients beyond Telegram must stay possible
+- telegram-bot must not own business logic
+- frontend should consume backend contracts rather than duplicating rules
 
-## Stable repo invariants
+### V1 limitation invariants
+- no Memora-managed audio storage in V1
+- only Telegram references/IDs are persisted for voice traceability
+- no QUESTION workflow in V1 MVP
+- no labels in V1 MVP
+- no regeneration workflows in V1 MVP
+- no AI-created new categories in V1 MVP
+- no view-count sorting in V1 MVP
 
-These are easy to regress and should be treated as durable defaults.
+## Required output style for agents
 
-### Auth invariants
-
-- protected routes use **session cookie + CSRF**
-- frontend requests should normally go through `frontend/src/shared/http.ts`
-- login returns a CSRF token
-- protected calls later send `X-CSRF-Token`
-
-### Backend correctness invariants
-
-- deleting a topic must consider remaining **active** topics, not raw counts
-- update payloads should reject explicit `null` where omission means “leave unchanged”
-- workbook / export-import flows should prefer exported topic IDs over names
-- `example_entries: []` means explicit clear
-- bulk topic import should stay atomic
-- duplicate active topic names are invalid even if slugs differ
-
-### Frontend correctness invariants
-
-- cache invalidation must cover downstream views that depend on changed words/topics
-- Smart Review must not show stale counts while shared word data is reloading
-- drawer/sidebar state must not leak across route transitions
-- pagination and URL must not disagree
-- topic hierarchy and many-to-many memberships must remain visible and intact
-
----
-
-## AI-specific rules
-
-### Topic suggestion
-
-Current suggestion path is a high-value optimization area.
-
-Default strategy when modifying it:
-
-1. deterministic shortcuts first
-2. candidate shortlisting second
-3. smallest possible model call third
-4. caching and observability included if feasible
-
-### AI curation / enrichment
-
-Before touching enrichment logic, read:
-
-- `docs/ai/ai-curation-workflow.md`
-- `docs/ai/example-style-guide.md`
-- `docs/ai/ai-cost-reduction-backlog.md`
-
-Durable rules include:
-
-- export from prod only
-- use lean exports when possible
-- 3 natural examples is the default completion threshold
-- keep examples natural and non-templated
-- split only broad topics with clear boundaries
-- keep umbrella topics when the split is fuzzy
-- dry-run before live import
-- spot-check before live import when plans are large or newly tuned
-
----
-
-## Validation rule
-
-When changing code, run the smallest relevant validation first.
-
-### Backend
-
-```bash
-cd backend
-python -m pytest
-ruff check .
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm test
-npm run lint
-npm run build
-```
-
-### Full-stack
-
-Validate both sides only if the task truly crosses the boundary.
-
----
-
-## Anti-patterns
-
-Avoid these unless the task explicitly requires them:
-
-- “Let me read everything first”
-- “Let me refactor while I’m here”
-- “Let me redesign auth”
-- “Let me add a new abstraction for future flexibility”
-- “Let me change unrelated formatting”
-- “Let me scan prod and local blindly without confirming environment shape”
-
----
-
-## Output preference for coding agents
-
-Prefer responses that include:
-
+Prefer output that includes:
 - exact file paths
-- proposed change boundaries
-- why the change is needed
+- exact contract being preserved
+- smallest useful change boundary
 - regression risks
-- minimal validation plan
+- smallest validation to run
 
 Avoid:
-
-- long repo summaries repeated every time
 - giant speculative redesigns
-- broad “best practice” rewrites disconnected from Lexora
+- sweeping refactors “while here”
+- repeating entire repo summaries every time
+- changing unrelated modules
+- inventing runtime/deployment behavior that belongs in Vault
 
----
-
-## If the task is still unclear
+## If the task is unclear
 
 Use this escalation path:
 
 1. `AGENTS.md`
 2. `.claude/generated/request-routing.md`
-3. one scoped file
-4. one compact architecture or API summary
-5. only then open exact code
+3. `docs/requirements/README.md`
+4. one scoped `AGENTS.md`
+5. one or two compact docs from `docs/ai/`
+6. only then inspect exact source files
 
-That order is the default token-saving discipline for Lexora.
+That is the default token-saving discipline for Memora.

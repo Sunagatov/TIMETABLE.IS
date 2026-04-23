@@ -2,16 +2,37 @@
 
 This folder contains the Memora web UI.
 
-## V1 responsibilities
+## Role
 
-- password login screen
-- Needs Review page
-- Failures page
+The web UI is the main surface for:
+
+- login
+- Needs Review
+- Failures
 - approved list
-- item detail and edit flow
+- item detail and editing
 - search / filter / sort
-- category sidebar
+- category tree browsing
+- category management
 
-## Important rule
+## V1 product rule
 
-UI should reflect the review-first trust model.
+The frontend must reflect the **review-first trust model**.
+
+Fresh AI output does not automatically belong in the trusted approved list.
+
+## Frontend responsibility boundaries
+
+The frontend should:
+
+- render backend state clearly
+- expose review actions
+- preserve state separation between approved/review/failure areas
+- stay thin in business rules
+- consume backend contracts rather than re-implementing logic in ad hoc ways
+
+## Read next
+
+- `frontend/AGENTS.md`
+- `docs/requirements/`
+- `docs/ai/architecture.md`

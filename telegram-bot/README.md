@@ -9,9 +9,25 @@ The bot is intentionally thin.
 It should:
 
 - receive Telegram updates
-- validate sender user ID
+- validate configured owner Telegram user ID
 - forward accepted input to backend
 - send immediate acknowledgement
-- send failure notifications when backend requests them
+- send failure notifications when backend requires them
 
-It should not own core business logic.
+It must not own core business logic.
+
+## Product rule
+
+In V1, one Telegram message becomes one Memora item.
+
+## Important boundary
+
+Telegram is not the source of truth.
+
+Backend is the source of truth.
+
+## Read next
+
+- `telegram-bot/AGENTS.md`
+- `docs/requirements/`
+- `docs/ai/architecture.md`

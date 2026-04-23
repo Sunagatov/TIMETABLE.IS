@@ -1,190 +1,154 @@
-# Backend instructions — Lexora
+# Backend instructions — Memora
 
 This file is the scoped operating contract for backend work.
 
----
-
 ## Backend stack
 
-- Python 3.12
-- FastAPI
-- SQLAlchemy 2
-- psycopg 3
-- Alembic
-- Pydantic 2
-- httpx
+Confirmed from repository build files:
 
----
+- Kotlin
+- Spring Boot
+- Java 21
+- validation
+- security
+
+## Backend role
+
+The backend is the Memora source of truth.
+
+It owns application/business logic and must stay reusable by future clients beyond Telegram.
 
 ## Read order for backend tasks
 
 ### Always start with
 
-- `backend/app/main.py`
-- `backend/app/shared/config.py`
-- `backend/app/shared/deps.py`
+- `backend/build.gradle.kts`
+- `backend/src` entry points relevant to the task
+- `docs/requirements/README.md`
+- exact relevant requirement file(s)
 
 ### Then
 
-Read only the exact target feature folder.
+Read only the exact target backend files.
 
-Representative feature groups confirmed in current app wiring:
+If a task touches product behavior, read the exact relevant files in:
+- `docs/requirements/`
 
-- `auth`
-- `health`
-- `topics`
-- `words`
-- `smart_review`
-- `trash`
-- `stats`
+If a task touches architecture or invariants, read:
+- `docs/ai/architecture.md`
+- `docs/ai/invariants.md`
 
-If the task is AI curation or topic enrichment related, read:
-
-- `docs/ai/ai-curation-workflow.md`
-- `docs/ai/example-style-guide.md`
-- exact curation files only
-
----
+If a task touches runtime/deployment behavior, check whether that truth actually lives in Vault before changing Memora source docs or code.
 
 ## Architectural pattern to preserve
 
-Typical backend flow:
+Backend code should trend toward:
 
-1. router handles HTTP concerns and validation boundaries
-2. service applies business rules
-3. repository/model layer performs DB work
-4. schemas shape input/output payloads
+1. transport/web layer handles HTTP concerns
+2. application/use-case layer owns business behavior
+3. domain model stays free from Telegram-specific transport details
+4. infrastructure layer handles persistence and integrations
 
-Stay consistent with this unless the task proves the pattern is wrong in that area.
-
----
+Do not over-engineer this into a heavy enterprise framework. Keep it simple and explicit.
 
 ## Core backend invariants
 
-### Auth and request invariants
+### Client boundary invariants
 
-- protected API routers use `verify_session` and `verify_csrf`
-- session auth is cookie-based
-- CSRF token is returned on login
-- frontend later sends `X-CSRF-Token`
-- bulk import also uses `X-Api-Key`
+- backend must remain client-agnostic
+- Telegram must remain just one adapter
+- future web/mobile/desktop clients must remain possible
+- do not put Telegram-specific branching deep inside application logic
 
-Do not break this contract casually.
+### Product invariants
 
-### Data correctness invariants
+- one Telegram message = one item
+- processing is asynchronous
+- new processed items enter review, not approved list
+- approved items and review/failure areas stay separate
+- category model is exactly 3 levels in V1
+- V1 type enum is exactly:
+  - `IDEA`
+  - `THOUGHT`
+  - `REMINDER`
+  - `OTHER`
 
-- deleting a topic must check whether a word still has any **active** topics left
-- explicit `null` should be rejected when omission means “leave unchanged”
-- workbook/import flows should resolve exported `topic_id` before falling back to topic name
-- `example_entries: []` must clear examples rather than silently preserving stale ones
-- bulk topic creation/import must remain atomic
-- duplicate active topic names are invalid even if slugs differ
+### V1 limitation invariants
 
-### Topic model invariants
+- no Memora-managed audio storage in V1
+- only Telegram references/IDs are persisted for voice traceability
+- no QUESTION workflow in V1 MVP
+- no labels in V1 MVP
+- no regeneration workflows in V1 MVP
+- no AI-created new categories in V1 MVP
+- no view-count sorting in V1 MVP
 
-- broad umbrella topics may remain in place when adding narrower child topics
-- subtopics are ordinary topic rows with `parent_topic_id`
-- do not invent parallel hierarchy systems
-- keep many-to-many word-topic membership intact
+## Persistence and state guidance
 
----
+The backend should model item lifecycle explicitly.
 
-## AI topic suggestion path
+Expected V1-style statuses include:
 
-Current path:
+- received
+- transcription failed
+- transcribed
+- ai processing failed
+- ai processed / unreviewed
+- human approved
+- human edited + approved
+- rejected
+- deleted
 
-1. load all active topics
-2. build prompt including topic list
-3. send model call
-4. expect exactly one existing topic name
-5. validate model output against real topics
+Exact names may vary, but the state machine must remain explicit and readable.
 
-This is the highest-ROI AI optimization area.
+## Failure-handling expectations
 
-When changing this flow:
+Backend work in this project must preserve:
 
-- keep deterministic fallbacks first
-- reduce prompt size aggressively
-- reduce output tokens aggressively
-- cache repeat lookups
-- prefer stable IDs or short candidate outputs internally
-- add observability if the task justifies it
+- no silent loss after accepted bot acknowledgement
+- retry counters / retry state recorded
+- failure stage recorded
+- failure reason recorded
+- dedicated failure visibility in UI
 
-Read `docs/ai/ai-cost-reduction-backlog.md` before changing this flow.
+## Telegram-specific backend guidance
 
----
+The backend may accept Telegram metadata such as:
 
-## AI curation / topic split work
+- message ID
+- file ID
+- file unique ID
 
-Before modifying curation logic, read:
+But must not become Telegram-shaped throughout the domain model.
 
-- `docs/ai/ai-curation-workflow.md`
-- `docs/ai/example-style-guide.md`
+## Production/deployment boundary
 
-Durable operational rules:
+Do not put deployment/runtime truth into Memora backend docs if it actually belongs in Vault.
 
-- export from prod only for prod imports
-- use lean exports whenever possible
-- `needs_examples_only=true` is the preferred narrow enrichment mode
-- 3 strong example sentences per word is the default completion threshold
-- broad topics should be split only when boundaries are clearly explainable
-- keep umbrella topics when the split is fuzzy
-- create new topics before reassigning words
-- dry-run before live import
-- spot-check before live import when plans are large or newly tuned
+For prod/deployment/runtime questions, read Vault first:
 
----
-
-## Alembic / migration rules
-
-These are important because they have already caused real pain.
-
-- in `alembic/env.py`, `SET LOCAL` statements must be **inside** `with context.begin_transaction()`
-- if those statements sit outside the transaction block, SQLAlchemy 2 autobegin can cause migrations to silently no-op
-- if Alembic startup fails with duplicate prepared-statement errors, check migration connection settings before retrying deploys blindly
-- Docker startup may run migrations on container start, so bad migration behavior is operationally expensive
-
----
-
-## Prod / Vault workflow
-
-For prod API calls or prod data work:
-
-- use Vault-managed secrets instead of repo-local `.env`
-- usual backend secret source is the Vault-managed prod env for Lexora
-- typical live API sequence:
-  1. call `/auth/login`
-  2. extract `csrf_token`
-  3. reuse session cookie + `X-CSRF-Token`
-
-For topic rename/split work:
-
-- inspect `/api/topics/audit` and `/api/topics` first
-- prefer in-place rename if topic ID stability matters
-- split only when the change is structural rather than cosmetic
-
----
+- `/Users/zufar/IdeaProjects/Vault`
+- `apps/memora/README.md`
+- `apps/memora/AI_AGENT_GUIDE.md`
+- `apps/memora/PORTS_AND_RUNTIME.md`
+- `apps/memora/ENV_CONTRACT.md`
 
 ## Change strategy
 
-When touching backend code:
+When changing backend code:
 
-- change as few files as possible
-- preserve service/repository split
-- avoid “while I’m here” refactors
-- prefer bug-specific or contract-specific tests
-- avoid mixing AI-path changes with unrelated backend cleanup
-
----
+- keep the diff small
+- keep state transitions explicit
+- prefer boring code over smart code
+- avoid speculative abstraction
+- avoid coupling to Telegram transport concerns
+- preserve requirement wording where behavior is sensitive
 
 ## Validation
 
-Use the smallest useful validation first.
+Use the smallest useful backend validation first.
 
-```bash
-cd backend
-python -m pytest
-ruff check .
-```
-
-If the change is feature-local, prefer targeted tests instead of broad scans.
+Typical choices:
+- targeted Gradle test
+- small build check
+- exact feature-focused validation

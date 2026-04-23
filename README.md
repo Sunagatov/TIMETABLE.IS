@@ -1,228 +1,124 @@
-# Lexora
+# Memora
 
-**Lexora** is a personal English vocabulary learning app focused on fast topic-based study, practical word management, and smart review.
+**Memora** is a personal thought-capture and review system built around:
 
-This repository is a **monorepo** containing the backend, frontend, and project docs used by both humans and coding agents.
+- Telegram-first capture
+- asynchronous backend processing
+- review-first trust in AI output
+- web-based search, filtering, editing, and approval
+- a backend that stays reusable for future clients beyond Telegram
 
----
+This repository is the **application source monorepo** for Memora.
 
-## Product purpose
+It is not the production deployment source of truth.
 
-Lexora exists to make English vocabulary study feel practical instead of chaotic.
+## Source-of-truth split
 
-The current product direction emphasizes:
+### This repository owns
 
-- topic-based study
-- fast review loops
-- word-by-word progress updates
-- quick CRUD workflows for words and topics
-- smart review queues
-- operationally safe AI-assisted enrichment
+- application source code
+- product requirements
+- AI/human working docs for implementation
+- backend, frontend, and telegram-bot source
+- project-level architecture and invariants
 
----
+### Vault owns
 
-## Runtime shape
+Production and deployment/runtime files for Memora live in the **Vault** project, not here.
 
-### Local development
+Local development path on the MacBook:
 
-- Postgres runs in Docker
-- backend serves FastAPI on `:8000`
-- frontend serves Vite/React on `:5173`
+- `/Users/zufar/IdeaProjects/Vault`
 
-### Main repository areas
+Repository:
 
-- `backend/` — FastAPI app, feature logic, DB models, auth, AI curation, smart review
-- `frontend/` — React app, routes, study flows, editing UI, shared HTTP client
-- `docs/ai/` — compact repo context and operating rules for coding agents
-- `.claude/generated/request-routing.md` — quick routing file for narrow-context work
+- `Sunagatov/Vault`
 
----
+Primary Vault area for Memora:
 
-## Quick start
+- `apps/memora/`
 
-### Prerequisites
+Important Vault docs for Memora operations:
 
-- Docker Desktop
-- Node.js 20+
-- npm
-- Python 3.12+ only if you want to run backend outside Docker
+- `apps/memora/README.md`
+- `apps/memora/AI_AGENT_GUIDE.md`
+- `apps/memora/CHANGE_MAP.md`
+- `apps/memora/PORTS_AND_RUNTIME.md`
+- `apps/memora/ENV_CONTRACT.md`
 
-### 1. Clone the repository
+## Current source modules
 
-```bash
-git clone https://github.com/Sunagatov/Lexora.git
-cd Lexora
-```
+- `backend/` — Kotlin + Spring Boot backend and source-of-truth business logic
+- `frontend/` — React + TypeScript web UI
+- `telegram-bot/` — thin Telegram adapter
+- `docs/requirements/` — product requirements and project contracts
+- `docs/ai/` — compact context for Claude CLI, Codex CLI, and human maintainers
 
-### 2. Configure environment
+## Product direction
 
-```bash
-cp .env.example .env
-# then set at least:
-# APP_PASSWORD
-# SECRET_KEY
-# API_KEY
-# OPENAI_API_KEY (if using topic suggestion or AI curation)
-```
+Memora is not a generic note-taking app.
 
-### 3. Start with Docker Compose
+It is a **private, single-user capture-and-review system** designed to help the user:
 
-```bash
-docker compose up --build
-```
+- get thoughts out of the head quickly
+- capture them via Telegram voice or text
+- process them asynchronously
+- review AI output before trusting it
+- retrieve approved items later in the web app
 
-### 4. Open the app
+## Core implementation stance
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
+- backend is source of truth
+- Telegram is an adapter, not the center of the architecture
+- AI output is useful but not trusted blindly
+- approved knowledge base is separate from unreviewed/failure queues
+- simplicity, clarity, and maintainability matter more than cleverness
 
----
+## Read order
 
-## Auth model at a glance
-
-Lexora uses **session-cookie auth** for normal protected routes.
-
-Typical flow:
-
-1. log in with `POST /auth/login`
-2. backend sets session cookie and returns `csrf_token`
-3. frontend stores the CSRF token
-4. protected requests send:
-   - session cookie
-   - `X-CSRF-Token` header
-
-Bulk import paths may also require `X-Api-Key`.
-
-Do not redesign this casually. It is a core project contract.
-
----
-
-## Read this before making changes
-
-### For humans
-
-Start with:
+### Humans
 
 1. `AGENTS.md`
-2. the smallest relevant scoped file:
+2. `docs/requirements/README.md`
+3. `docs/ai/README.md`
+4. the smallest relevant scoped file:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`
-   - `docs/ai/ai-curation-workflow.md`
-3. only the exact source files involved in the task
+   - `telegram-bot/AGENTS.md`
 
-### For Claude CLI / Codex CLI
+### Claude CLI / Codex CLI
 
-Use the same narrow read order.  
-Do **not** scan the entire repository by default.
+Use the same order.
 
-Important helper docs:
+Do not start by scanning the whole repository.
 
-- `docs/ai/repo-map.md`
-- `docs/ai/architecture.md`
-- `docs/ai/api-surface.md`
-- `docs/ai/env-reference.md`
-- `docs/ai/context-budget-rules.md`
+## Stack at a glance
 
----
+### Backend
+- Kotlin 2.0.x
+- Java 21
+- Spring Boot 3.4.x
+- Spring Security
+- validation
 
-## Key product capabilities already present
+### Frontend
+- React 18
+- TypeScript 5
+- Vite 6
 
-Confirmed feature families include:
+### Telegram bot
+- Python-based thin adapter
+- forwards accepted messages to backend
+- should remain transport-focused
 
-- auth
-- health
-- topics
-- words
-- smart review
-- trash
-- stats
-- AI topic suggestion
-- AI curation/import tooling for vocabulary enrichment
+## Current repository purpose
 
----
+The repository is still early-stage.
 
-## AI-assisted areas
+These docs exist to prevent AI agents and humans from:
 
-Lexora already has two important AI-related workflows:
-
-### 1. Topic suggestion during word creation
-The backend can suggest a topic for a word + translation pair.
-
-### 2. AI curation / enrichment
-The backend and `docs/ai/` include a workflow for:
-
-- exporting topic words
-- enriching example sentences
-- dry-run imports
-- live imports
-- safe topic splitting and reassignment
-
-Before changing any AI path, read:
-
-- `docs/ai/ai-cost-reduction-backlog.md`
-- `docs/ai/ai-curation-workflow.md`
-- `docs/ai/example-style-guide.md`
-
----
-
-## Validation philosophy
-
-Use the **smallest relevant validation first**.
-
-### Backend-only
-
-```bash
-cd backend
-python -m pytest
-ruff check .
-```
-
-### Frontend-only
-
-```bash
-cd frontend
-npm test
-npm run lint
-npm run build
-```
-
-Do not jump to full-repo validation if the change is narrow.
-
----
-
-## Non-goals for normal work
-
-Avoid these by default:
-
-- scanning the whole repo before understanding the task
-- broad refactors without concrete evidence
-- touching auth/CSRF/session plumbing unless required
-- inventing new abstractions for speculative future use
-- changing prod data flows casually
-- using local DB exports for prod imports
-
----
-
-## Important operational note
-
-For production work, **Vault is the source of truth** for:
-
-- secrets
-- deploy tasks
-- SSH access
-- prod automation
-- prod logs
-
-Do not assume repo-local `.env` files are valid for prod work.
-
----
-
-## Documentation intent
-
-The docs in this repo are intentionally optimized for:
-
-- low-token AI work
-- minimal assumptions
-- stable invariants
-- predictable change plans
-- safe prod-adjacent workflows
+- carrying over stale Lexora assumptions
+- coupling backend to Telegram
+- guessing deployment/runtime truth from source files
+- over-engineering initial V1
+- wasting tokens on avoidable repo-wide scans
