@@ -1,76 +1,49 @@
 # Domain Glossary
 
-## Item
+## Topic
+A named vocabulary grouping. Topics may form a hierarchy through `parent_topic_id`.
 
-A single captured unit in Memora. One Telegram message becomes one item.
+## Root Topic
+A topic with no parent.
 
-## Source
+## Child Topic
+A topic whose `parent_topic_id` points to another topic.
 
-The origin of an item.  
-V1 sources:
+## Word
+A vocabulary record that can belong to one or more topics.
 
-- `TELEGRAM_VOICE`
-- `TELEGRAM_TEXT`
+## Knowledge Level
+An integer from 1 to 5 representing current familiarity/study state.
 
-## Raw transcript
+## Parked Word
+A word at knowledge level 5. In current backend constraints, level 5 represents a rare/strange word excluded from Smart Review.
 
-The transcription output produced from a voice message before AI cleanup.
+## Active Item
+A topic or word with `deleted_at = null` and `is_active = true`.
 
-## Raw input text
+## Deleted Item
+A topic or word soft-deleted by setting `deleted_at`.
 
-The original Telegram text message content before AI cleanup.
+## Trash
+The recoverable area for soft-deleted topics and words.
 
-## Cleaned text
+## Smart Review Queue
+A generated queue of words selected by configured rules for focused review.
 
-The AI-polished version of the user's original content. It should sound like natural native-quality English while preserving the original intended meaning.
+## Queue Item
+A single word entry inside a Smart Review queue, with completion state and position.
 
-## Approved item
+## Topic Suggestion
+An AI-assisted feature that maps a word + translation to one of the existing topics.
 
-An item that has been explicitly accepted by the human reviewer and is allowed to live in the main knowledge base list.
+## AI Curation Export
+A structured export of topic words for external AI-assisted enrichment and later re-import.
 
-## Needs Review
+## Workbook Import/Export
+Excel `.xlsx` based import/export flow for vocabulary data.
 
-The queue/page containing AI-processed items that are waiting for human review.
+## Sidebar Stats
+Topic-related aggregated counts used by the UI sidebar.
 
-## Failures
-
-The queue/page containing items whose processing failed at a specific stage.
-
-## Category
-
-The top-level topic assigned to an item.
-
-## Subcategory
-
-The second-level topic assigned under a category.
-
-## Subsubcategory
-
-The third-level topic assigned under a subcategory.
-
-## Type
-
-A lightweight classification of what the item is.
-
-V1 type enum:
-
-- `IDEA`
-- `THOUGHT`
-- `REMINDER`
-- `OTHER`
-
-## Default category
-
-A fallback category path used when no appropriate category can be chosen confidently in V1.
-
-## Rejected item
-
-An item intentionally kept in the system but not accepted into the approved knowledge base.
-
-## Deleted item
-
-An item moved to trash and recoverable later.
-
-## Memora ID
-
-A stable application-level identifier returned to the user in Telegram and used for traceability in the web app.
+## Usage Event
+A recorded frontend usage/activity signal used to compute productivity and engagement metrics.

@@ -1,87 +1,90 @@
 # Domain Model
 
-## Main entity: Item
+## Topic
 
-### Core identity
+### Fields
+- id
+- name
+- slug
+- description
+- parent_topic_id
+- is_active
+- deleted_at
+- created_at
+- updated_at
 
-- `id`
-- `Memora_id`
-- `source_type`
-- `created_at`
-- `updated_at`
+### Rules
+- topic name is required
+- slug must remain unique
+- parent topic must be valid
+- deleting a topic with active child topics is forbidden
+- deleted topics are recoverable through trash
 
-### Source metadata
+## Word
 
-- `telegram_user_id`
-- `telegram_chat_id`
-- `telegram_message_id`
-- `telegram_file_id` (nullable for text items)
-- `telegram_file_unique_id` (nullable for text items)
+### Fields
+- id
+- topic_ids
+- term
+- past_simple
+- past_participle
+- translations
+- translation_entries
+- part_of_speech
+- knowledge_level
+- countability
+- pattern
+- example
+- example_entries
+- notes
+- is_active
+- deleted_at
+- created_at
+- updated_at
 
-### Raw content
+### Derived/Computed fields
+- example_count
+- example_target_count
+- example_status
+- needs_example_enrichment
 
-- `raw_input_text` (nullable, for text source)
-- `raw_transcript` (nullable, for voice source)
+### Rules
+- word term is required
+- translations are required
+- at least one topic is required on create
+- duplicates must be blocked according to backend duplicate rules
+- knowledge level range is 1..5
+- level 5 means parked/excluded from Smart Review
 
-### AI-generated / processed content
+## StudyQueue
 
-- `ai_title`
-- `ai_cleaned_text`
-- `ai_type`
-- `ai_category`
-- `ai_subcategory`
-- `ai_subsubcategory`
-- `ai_priority`
+### Fields
+- id
+- generated_at
+- expires_at
+- is_active
+- total_count
+- completed_count
 
-### Current human-visible content
+## StudyQueueItem
 
-- `title`
-- `cleaned_text`
-- `type`
-- `category`
-- `subcategory`
-- `subsubcategory`
-- `priority`
+### Fields
+- id
+- queue_id
+- word_id
+- position
+- is_completed
+- completed_at
 
-### Review and lifecycle
+## UsageEvent
 
-- `status`
-- `failure_stage` (nullable)
-- `failure_reason` (nullable)
-- `retry_count_transcription`
-- `retry_count_ai`
-- `approved_at` (nullable)
-- `deleted_at` (nullable)
-- `rejected_at` (nullable)
+### Fields
+- event_key
+- session_key
+- route
+- active_seconds
 
-### Version traceability
+## Trash Semantics
 
-- `original_ai_output_snapshot`
-- `latest_human_version_snapshot`
-
-## Type enum (V1)
-
-- `IDEA`
-- `THOUGHT`
-- `REMINDER`
-- `OTHER`
-
-## Status enum (V1)
-
-- `RECEIVED`
-- `TRANSCRIPTION_FAILED`
-- `TRANSCRIBED`
-- `AI_PROCESSING_FAILED`
-- `AI_PROCESSED_UNREVIEWED`
-- `HUMAN_APPROVED`
-- `HUMAN_EDITED_APPROVED`
-- `REJECTED`
-- `DELETED`
-
-## Priority enum (V1)
-
-- `URGENT_IMPORTANT`
-- `URGENT_NOT_IMPORTANT`
-- `NOT_URGENT_IMPORTANT`
-- `NOT_URGENT_NOT_IMPORTANT`
-- `NOT_APPLICABLE`
+Topics and words are soft-deleted first.
+Purge is a separate hard-delete operation.

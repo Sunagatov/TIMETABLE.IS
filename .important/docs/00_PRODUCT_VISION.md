@@ -1,58 +1,54 @@
-# Product Vision
+# Lexora — Product Vision
 
-## Product name
+## Product Summary
 
-Memora
+Lexora is a personal English vocabulary learning system focused on topic-based study, fast review, practical progress tracking, and low-friction data curation.
 
-## Product summary
+The product combines:
 
-Memora is a private, single-user system for capturing thoughts with minimal friction and then turning them into structured, reviewable records.
+- a FastAPI backend
+- a future React/Vite frontend
+- PostgreSQL persistence
+- optional AI-assisted workflows for topic suggestion and vocabulary curation
 
-The primary entry point is a Telegram bot. The primary management interface is a web application.
+## Core Product Promise
 
-## Core problem
+Lexora should help the user:
 
-The user often has many thoughts, ideas, reminders, and reflections in mind at once. Typing them manually into a notes app is annoying, slow, and energy-consuming. Raw notes also become an unstructured pile of text that is hard to review and use later.
+- organize vocabulary by topic hierarchy
+- create, update, import, export, and review words efficiently
+- keep vocabulary quality high over time
+- measure learning progress with clear metrics
+- avoid losing work through soft-delete and restore flows
+- accelerate curation with AI without losing human control
 
-Memora should help the user:
+## Primary Product Shape
 
-- get thoughts out of the head quickly
-- capture them by voice or text in Telegram
-- structure them automatically
-- review AI output before trusting it
-- retrieve approved items later through the web app
+Lexora is not a generic language-learning social app.
 
-## Main pain statement
+It is a **single-user, owner-operated vocabulary workspace** with strong CRUD, review, import/export, and observability features.
 
-> Help the user get spoken or typed thoughts out of the head, structure them asynchronously, and find them later without creating another chaotic notes dump.
+## Primary User
 
-## Target user in V1
+V1 assumes one owner-user with full access to the system.
 
-Only one user: the product owner.
+No public signup or multi-tenant support is required.
 
-## Success outcomes after one month of use
+## Product Goals
 
-- fewer ideas lost
-- easier retrieval
-- cleaner thinking
-- more ideas turned into projects or content
-- less mental overload
+1. Provide a reliable topic-centric vocabulary database.
+2. Make word review and progress updates fast.
+3. Support efficient bulk ingestion and curation.
+4. Support AI as an assistant, not as an autonomous authority.
+5. Preserve user control over topic structure and word quality.
 
-## Product positioning
+## Non-Goals for current V1
 
-V1 is a private personal system first.  
-It may become a reusable/public product later, but current requirements should optimize for the single-user case.
-
-## Primary use pattern
-
-- Capture in Telegram
-- Process asynchronously
-- Review in web app
-- Approve only what should join the trusted knowledge base
-
-## High-level product principles
-
-- Telegram is the capture adapter, not the center of the system.
-- The backend must be reusable by future clients (mobile, desktop, other bots).
-- AI output is useful, but not fully trusted by default.
-- Fresh AI-processed items must remain separate until the human reviews them.
+- social features
+- public sharing
+- collaborative editing
+- teacher/student roles
+- gamified leaderboards
+- offline-first synchronization
+- mobile-native apps
+- multilingual UI management
