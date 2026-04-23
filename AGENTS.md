@@ -1,48 +1,66 @@
-# AGENTS.md
+# Memora — Agent Instructions
 
-This file exists to make work in this repository easier for AI coding agents and humans.
+Memora is a private, single-user system for capturing thoughts through a Telegram bot, processing them asynchronously, and reviewing/searching them in a web app.
 
-## Goal
+This repository should stay easy for both **Claude CLI** and **Codex CLI** to continue without rereading unnecessary files.
 
-Implement Memora V1 MVP with minimal ambiguity and minimal over-engineering.
+## Read order for low-token work
 
-## Required reading order before making changes
+1. Read this file.
+2. Read `CLAUDE.md` or `CODEX.md` only if the current agent needs extra repo-level guidance.
+3. Read `.claude/generated/request-routing.md` if it exists.
+4. Read only the nearest scoped file:
+   - `backend/AGENTS.md` for backend work
+   - `frontend/AGENTS.md` for frontend work
+   - `telegram-bot/AGENTS.md` for bot work
+5. Read only the exact docs required by the task:
+   - `docs/00_PRODUCT_VISION.md`
+   - `docs/01_SCOPE_AND_MVP.md`
+   - `docs/03_FUNCTIONAL_REQUIREMENTS.md`
+   - `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
+   - `docs/06_DOMAIN_MODEL.md`
+   - `docs/07_PROCESSING_PIPELINE.md`
+   - `docs/08_ERROR_HANDLING_AND_RETRY.md`
+   - `docs/09_REVIEW_WORKFLOW.md`
+   - `docs/10_AI_BEHAVIOR_RULES.md`
+   - `docs/13_ENGINEERING_PRINCIPLES.md`
+   - `docs/16_IMPLEMENTATION_ORDER.md`
+6. Read only the files directly touched by the task.
 
-1. `docs/00_PRODUCT_VISION.md`
-2. `docs/01_SCOPE_AND_MVP.md`
-3. `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-4. `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
-5. `docs/06_DOMAIN_MODEL.md`
-6. `docs/07_PROCESSING_PIPELINE.md`
-7. `docs/08_ERROR_HANDLING_AND_RETRY.md`
-8. `docs/09_REVIEW_WORKFLOW.md`
-9. `docs/10_AI_BEHAVIOR_RULES.md`
-10. `docs/13_ENGINEERING_PRINCIPLES.md`
-11. `docs/16_IMPLEMENTATION_ORDER.md`
+Do **not** scan the whole repo by default.
 
-## Hard rules
+## Repo shape
 
-- Do not invent features outside the docs.
-- Do not introduce Docker or deployment files in this repository.
-- Do not couple backend business logic to Telegram transport details.
-- Do not build for multi-user in V1.
-- Do not add labels, semantic search, question answering, regeneration flows, or AI-created categories in V1.
-- Keep code boring and explicit.
-- Prefer straightforward application services/use cases over abstraction-heavy designs.
-- Prefer small files where practical. Aim for roughly under 350 LOC if possible.
-- Preserve terminology from the docs.
+- `backend/` — source of truth, business logic, persistence, auth/session, review workflow
+- `frontend/` — web UI for login, review, failures, approved items, search/filter/sort
+- `telegram-bot/` — thin adapter that forwards accepted messages to backend
+- `docs/` — product/source-of-truth docs
+- `.claude/generated/` — compact routing aids to save tokens
 
-## Architecture expectation
+## Important rules
 
-- `backend/` owns business logic and persistence contracts.
-- `telegram-bot/` is a thin adapter/client to backend APIs.
-- `frontend/` is the review/search/edit UI.
-- `docs/` is the source of truth for requirements and scope.
+- Telegram is a client adapter, not the place for core business logic.
+- Keep backend reusable by future clients.
+- Preserve the review-first trust model.
+- Do not invent V1 features outside the docs.
+- Do not add deployment/infrastructure material to this repo.
+- Prefer simple, boring code over clever abstractions.
+- Run the **smallest relevant validation** first.
 
-## If requirements and code conflict
+## Hard V1 boundaries
 
-The docs win unless the user explicitly changed the requirement later in chat.
+Do not add these in V1 unless the user explicitly changes scope:
 
-## How to implement incrementally
+- multi-user support
+- labels
+- semantic search
+- question-answering workflow
+- AI-created new categories
+- regeneration workflows
+- Memora-managed audio storage
+- mobile app
+- public sharing
 
-Follow `docs/16_IMPLEMENTATION_ORDER.md`.
+## If docs and code conflict
+
+Docs win unless the user explicitly changed the requirement later.

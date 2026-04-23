@@ -2,44 +2,38 @@
 
 ## Purpose
 
-Guidance for Codex CLI when working in this repository.
+Help Codex CLI continue work in Memora with low ambiguity and low token waste.
 
-## Primary objective
-
-Implement Memora V1 MVP exactly as described in `docs/`, while keeping the codebase easy to extend and easy for AI agents to understand.
-
-## Constraints
-
-- no over-engineering
-- no deployment files here
-- no Telegram-shaped domain logic
-- no speculative abstractions
-- keep files readable and reasonably small
-- stay within V1 scope
-
-## Read before writing code
+## Read order
 
 1. `AGENTS.md`
-2. `docs/01_SCOPE_AND_MVP.md`
-3. `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-4. `docs/06_DOMAIN_MODEL.md`
-5. `docs/07_PROCESSING_PIPELINE.md`
-6. `docs/13_ENGINEERING_PRINCIPLES.md`
-7. `docs/16_IMPLEMENTATION_ORDER.md`
+2. nearest scoped file:
+   - `backend/AGENTS.md`
+   - `frontend/AGENTS.md`
+   - `telegram-bot/AGENTS.md`
+3. exact docs relevant to the task
+4. exact implementation files only
 
-## Implementation bias
+## Codex-specific guidance
 
-Prefer:
+- optimize for continuity
+- keep naming explicit
+- prefer direct data flow
+- avoid speculative abstractions
+- keep files reasonably small where practical
+- preserve V1 boundaries strictly
 
-- direct data flow
-- explicit service boundaries
-- simple tests
-- simple DTOs
-- stable package layout
+## Do not do by default
 
-Avoid:
+- do not scan unrelated app folders
+- do not redesign architecture without a requirement
+- do not add deployment concerns
+- do not introduce new product behavior silently
+- do not widen scope just because it feels “useful”
 
-- deep inheritance
-- framework-heavy patterns
-- generic base classes with unclear value
-- speculative plugin systems
+## Preferred change style
+
+- one small slice at a time
+- one use case at a time
+- one route/page/flow at a time
+- one targeted validation at a time

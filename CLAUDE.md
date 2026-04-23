@@ -1,38 +1,60 @@
 # CLAUDE.md
 
-## Purpose
+## What this repo is
 
-Guidance for Claude CLI when working in this repository.
+Memora is a product repo, not an ops repo.
 
-## What matters most
+It stores:
 
-- Keep the codebase easy to navigate.
-- Respect docs before coding.
-- Avoid speculative architecture.
-- Preserve backend/client separation.
-- Prefer explicit state transitions and clear DTOs.
+- backend source
+- frontend source
+- telegram-bot source
+- product and engineering docs
+- AI-agent guidance
 
-## Before coding
+It does **not** store deployment or infra concerns.
 
-Read:
+## Token discipline
+
+To save time and tokens:
+
+- do not scan the whole repo by default
+- start from `AGENTS.md`
+- then open only the nearest scoped file
+- then read only the exact docs needed for the task
+- then read only the target implementation files
+
+## First places to look
+
+### Repo-level
 
 - `AGENTS.md`
+- `README.md`
+- `docs/01_SCOPE_AND_MVP.md`
 - `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
 - `docs/13_ENGINEERING_PRINCIPLES.md`
-- `docs/16_IMPLEMENTATION_ORDER.md`
 
-## Coding style
+### Backend work
 
-- choose simple names
-- keep use cases explicit
-- avoid hidden magic
-- avoid large files where practical
-- no deployment concerns here
-- no Docker files here
-- do not silently add new dependencies without reason
+- `backend/AGENTS.md`
 
-## When adding code
+### Frontend work
 
-Update docs only if behavior changes.  
-Do not drift from requirements.
+- `frontend/AGENTS.md`
+
+### Telegram bot work
+
+- `telegram-bot/AGENTS.md`
+
+## Important repo rules
+
+- preserve backend/client separation
+- avoid repo-wide scans unless the task explicitly needs them
+- keep diffs small and scoped
+- prefer minimal changes over broad refactors
+- do not add deployment files here
+- keep code and docs aligned
+
+## Validation rule
+
+After edits, run the **smallest matching validation** instead of broad repo-wide checks.

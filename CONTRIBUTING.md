@@ -1,31 +1,34 @@
 # Contributing
 
-## Working approach
+## Working style
 
-This repository is intentionally structured to be comfortable for both humans and AI coding agents.
+This repository should stay easy for:
+
+- humans
+- Claude CLI
+- Codex CLI
 
 ## Principles
 
-- read docs first
-- keep changes scoped
-- keep naming explicit
-- preserve backend/client boundaries
-- do not add out-of-scope features
+- docs first
+- smallest useful change first
+- minimal diffs
+- no over-engineering
+- preserve backend/client separation
+- preserve V1 scope
 
-## Commit style
+## Preferred commit message style
 
-Prefer commit messages like:
+- `docs: refine review workflow wording`
+- `backend: add item status enum`
+- `frontend: add needs review route shell`
+- `telegram-bot: forward accepted text message to backend`
 
-- `docs: refine v1 review workflow`
-- `backend: add item status transitions`
-- `frontend: add needs review page shell`
-- `telegram-bot: forward accepted message to backend`
+## Before considering a change done
 
-## Pull request expectations
+Check:
 
-A change is better when it is:
-
-- small
-- understandable
-- traceable to requirements
-- easy to review
+- does it match docs?
+- is it still in V1 scope?
+- did it avoid unnecessary abstractions?
+- is it easy for the next AI agent to continue?
