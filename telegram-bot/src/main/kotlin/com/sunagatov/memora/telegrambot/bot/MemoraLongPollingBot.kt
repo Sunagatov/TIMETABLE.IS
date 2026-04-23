@@ -20,7 +20,11 @@ class MemoraLongPollingBot(
 
     private val logger = LoggerFactory.getLogger(MemoraLongPollingBot::class.java)
 
-    override fun consume(update: Update) {
+    override fun consume(updates: MutableList<Update>) {
+        updates.forEach(::consumeSingle)
+    }
+
+    private fun consumeSingle(update: Update) {
         val message = update.message ?: return
         val from = message.from ?: return
         val chatId = message.chatId.toString()
@@ -54,11 +58,11 @@ class MemoraLongPollingBot(
         }
 
         try {
-            val mindraftId = backendClient.ingest(request)
+            val itemId = backendClient.ingest(request)
             telegramClient.execute(
                 SendMessage.builder()
                     .chatId(chatId)
-                    .text("Accepted. Processing asynchronously. Mindraft ID: $mindraftId")
+                    .text("Accepted. Processing asynchronously. Item ID: $itemId")
                     .build()
             )
         } catch (exception: Exception) {
