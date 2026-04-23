@@ -1,6 +1,6 @@
 # Frontend
 
-The frontend is the main review/search/edit surface for Mindraft V1.
+The frontend is the main review/search/edit surface for Memora V1.
 
 ## Responsibilities
 

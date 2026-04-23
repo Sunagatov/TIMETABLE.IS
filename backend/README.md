@@ -1,6 +1,6 @@
 # Backend
 
-The backend is the source of truth for Mindraft.
+The backend is the source of truth for Memora.
 
 ## Responsibilities
 

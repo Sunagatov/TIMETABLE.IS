@@ -1,10 +1,10 @@
 <div align="center">
   <br>
-  <h1>🕐 TIMETABLE.IS</h1>
+  <h1>🕐 Memora</h1>
   <p><strong>A Telegram bot that tells you the time anywhere in the world — instantly.</strong></p>
   <p>
     <a href="https://t.me/zufarexplained">💬 Community</a> ·
-    <a href="https://github.com/Sunagatov/TIMETABLE.IS/issues">🐛 Issues</a>
+    <a href="https://github.com/Sunagatov/Memora/issues">🐛 Issues</a>
   </p>
 
   [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -19,7 +19,7 @@
 
 ```bash
 # 1. 📥 Clone
-git clone https://github.com/Sunagatov/TIMETABLE.IS.git && cd TIMETABLE.IS
+git clone https://github.com/Sunagatov/Memora.git && cd Memora
 
 # 2. 🔧 Fill in your credentials
 cp .env.example .env
@@ -59,7 +59,7 @@ docker-compose down
 
 ## 🤔 What is this?
 
-TIMETABLE.IS is a Telegram bot that provides current time for any major city worldwide and calculates time differences between cities. Browse by continent and country, or use popular cities shortcuts. Supports 50+ major cities across all continents with interactive inline keyboards.
+Memora is a Telegram bot that provides current time for any major city worldwide and calculates time differences between cities. Browse by continent and country, or use popular cities shortcuts. Supports 50+ major cities across all continents with interactive inline keyboards.
 
 ---
 
@@ -151,8 +151,8 @@ See `.env.example` for the template.
 
 | 🎯 Situation | 🚀 Action |
 |---|---|
-| 🐛 Found a bug | [Open an issue](https://github.com/Sunagatov/TIMETABLE.IS/issues/new) with the `bug` label |
-| 💡 Want a feature | Start a [Discussion](https://github.com/Sunagatov/TIMETABLE.IS/discussions) first |
+| 🐛 Found a bug | [Open an issue](https://github.com/Sunagatov/Memora/issues/new) with the `bug` label |
+| 💡 Want a feature | Start a [Discussion](https://github.com/Sunagatov/Memora/discussions) first |
 | 👨💻 Ready to code | Pick an issue, comment "I'm on it" |
 
 ---
@@ -168,6 +168,6 @@ See `.env.example` for the template.
 - 💬 **Telegram community:** [Zufar Explained IT](https://t.me/zufarexplained)
 - 👤 **Personal Telegram:** [@lucky_1uck](https://web.telegram.org/k/#@lucky_1uck)
 - 📧 **Email:** [zufar.sunagatov@gmail.com](mailto:zufar.sunagatov@gmail.com)
-- 🐛 **Issues:** [GitHub Issues](https://github.com/Sunagatov/TIMETABLE.IS/issues)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/Sunagatov/Memora/issues)
 
 ❤️

@@ -1,6 +1,6 @@
 # Product Vision
 
-Mindraft is a single-user system for capturing ideas via Telegram voice/text and reviewing structured results in a web app.
+Memora is a single-user system for capturing ideas via Telegram voice/text and reviewing structured results in a web app.
 
 ## Core problem
 

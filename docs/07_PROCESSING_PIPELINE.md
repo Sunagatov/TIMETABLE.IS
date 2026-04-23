@@ -20,4 +20,4 @@
 
 ## V1 limitation
 
-Mindraft does not store original audio in its own storage in V1.
+Memora does not store original audio in its own storage in V1.

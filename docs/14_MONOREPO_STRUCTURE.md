@@ -1,7 +1,7 @@
 # Monorepo Structure
 
 ```text
-mindraft/
+Memora/
   docs/
   backend/
   frontend/

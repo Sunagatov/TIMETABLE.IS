@@ -21,7 +21,7 @@
 - Labels
 - Question-answering flow
 - AI-generated new categories requiring approval
-- Audio storage in Mindraft
+- Audio storage in Memora
 - Audio replay/download in web app
 - Advanced semantic search
 - Regeneration flows

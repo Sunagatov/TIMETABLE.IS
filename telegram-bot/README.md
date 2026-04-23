@@ -7,7 +7,7 @@ The Telegram bot is a thin adapter.
 - Accept updates only from the configured Telegram user ID
 - Verify webhook secret
 - Forward accepted messages to backend
-- Return immediate acknowledgement with a stable Mindraft item ID
+- Return immediate acknowledgement with a stable Memora item ID
 - Return failure notifications with useful processing context
 
 ## Non-responsibilities

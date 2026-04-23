@@ -21,7 +21,7 @@ Processing failures stay in the same core item model using explicit status and m
 
 Failure notification should include:
 
-- Mindraft item ID
+- Memora item ID
 - failed stage
 - human-readable failure summary
 - retry status / retry count

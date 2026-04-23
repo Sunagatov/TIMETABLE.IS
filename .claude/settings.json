@@ -13,8 +13,7 @@
       "Read(./node_modules/**)",
       "Read(./.venv/**)",
       "Read(./backend/.venv/**)",
-      "Read(./frontend/dist/**)",
-      "Read(./backend/lexora_backend.egg-info/**)"
+      "Read(./frontend/dist/**)"
     ]
   }
 }

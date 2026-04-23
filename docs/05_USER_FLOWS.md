@@ -5,7 +5,7 @@
 1. User sends text or voice message to bot
 2. Bot verifies allowed Telegram user
 3. Bot creates/forwards work to backend
-4. Bot replies: Accepted. Processing asynchronously. Mindraft ID: ...
+4. Bot replies: Accepted. Processing asynchronously. Memora ID: ...
 5. Backend processes asynchronously
 6. Item lands in Needs Review or Failures
 

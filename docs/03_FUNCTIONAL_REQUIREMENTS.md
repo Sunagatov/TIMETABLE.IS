@@ -3,9 +3,9 @@
 ## Capture
 
 1. The system shall accept Telegram text and voice messages from exactly one allowed Telegram user ID.
-2. The Telegram bot shall acknowledge accepted input immediately with a stable Mindraft item ID.
+2. The Telegram bot shall acknowledge accepted input immediately with a stable Memora item ID.
 3. The Telegram bot shall process messages asynchronously.
-4. Each Telegram message shall create exactly one Mindraft item.
+4. Each Telegram message shall create exactly one Memora item.
 
 ## Processing
 
