@@ -2,20 +2,27 @@
 
 ## Purpose
 
-Repository guidance for Codex CLI.
+Compact guidance for Codex CLI.
 
-## Read first
+## Core instructions
 
-1. `AGENTS.md`
-2. `docs/requirements/README.md`
-3. `docs/requirements/08_tech-stack-decision.md`
-4. `docs/ai/README.md`
-5. relevant subproject `AGENTS.md`
+- Read the docs before coding.
+- Keep the repo aligned with feature/domain structure.
+- Backend must stay reusable beyond Telegram.
+- Do not copy deployment/runtime logic into this repository.
+- Stay within V1 scope unless the user explicitly expands it.
 
-## Coding stance
+## Preferred workflow
 
-- favor explicit code over clever code
-- keep file count reasonable but do not create giant files
-- keep classes/functions narrowly responsible
-- preserve backend/client separation
-- do not invent product behavior
+1. read `AGENTS.md`
+2. read `docs/ai/current-bootstrap-state.md`
+3. identify the smallest affected domain area
+4. implement one clear slice
+5. update docs if behavior changed
+
+## Preferred style
+
+- simple > clever
+- explicit > magical
+- feature-oriented > global technical layers
+- maintainable > hyper-abstract

@@ -2,19 +2,19 @@
 
 ## Purpose
 
-The Telegram bot is a thin Kotlin adapter.
-
-## Responsibilities
-
-- poll or receive Telegram updates
-- validate owner user ID
-- forward accepted content to backend
-- send acceptance message with Mindraft ID
-- send failure information when backend indicates it
+Telegram bot is a thin Memora transport adapter.
 
 ## Rules
 
-- do not move backend logic here
-- do not invent domain rules here
-- keep transport code explicit and small
-- if unsure, backend should decide
+- keep it thin
+- keep it boring
+- keep it transport-focused
+- do not move core domain logic here
+- follow feature/area structure similar to Festiva-style bot organization
+
+## Current areas
+- `config`
+- `backend`
+- `command`
+- `ingest`
+- `bot`

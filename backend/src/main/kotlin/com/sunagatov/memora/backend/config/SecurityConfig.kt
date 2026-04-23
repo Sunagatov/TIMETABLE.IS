@@ -1,6 +1,7 @@
 package com.sunagatov.memora.backend.config
 
-import com.sunagatov.memora.backend.web.SessionAuthFilter
+import com.sunagatov.memora.backend.auth.security.SessionAuthFilter
+import com.sunagatov.memora.backend.capture.security.BotIngestTokenFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -13,7 +14,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 class SecurityConfig(
-    private val properties: MemoraProperties
+    private val properties: MemoraProperties,
+    private val sessionAuthFilter: SessionAuthFilter,
+    private val botIngestTokenFilter: BotIngestTokenFilter
 ) {
 
     @Bean
@@ -24,10 +27,8 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
             .authorizeHttpRequests { it.anyRequest().permitAll() }
-            .addFilterBefore(
-                SessionAuthFilter(properties.botIngestToken),
-                AnonymousAuthenticationFilter::class.java
-            )
+            .addFilterBefore(botIngestTokenFilter, AnonymousAuthenticationFilter::class.java)
+            .addFilterBefore(sessionAuthFilter, AnonymousAuthenticationFilter::class.java)
 
         return http.build()
     }

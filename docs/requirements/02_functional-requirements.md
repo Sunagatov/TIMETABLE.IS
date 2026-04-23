@@ -1,130 +1,42 @@
 # Functional Requirements
 
-## FR-01 Input channels
+## FR-01 Capture input
+Memora shall accept Telegram text messages and Telegram voice messages from the configured owner Telegram user id.
 
-The system shall accept:
+## FR-02 Backend source of truth
+Backend shall own item lifecycle, review state, auth state, and accepted item records.
 
-- Telegram text messages
-- Telegram voice messages
+## FR-03 Telegram bot role
+Telegram bot shall remain a thin adapter. It must not become a second backend.
 
-## FR-02 Telegram identity restriction
+## FR-04 Immediate acknowledgement
+Accepted Telegram messages shall receive an acknowledgement that includes:
+- accepted status
+- asynchronous processing notice
+- stable Memora item id
 
-The bot shall process messages only from the configured owner Telegram user ID.
+## FR-05 Review-first trust
+Newly processed items shall land in review queues before becoming approved knowledge.
 
-## FR-03 Immediate bot acknowledgement
+## FR-06 Queues
+The system shall expose:
+- needs review queue
+- failures queue
+- approved items view
 
-After valid receipt, the bot shall send:
+## FR-07 Auth
+Frontend shall use password-based login with backend-managed session.
 
-`Accepted. Processing asynchronously. Mindraft ID: ...`
-
-## FR-04 One message = one item
-
-Each Telegram message shall map to exactly one Memora item in V1.
-
-## FR-05 Backend source of truth
-
-Backend shall own:
-
-- item lifecycle
-- type/category/priority decisions
-- review queues
-- approved knowledge base
-- failure handling
-- auth/session logic
-
-## FR-06 Review-first trust model
-
-AI-processed items shall not immediately enter the approved knowledge base.
-
-They shall first appear in **Needs Review**.
-
-## FR-07 Needs Review actions
-
-The reviewer shall be able to:
-
-- approve as is
-- edit then approve
-- reject
-- delete to trash
-- retry processing
-
-## FR-08 Main approved list
-
-The default main list shall contain only approved items.
-
-## FR-09 Failures area
-
-The system shall provide a dedicated failures area.
-
-## FR-10 Search/filter/sort
-
-The web app shall support:
-
-- keyword search across title + cleaned text + raw text/transcript
-- filters by date, type, status, category tree, priority
-- sorting by title and creation date
-
-## FR-11 Category tree
-
-The system shall support exactly 3 category levels:
-
+## FR-08 Category path
+Items shall have:
 - category
 - subcategory
 - subsubcategory
 
-## FR-12 Category management
+## FR-09 Backend reuse
+Business logic shall be reusable by future clients beyond Telegram.
 
-V1 shall support:
+## FR-10 Voice bootstrap rule
+Current starter implementation may persist accepted voice metadata before the full transcription slice is implemented.
 
-- create category
-- rename category
-- move items between categories
-- delete category only if empty
-
-## FR-13 Type enum in V1
-
-Allowed item types:
-
-- `IDEA`
-- `THOUGHT`
-- `REMINDER`
-- `OTHER`
-
-## FR-14 Type fallback
-
-If AI is uncertain about type, it shall use `OTHER`.
-
-## FR-15 Category fallback
-
-If AI cannot confidently map to an existing category path, it shall use the configured default category path.
-
-## FR-16 Priority fallback
-
-If AI confidence is low, priority shall be `NOT_APPLICABLE`.
-
-## FR-17 Telegram metadata persistence
-
-For voice items, the system shall persist enough Telegram metadata for traceability, including:
-
-- message ID
-- file ID
-- file unique ID
-- generated Mindraft ID
-- media metadata when available
-
-## FR-18 Human edits after approval
-
-Human edits to an already approved item shall keep the item approved automatically in V1.
-
-## FR-19 Version visibility
-
-UI shall preserve and expose:
-
-- original AI output
-- latest human version
-
-## FR-20 Vault boundary
-
-Application code and product docs belong here.
-
-Deployment/runtime/prod files belong in Vault.
+This is acceptable in bootstrap state and must be documented clearly.

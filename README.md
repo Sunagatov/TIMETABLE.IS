@@ -54,6 +54,35 @@ Important Vault docs for Memora operations:
 - `docs/requirements/` — product requirements and project contracts
 - `docs/ai/` — compact context for Claude CLI, Codex CLI, and human maintainers
 
+## Structural style used in this repository
+
+This repository intentionally prefers **domain / feature / area oriented structure** over pure technical layers.
+
+That means:
+
+- backend code should be grouped into areas like `auth`, `capture`, `review`, `item`
+- frontend code should be grouped into `features/*` and `shared/*`
+- telegram bot code should be grouped into `bot`, `command`, `backend`, `ingest`, `config`
+
+Pure global layering like only `controller / service / repository / dao / converter` at the top level is not the preferred style here.
+
+## Current bootstrap state
+
+This repository now contains a **runnable starter implementation** for backend, frontend, and telegram-bot.
+
+Important bootstrap limitation:
+
+- backend persistence is currently **in-memory starter persistence**
+- voice capture is currently accepted and persisted with metadata, but full transcription integration is a later implementation slice
+- the product requirements still define the target V1 behavior; the current code is the starter foundation to implement toward that target
+
+See:
+
+- `docs/ai/current-bootstrap-state.md`
+- `docs/requirements/08_tech-stack-decision.md`
+- `docs/ai/repo-map.md`
+- `docs/ai/change-playbook.md`
+
 ## Read order
 
 ### Humans
@@ -80,7 +109,7 @@ Do not start by scanning the whole repository.
 - Java 25 (LTS)
 - Spring Boot 4.0.5
 - Spring Security
-- MongoDB support
+- MongoDB target persistence
 - Gradle Kotlin DSL
 
 ### Frontend
@@ -99,3 +128,13 @@ Do not start by scanning the whole repository.
 - Java 25
 - TelegramBots 9.2.0
 - thin adapter that forwards accepted messages to backend
+
+## Current repository purpose
+
+These docs and starter files exist to prevent AI agents and humans from:
+
+- carrying over stale assumptions
+- coupling backend to Telegram
+- guessing deployment/runtime truth from source files
+- over-engineering initial V1
+- wasting tokens on avoidable repo-wide scans

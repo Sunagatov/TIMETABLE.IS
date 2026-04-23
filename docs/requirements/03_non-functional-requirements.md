@@ -1,59 +1,25 @@
 # Non-Functional Requirements
 
-## NFR-01 Single-user optimization
+## NFR-01 Simplicity
+Prefer simple, maintainable code over cleverness.
 
-The product is optimized for one user in V1.
+## NFR-02 Structure
+Prefer feature/domain/area-oriented structure over global technical layer sprawl.
 
-## NFR-02 KISS
+## NFR-03 AI-agent friendliness
+Repository should minimize ambiguity for Claude CLI, Codex CLI, and human maintainers.
 
-Prefer simple and understandable solutions.
+## NFR-04 Small files
+Prefer reasonably small files when practical.
 
-## NFR-03 YAGNI
+## NFR-05 Explicitness
+Status transitions, auth behavior, ingest behavior, and review behavior should stay explicit.
 
-Do not implement future features before they are needed.
+## NFR-06 Vault boundary
+This repository must not become a duplicate runtime/deployment workspace.
 
-## NFR-04 Maintainability
+## NFR-07 Startability
+Backend, frontend, and telegram bot folders must be runnable as local starter apps.
 
-The codebase must stay easy for:
-
-- Claude CLI
-- Codex CLI
-- the human maintainer
-
-## NFR-05 Backend/client separation
-
-Backend business logic must remain client-agnostic.
-
-## NFR-06 Session auth
-
-The web app shall use password login with backend-managed session handling.
-
-## NFR-07 Security baseline
-
-Minimum baseline:
-
-- HTTPS in real deployed environments
-- session-based auth
-- password not stored in plaintext
-- internal backend bot-ingest secret
-- no public write endpoints
-
-## NFR-08 Performance priority
-
-Fast, stable page loading matters more than instant processing completion.
-
-## NFR-09 Reliability baseline
-
-Accepted messages shall not disappear silently.
-
-## NFR-10 Retryability
-
-Failures shall be retryable.
-
-## NFR-11 Small scoped files
-
-Prefer reasonably small files where practical.
-
-## NFR-12 No deployment files here
-
-This repo must not absorb Vault runtime concerns.
+## NFR-08 Bootstrap honesty
+Starter implementation limitations must be documented instead of hidden.

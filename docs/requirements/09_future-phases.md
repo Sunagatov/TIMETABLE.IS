@@ -1,13 +1,13 @@
 # Future Phases
 
-Possible later additions:
+## Planned later slices
 
-- question-answering workflow
-- AI-generated category suggestions requiring approval
-- regeneration flows
+- real MongoDB persistence implementation
+- real voice transcription integration
+- AI provider integration
+- review mutation UI
+- search/filter/sort beyond placeholders
+- category management UI
+- question-answering flow
 - labels
 - semantic search
-- Memora-managed audio storage
-- audio playback/download in web app
-- more advanced search ranking
-- additional clients beyond Telegram/web

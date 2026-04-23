@@ -1,63 +1,43 @@
 # Scope and MVP
 
-## In scope for V1
+## In scope for initial V1 MVP
 
 ### Capture
-
-- Telegram voice messages
-- Telegram text messages
-- Telegram bot accepts only the configured owner user ID
-- immediate acknowledgement with stable Mindraft ID
-
-### Processing
-
-- asynchronous processing model
-- voice transcription
-- AI cleanup / language polishing
-- AI title suggestion
-- AI type suggestion
-- AI category selection from existing categories only
-- AI priority suggestion only when confidence is high
-
-### Web app
-
-- login screen
-- Needs Review page
-- Failures page
-- approved items list
-- item details
-- edit + approve flow
-- basic keyword search
-- filtering
-- sorting
-- category sidebar
-- category management within V1 scope
+- Telegram text capture
+- Telegram voice capture
+- single-user bot access
+- async acknowledgement with stable item id
 
 ### Backend
-
-- source of truth for business logic
-- session-based auth
+- client-agnostic source-of-truth backend
+- auth/session endpoints
 - Telegram ingest endpoint
-- list/review endpoints
-- category endpoints
-- clear item status lifecycle
+- review queues
+- approved items list
+- in-memory starter persistence for runnable bootstrap
+- MongoDB-targeted persistence model in docs and structure
+
+### Frontend
+- password login screen
+- review workspace
+- failures workspace
+- approved items workspace
+- simple search/filter/sort placeholders
+- category sidebar placeholder
 
 ### Telegram bot
-
 - thin Kotlin adapter
-- forwards accepted content to backend
-- replies with accepted message + Mindraft ID
-- sends failure information when backend indicates it
+- owner-only access
+- forwards accepted messages to backend
+- `/start` support
+- acceptance and failure messaging
 
-## Out of scope for V1
-
-- deployment/runtime files in this repo
+## Out of scope for initial MVP
 - multi-user support
-- public sharing
-- question-answering workflow
-- labels
-- regeneration workflows
-- AI-created categories
+- deployment/runtime files in this repo
 - semantic search
-- Memora-managed audio object storage
-- audio playback/download in web app
+- labels
+- AI-generated new categories
+- question-answering flow
+- full voice transcription pipeline implementation
+- media storage in Memora repo/app runtime

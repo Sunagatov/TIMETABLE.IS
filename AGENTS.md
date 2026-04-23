@@ -8,7 +8,7 @@ This repository is intentionally structured to be easy for:
 
 ## Primary goal
 
-Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`.
+Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`, while preserving the current structure and engineering principles.
 
 ## Hard boundaries
 
@@ -18,6 +18,26 @@ Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`.
 - Telegram is an adapter, not the center of the architecture.
 - Do not add out-of-scope features.
 - Do not over-engineer.
+
+## Structural rule
+
+Prefer **domain / feature / area** oriented structure.
+
+Examples of preferred style:
+
+- backend: `auth`, `capture`, `review`, `item`
+- frontend: `features/review`, `features/auth`, `shared/api`, `shared/ui`
+- telegram bot: `bot`, `command`, `backend`, `ingest`
+
+Avoid making the root package structure primarily technical like only:
+
+- `controller`
+- `service`
+- `repository`
+- `dao`
+- `converter`
+
+Those technical building blocks may exist **inside a feature package**, but should not dominate the whole project structure.
 
 ## Required read order before coding
 
@@ -30,7 +50,8 @@ Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`.
 7. `docs/requirements/07_ai-behavior-rules.md`
 8. `docs/requirements/08_tech-stack-decision.md`
 9. `docs/ai/README.md`
-10. the smallest relevant subproject guide:
+10. `docs/ai/current-bootstrap-state.md`
+11. the smallest relevant subproject guide:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`
    - `telegram-bot/AGENTS.md`
@@ -44,3 +65,4 @@ Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`.
 - Backend use cases/services must remain reusable by future non-Telegram clients.
 - If requirements and code disagree, requirements win.
 - If requirements are ambiguous, update docs first or ask for a decision instead of inventing behavior.
+- Do not move deployment concerns into this repository.

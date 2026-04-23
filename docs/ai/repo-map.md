@@ -1,33 +1,34 @@
 # Repo Map
 
 ## Root
+- `README.md` — repo purpose and boundaries
+- `AGENTS.md` — global agent rules
+- `CLAUDE.md` — Claude CLI guidance
+- `CODEX.md` — Codex CLI guidance
+- `.env.example` — local config template
 
-- `README.md` — source-of-truth split + repository purpose
-- `AGENTS.md` — global repo rules for humans and AI
-- `CLAUDE.md` — Claude CLI repo guidance
-- `CODEX.md` — Codex CLI repo guidance
+## Backend
+- `backend/AGENTS.md`
+- `backend/README.md`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/auth/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/item/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/review/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/health/`
 
-## docs/requirements
+## Frontend
+- `frontend/AGENTS.md`
+- `frontend/README.md`
+- `frontend/src/app/`
+- `frontend/src/features/auth/`
+- `frontend/src/features/review/`
+- `frontend/src/shared/`
 
-Product and engineering truth for V1.
-
-## docs/ai
-
-Compact AI continuation context.
-
-## backend
-
-Spring Boot application source of truth.
-
-## frontend
-
-React review/search/edit UI.
-
-## telegram-bot
-
-Thin Kotlin Telegram adapter.
-
-## Important mental model
-
-Backend owns business logic.  
-Frontend and Telegram bot are clients/adapters.
+## Telegram bot
+- `telegram-bot/AGENTS.md`
+- `telegram-bot/README.md`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/command/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/backend/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/config/`

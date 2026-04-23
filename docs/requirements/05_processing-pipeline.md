@@ -1,46 +1,23 @@
 # Processing Pipeline
 
-## Voice item flow
+## Intended V1 target
 
-1. receive Telegram update
-2. validate owner user ID
-3. create item + Mindraft ID
-4. persist Telegram references
-5. send immediate acknowledgement
-6. fetch Telegram file
-7. transcribe audio
-8. persist raw transcript
-9. run AI cleanup/classification
-10. persist AI snapshot
-11. move item to `AI_PROCESSED_UNREVIEWED`
+1. Telegram message accepted
+2. stable item id generated
+3. item persisted
+4. text and voice content processed asynchronously
+5. AI-cleaned output and inferred metadata created
+6. item routed into review queue
+7. human review decides whether the item becomes approved knowledge
 
-## Text item flow
+## Current starter reality
 
-1. receive Telegram update
-2. validate owner user ID
-3. create item + Mindraft ID
-4. persist raw input text
-5. send immediate acknowledgement
-6. run AI cleanup/classification
-7. persist AI snapshot
-8. move item to `AI_PROCESSED_UNREVIEWED`
+The current runnable starter implements:
 
-## Fallbacks
+- accepted text ingest
+- accepted voice metadata ingest
+- stable item id generation
+- simple normalization/inference starter logic
+- review/failure/approved query endpoints
 
-### Type
-
-If uncertain: `OTHER`
-
-### Category
-
-If no suitable category path exists: configured default path
-
-### Priority
-
-If uncertain: `NOT_APPLICABLE`
-
-## Accepted V1 limitation
-
-Memora does not store audio in its own managed storage in V1.
-
-Audio remains in Telegram. Memora stores only the references and metadata needed for traceability.
+The full transcription and AI integration slices are intentionally still future implementation tasks.

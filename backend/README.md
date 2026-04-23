@@ -1,41 +1,42 @@
 # Backend
 
-Kotlin + Spring Boot backend for Memora.
+Backend is Memora's source of truth.
 
-## Current intent
+## Structural style
 
-This backend is the source of truth for:
+The backend intentionally uses **feature/domain/area-oriented packages**.
 
-- auth/session handling
-- item ingestion
-- review/failure queues
-- approved knowledge base
-- category tree operations
+Examples in this starter:
+- `auth`
+- `capture`
+- `item`
+- `review`
+- `health`
 
-## Local run
+This is preferred over a top-level structure dominated by only:
+- controller
+- service
+- repository
+- dao
+- converter
 
-Prerequisites:
+Those technical parts may exist **inside a feature package**, but should not define the whole backend layout.
 
-- Java 25
-- Gradle available locally
+## Current bootstrap state
 
-Run:
+This backend is runnable and intentionally simple.
+
+It currently uses:
+- in-memory starter persistence
+- session auth starter
+- Telegram ingest starter
+- review queue starter
+
+Target persistence remains MongoDB, but bootstrap stays in-memory until the real persistence slice is implemented.
+
+## Run locally
 
 ```bash
 cd backend
-gradle bootRun
+./gradlew bootRun
 ```
-
-By default it starts on:
-
-- `http://localhost:8080`
-
-Health endpoint:
-
-- `GET /api/health`
-
-## Notes
-
-The initial starter uses in-memory storage to keep local startup simple.
-
-MongoDB support is already included in the stack decision and dependency set, but full persistence can be added in the next implementation step without changing the product contract.

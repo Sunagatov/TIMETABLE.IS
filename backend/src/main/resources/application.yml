@@ -1,17 +1,19 @@
-server:
-  port: ${BACKEND_PORT:8080}
-
 spring:
   application:
     name: memora-backend
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/memora}
+
+server:
+  port: ${BACKEND_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
 
 memora:
+  allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}
   app-password: ${BACKEND_APP_PASSWORD:change-me}
-  secret-key: ${BACKEND_SECRET_KEY:change-me}
   session-days: ${BACKEND_SESSION_DAYS:30}
   bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}
   default-category-path: ${DEFAULT_CATEGORY_PATH:Default/General/Inbox}
-  allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}

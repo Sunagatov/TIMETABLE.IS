@@ -1,89 +1,65 @@
 # Domain Model
 
-## Main entity: Item
+## Primary domains / areas
 
-### Identity
+### auth
+- session login
+- session validation
+- logout
 
-- `id`
-- `mindraftId`
-- `sourceType`
-- `createdAt`
-- `updatedAt`
+### capture
+- Telegram ingest
+- acceptance id generation
+- initial item creation
 
-### Telegram metadata
+### item
+- item identity
+- source metadata
+- current content
+- status
+- category path
+- priority
 
-- `telegramUserId`
-- `telegramChatId`
-- `telegramMessageId`
-- `telegramFileId`
-- `telegramFileUniqueId`
+### review
+- needs review
+- failures
+- approved items
+- approve/reject/delete transitions
 
-### Raw content
+## Item shape
 
-- `rawInputText`
-- `rawTranscript`
+Starter item model includes:
+- internal id
+- stable memora item id
+- source type
+- Telegram metadata
+- raw input text
+- raw transcript
+- AI-generated title
+- AI-generated cleaned text
+- AI-generated type/category/priority
+- current human-visible title/text/type/category/priority
+- status
+- retry counters
+- timestamps
 
-### AI output snapshot
+## Item status
 
-- `aiTitle`
-- `aiCleanedText`
-- `aiType`
-- `aiCategory`
-- `aiSubcategory`
-- `aiSubsubcategory`
-- `aiPriority`
+Starter status set:
+- RECEIVED
+- TRANSCRIPTION_FAILED
+- TRANSCRIBED
+- AI_PROCESSING_FAILED
+- AI_PROCESSED_UNREVIEWED
+- HUMAN_APPROVED
+- HUMAN_EDITED_APPROVED
+- REJECTED
+- DELETED
 
-### Current editable values
+## Item type
 
-- `title`
-- `cleanedText`
-- `type`
-- `category`
-- `subcategory`
-- `subsubcategory`
-- `priority`
-
-### Lifecycle
-
-- `status`
-- `failureStage`
-- `failureReason`
-- `retryCountTranscription`
-- `retryCountAi`
-- `approvedAt`
-- `deletedAt`
-- `rejectedAt`
-
-## Type enum
-
-- `IDEA`
-- `THOUGHT`
-- `REMINDER`
-- `OTHER`
-
-## Status enum
-
-- `RECEIVED`
-- `TRANSCRIPTION_FAILED`
-- `TRANSCRIBED`
-- `AI_PROCESSING_FAILED`
-- `AI_PROCESSED_UNREVIEWED`
-- `HUMAN_APPROVED`
-- `HUMAN_EDITED_APPROVED`
-- `REJECTED`
-- `DELETED`
-
-## Priority enum
-
-- `URGENT_IMPORTANT`
-- `URGENT_NOT_IMPORTANT`
-- `NOT_URGENT_IMPORTANT`
-- `NOT_URGENT_NOT_IMPORTANT`
-- `NOT_APPLICABLE`
-
-## Important invariant
-
-Type and category must stay separate.
-
-- type = what kind of item it is
-- category tree = what topic it belongs to
+Starter type set:
+- IDEA
+- THOUGHT
+- REMINDER
+- OTHER

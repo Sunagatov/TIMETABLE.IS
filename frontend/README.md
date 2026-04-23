@@ -1,36 +1,31 @@
 # Frontend
 
-React + TypeScript + Vite frontend for Memora.
+Frontend is the Memora web review workspace.
 
-## Current purpose
+## Structural style
 
-Provide the review-first UI for Memora V1.
+Frontend intentionally follows a **feature + shared** structure inspired by the user's preferred approach.
 
-## Included stack
+### Features
+- `features/auth`
+- `features/review`
 
-- React 19.2.1
-- TypeScript 6.0.2
-- Vite 8.0.8
-- TanStack Query 5.99.1
-- React Hook Form 7.73.0
-- Zod 4.3.6
-- Tailwind CSS 4.2.2
+### Shared
+- `shared/api`
+- `shared/config`
 
-## Local run
+### App
+- `app/`
 
-Prerequisites:
+## Current bootstrap state
 
-- Node.js installed
-- npm available
+This frontend is runnable and intentionally simple.
 
-Run:
+It currently includes:
+- password login screen
+- review workspace shell
+- queue switching
+- backend session bootstrap
+- starter query wiring
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Default URL:
-
-- `http://localhost:5173`
+It does not yet implement the full target V1 UI.

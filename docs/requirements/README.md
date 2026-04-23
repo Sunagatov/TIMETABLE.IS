@@ -25,3 +25,8 @@ It is built to:
 - keep AI output separated from approved knowledge
 - allow search/filter/edit in the web UI
 - keep backend logic reusable by future non-Telegram clients
+
+## Source-of-truth split reminder
+
+- application source + requirements = `Sunagatov/Memora`
+- deployment/runtime/prod files = `Sunagatov/Vault`, especially `apps/memora/`

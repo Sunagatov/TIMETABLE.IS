@@ -1,30 +1,31 @@
 # Telegram Bot
 
-Kotlin-based thin Telegram adapter for Memora.
+Telegram bot is a thin Memora adapter.
 
-## Local run
+## Structural style
 
-Prerequisites:
+This bot intentionally follows a **Festiva-like area structure** rather than one flat package.
 
-- Java 25
-- Gradle installed locally
+Current areas:
+- `config`
+- `backend`
+- `command`
+- `ingest`
+- `bot`
 
-Run:
+## Responsibility
+
+The bot should:
+- validate that messages come from the configured owner
+- acknowledge accepted messages
+- forward accepted messages to backend
+- remain transport-focused
+
+It should **not** become a second backend.
+
+## Run locally
 
 ```bash
 cd telegram-bot
-gradle run
+./gradlew run
 ```
-
-## Required env vars
-
-- `TELEGRAM_BOT_TOKEN`
-- `OWNER_TELEGRAM_USER_ID`
-- `BACKEND_BASE_URL`
-- `BACKEND_BOT_INGEST_TOKEN`
-
-## Important rule
-
-This bot is only a transport adapter.
-
-Backend owns the real business logic.

@@ -1,39 +1,18 @@
 # Review Workflow
 
-## Needs Review
+## Queues
 
-Contains successfully processed items awaiting human review.
+### Needs Review
+Contains unapproved items that were accepted into the review-first workflow.
 
-## Failures
+### Failures
+Contains items that failed at a processing stage.
 
-Contains items that failed in one or more stages.
+### Approved
+Contains items that were explicitly approved by the human.
 
-## Allowed review actions in V1
+## Current starter actions
+Starter implementation supports query endpoints and basic status mutation patterns.
 
-- approve as is
-- edit then approve
-- reject
-- delete
-- retry processing
-
-## Approval outcomes
-
-### Approve as is
-
-Status becomes `HUMAN_APPROVED`.
-
-### Edit then approve
-
-Status becomes `HUMAN_EDITED_APPROVED`.
-
-### Reject
-
-Status becomes `REJECTED`.
-
-### Delete
-
-Status becomes `DELETED`.
-
-## Approved knowledge base
-
-Only approved items appear in the default main list.
+## Required principle
+Approved knowledge must remain distinct from unreviewed or failed items.
