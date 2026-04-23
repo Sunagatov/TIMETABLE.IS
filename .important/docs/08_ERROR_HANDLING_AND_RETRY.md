@@ -44,7 +44,7 @@ The user shall be able to manually retry failed items from the web app.
 
 The bot should provide as much useful failure context as reasonably possible in V1, including at least:
 
-- Mindraft ID
+- Memora ID
 - failed stage
 - human-readable failure summary
 - retry count or retry state

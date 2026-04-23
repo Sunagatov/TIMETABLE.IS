@@ -6,8 +6,7 @@ A single captured unit in Memora. One Telegram message becomes one item.
 
 ## Source
 
-The origin of an item.
-
+The origin of an item.  
 V1 sources:
 
 - `TELEGRAM_VOICE`
@@ -72,6 +71,6 @@ An item intentionally kept in the system but not accepted into the approved know
 
 An item moved to trash and recoverable later.
 
-## Mindraft ID
+## Memora ID
 
 A stable application-level identifier returned to the user in Telegram and used for traceability in the web app.

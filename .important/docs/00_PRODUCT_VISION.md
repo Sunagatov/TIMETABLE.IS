@@ -30,6 +30,19 @@ Memora should help the user:
 
 Only one user: the product owner.
 
+## Success outcomes after one month of use
+
+- fewer ideas lost
+- easier retrieval
+- cleaner thinking
+- more ideas turned into projects or content
+- less mental overload
+
+## Product positioning
+
+V1 is a private personal system first.  
+It may become a reusable/public product later, but current requirements should optimize for the single-user case.
+
 ## Primary use pattern
 
 - Capture in Telegram

@@ -26,6 +26,10 @@ The AI may improve language quality and clarity.
 
 It should not inject disagreement, moral commentary, or ideological correction merely because the user's content contains opinions, mistakes, subjective judgments, or emotionally charged wording.
 
+### No forced factual correction of intent
+
+If the user says something factually wrong, speculative, exaggerated, or emotional, AI should not silently rewrite it into a corrected factual claim unless explicitly instructed later in a different workflow.
+
 ### Category restriction
 
 AI may select only from pre-existing categories in V1.
@@ -50,13 +54,3 @@ AI may suggest priority only when confidence is high.
 
 If uncertain:
 - use `NOT_APPLICABLE`
-
-## Explicitly out of scope in V1
-
-- answering questions
-- web-searched answers
-- labels
-- regeneration of cleaned text
-- regeneration of category proposal
-- regeneration of all AI output
-- automatic creation of new categories

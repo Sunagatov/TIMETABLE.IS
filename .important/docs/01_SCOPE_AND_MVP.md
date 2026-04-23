@@ -1,6 +1,6 @@
 # Scope and MVP
 
-## In scope for initial V1 MVP
+## In scope for V1 MVP
 
 ### Capture
 
@@ -8,7 +8,7 @@
 - Telegram text messages as input
 - Bot accepts messages only from the owner's Telegram user ID
 - Immediate Telegram acknowledgement:
-  - `Accepted. Processing asynchronously. Mindraft ID: ...`
+  - `Accepted. Processing asynchronously. Memora ID: ...`
 
 ### Processing
 
@@ -68,13 +68,14 @@
 - no Memora-managed audio storage
 - no audio playback in web app
 - no audio download in web app
-- no reliable audio reprocessing guarantee inside Memora
+- no reliable audio reprocessing guarantee inside Memora itself
 - question-answering functionality removed from initial V1 MVP
 - labels out of scope
 - regeneration workflows out of scope
 - AI-created new categories out of scope
 - view count tracking out of scope
 - semantic search out of scope
+- reminders/calendar integration out of scope
 
 ## Out of scope for V1
 

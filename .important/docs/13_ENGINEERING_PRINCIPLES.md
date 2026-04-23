@@ -33,13 +33,3 @@ Use SOLID ideas to improve maintainability, not as an excuse for unnecessary lay
 The backend must encapsulate business logic in a client-agnostic way.
 
 Telegram bot code must act as an adapter/integration layer only.
-
-## AI agent guidance
-
-When AI coding agents implement Memora, they should:
-
-- optimize for readability and maintainability
-- keep business rules explicit
-- avoid coupling domain logic to Telegram transport details
-- avoid inventing features not present in the requirements
-- prefer stable, boring code over “smart” code

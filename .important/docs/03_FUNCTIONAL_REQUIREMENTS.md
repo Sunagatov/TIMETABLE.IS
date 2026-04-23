@@ -13,6 +13,8 @@ The system shall not allow item creation from the web app in V1.
 
 The bot shall process messages only from the configured owner Telegram user ID.
 
+Messages from any other Telegram user ID shall be ignored or rejected safely.
+
 ## FR-03 Immediate acknowledgement
 
 After receiving a valid Telegram message, the bot shall send an acknowledgement message in Telegram.
@@ -21,11 +23,11 @@ The acknowledgement shall include:
 
 - confirmation that the item was accepted
 - that processing is asynchronous
-- a stable Mindraft item ID
+- a stable Memora item ID
 
 Example:
 
-`Accepted. Processing asynchronously. Mindraft ID: MDR-2026-000123`
+`Accepted. Processing asynchronously. Memora ID: MDR-2026-000123`
 
 ## FR-04 One message = one item
 
@@ -121,6 +123,8 @@ The web app shall provide:
 - a dedicated **Needs Review** area
 - a dedicated **Failures** area
 
+Unapproved and failed items shall also be searchable/filterable intentionally through status filters.
+
 ## FR-15 Item editing
 
 After approval, the human user shall be able to edit all fields of the item.
@@ -190,9 +194,9 @@ Deleting an item shall move it to trash rather than hard-delete it immediately.
 
 ## FR-22 Failure notifications
 
-If processing fails, the Telegram bot shall send a failure message containing useful operational information including at least:
+If processing fails, the Telegram bot shall send a failure message containing as much useful operational information as reasonably possible in V1, including at least:
 
-- Mindraft item ID
+- Memora item ID
 - failed stage
 - human-readable failure summary
 - retry status or retry count when available
@@ -205,7 +209,7 @@ For voice items, the system shall persist enough Telegram metadata for traceabil
 - Telegram message ID
 - Telegram file ID
 - Telegram file unique ID
-- generated Mindraft item ID
+- generated Memora item ID
 - available basic media metadata if present
 
 ## FR-24 Session-based access

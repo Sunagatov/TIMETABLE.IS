@@ -10,7 +10,7 @@ Telegram capture must not wait for full completion.
 
 1. Receive Telegram update
 2. Validate Telegram sender
-3. Create item + Mindraft ID
+3. Create item + Memora ID
 4. Persist Telegram references and metadata
 5. Acknowledge in Telegram
 6. Retrieve audio using Telegram references
@@ -24,12 +24,20 @@ Telegram capture must not wait for full completion.
 
 1. Receive Telegram update
 2. Validate Telegram sender
-3. Create item + Mindraft ID
+3. Create item + Memora ID
 4. Persist raw input text
 5. Acknowledge in Telegram
 6. Run AI cleanup/classification
 7. Persist AI output
 8. Move item to `AI_PROCESSED_UNREVIEWED`
+
+## AI output expected in V1
+
+- title
+- cleaned text
+- type
+- category path
+- priority when confidence is high
 
 ## Fallback rules
 
@@ -41,7 +49,7 @@ If uncertain:
 ### Category fallback
 
 If no good match exists:
-- use default category path
+- use configured default category path
 
 ### Priority fallback
 

@@ -5,7 +5,7 @@
 ### Core identity
 
 - `id`
-- `mindraft_id`
+- `Memora_id`
 - `source_type`
 - `created_at`
 - `updated_at`
@@ -46,13 +46,13 @@
 ### Review and lifecycle
 
 - `status`
-- `failure_stage`
-- `failure_reason`
+- `failure_stage` (nullable)
+- `failure_reason` (nullable)
 - `retry_count_transcription`
 - `retry_count_ai`
-- `approved_at`
-- `deleted_at`
-- `rejected_at`
+- `approved_at` (nullable)
+- `deleted_at` (nullable)
+- `rejected_at` (nullable)
 
 ### Version traceability
 
@@ -85,10 +85,3 @@
 - `NOT_URGENT_IMPORTANT`
 - `NOT_URGENT_NOT_IMPORTANT`
 - `NOT_APPLICABLE`
-
-## Important modeling rule
-
-Type and category must stay separate:
-
-- `TYPE` answers “what kind of item is this?”
-- `CATEGORY TREE` answers “what topic does this belong to?”

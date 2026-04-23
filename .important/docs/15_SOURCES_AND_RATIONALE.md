@@ -1,31 +1,28 @@
 # Sources and Rationale
 
-This file records external references that influenced implementation-sensitive requirements.
-
 ## Telegram Bot API
 
-Used for rationale around:
-
+Relevant for:
+- webhook secret verification
+- file retrieval behavior
 - HTTP-based bot integration
-- webhook secret token support
-- file retrieval via `getFile`
 
 Source:
-- Telegram Bot API: https://core.telegram.org/bots/api
+- https://core.telegram.org/bots/api
 
-## OWASP Session Management
+## OWASP Session Management Cheat Sheet
 
-Used for rationale around:
-
-- session-based auth
-- secure cookie handling
-
-Source:
-- OWASP Session Management Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
-
-## OWASP Password Storage
-
-Used for rationale around password hashing.
+Relevant for:
+- session cookie protections
+- secure session handling
 
 Source:
-- OWASP Password Storage Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+
+## OWASP Password Storage Cheat Sheet
+
+Relevant for:
+- password hashing expectations
+
+Source:
+- https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html

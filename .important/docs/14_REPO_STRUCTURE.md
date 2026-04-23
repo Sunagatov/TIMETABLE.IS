@@ -1,19 +1,18 @@
-# Suggested Repo Structure
+# Suggested Monorepo Structure
+
+## High-level structure
 
 ```text
 Memora/
-  docs/
   backend/
   frontend/
   telegram-bot/
-  AGENTS.md
-  CLAUDE.md
-  CODEX.md
+  docs/
 ```
 
-## Responsibilities
+## Backend
 
-### backend/
+Responsibilities:
 
 - source of truth
 - domain model
@@ -27,7 +26,9 @@ Memora/
 - AI orchestration
 - Telegram-facing API endpoints for bot adapter
 
-### frontend/
+## Frontend
+
+Responsibilities:
 
 - login screen
 - session-aware app shell
@@ -39,10 +40,6 @@ Memora/
 - item detail/edit/review UI
 - category management UI
 
-### telegram-bot/
+## Telegram bot
 
-- receive Telegram updates
-- validate sender
-- forward input to backend
-- send immediate acknowledgement
-- send failure notifications when needed
+Thin adapter only.
