@@ -77,7 +77,7 @@ class TelegramCaptureService(
 
     private fun normalizeText(raw: String): String =
         raw.trim()
-            .replace(Regex("\s+"), " ")
+            .replace(Regex("\\s+"), " ")
             .replaceFirstChar { char ->
                 if (char.isLowerCase()) char.titlecase() else char.toString()
             }
