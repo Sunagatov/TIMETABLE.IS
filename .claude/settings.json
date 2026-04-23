@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./backend/.env)",
+      "Read(./backend/.env.*)",
+      "Read(./frontend/.env)",
+      "Read(./frontend/.env.*)",
+      "Read(./secrets/**)",
+      "Read(./frontend/node_modules/**)",
+      "Read(./node_modules/**)",
+      "Read(./.venv/**)",
+      "Read(./backend/.venv/**)",
+      "Read(./frontend/dist/**)",
+      "Read(./backend/lexora_backend.egg-info/**)"
+    ]
+  }
+}
