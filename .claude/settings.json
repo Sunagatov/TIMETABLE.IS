@@ -14,6 +14,9 @@
       "Read(./.venv/**)",
       "Read(./backend/.venv/**)",
       "Read(./frontend/dist/**)"
+    ],
+    "allow": [
+      "Bash(dig *)"
     ]
   }
 }
