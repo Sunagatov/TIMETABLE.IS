@@ -14,7 +14,7 @@ Avoid:
 - whole-repo scans
 - reading all three modules for one task
 - repeating requirements that are already summarized
-- carrying stale Lexora assumptions into Memora
+- carrying stale Memora assumptions into Memora
 
 ## Stop conditions
 

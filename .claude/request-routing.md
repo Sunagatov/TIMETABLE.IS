@@ -1,4 +1,4 @@
-# Lexora request routing
+# Memora request routing
 
 Use this file before opening source code.
 
@@ -53,7 +53,7 @@ Read:
 
 ### Prod deploys, logs, SSH, secrets, server automation
 Read:
-- Vault repo, not Lexora source tree
+- Vault repo, not Memora source tree
 
 ### If the user names exact files
 Read only those files plus the smallest required contract file.
