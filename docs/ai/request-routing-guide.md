@@ -2,14 +2,15 @@
 
 ## Backend-only task
 Read:
-1. `backend/AGENTS.md`
+1. `backend/AGENTS.md` — state guards, filter params, sort format, category rules, test patterns
 2. exact relevant requirement file(s)
 3. `docs/ai/current-bootstrap-state.md` if foundation/bootstrap shape matters
-4. exact backend files
+4. `docs/ai/api-surface.md` when changing endpoints, DTOs, or filter params
+5. exact backend files
 
 ## Frontend-only task
 Read:
-1. `frontend/AGENTS.md`
+1. `frontend/AGENTS.md` — component structure, filter param names, patterns
 2. exact relevant requirement file(s)
 3. exact frontend files
 
@@ -17,7 +18,17 @@ Read:
 Read:
 1. `telegram-bot/AGENTS.md`
 2. exact relevant requirement file(s)
-3. exact bot files
+3. `docs/ai/api-surface.md` (capture section) if touching backend contract
+4. exact bot files
+
+## Filter/search/sort task (any layer)
+Read:
+1. `docs/ai/api-surface.md` (search/filter/sort table)
+2. `docs/ai/token-budget-rules.md` (known high-risk areas section)
+3. `backend/src/main/kotlin/.../item/api/ItemDtos.kt` for backend param names
+4. `frontend/src/features/review/types/reviewTypes.ts` for frontend param names
+
+Key: param names must match exactly between frontend and backend. Date params are `createdFrom`/`createdTo`.
 
 ## Product/behavior question
 Read:
@@ -35,6 +46,20 @@ Read:
 2. `docs/ai/current-bootstrap-state.md`
 3. `docs/ai/api-surface.md`
 4. exact backend files only after that
+
+## State transition question
+Read:
+1. `docs/ai/invariants.md` (state transition guards section)
+2. `backend/AGENTS.md` (state machine section)
+3. `backend/src/main/kotlin/.../review/application/ReviewService.kt`
+4. `backend/src/main/kotlin/.../item/application/ItemService.kt`
+
+## Test question (backend)
+Read:
+1. `backend/AGENTS.md` (testing patterns section)
+2. `backend/src/test/kotlin/.../FoundationServicesTests.kt`
+
+Use `directExecutor()` for synchronous processing. Use `testProperties()` for consistent config.
 
 ## Deployment/runtime/prod question
 Read Vault docs first.

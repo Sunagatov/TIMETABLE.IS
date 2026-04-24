@@ -19,30 +19,33 @@ This is a short index. Prefer `current-bootstrap-state.md` and `implementation-s
 ### Phase 1 status
 
 Already present in backend:
-- explicit item lifecycle/status model
+- explicit item lifecycle/status model with state guards
 - in-memory item/session/category stores
 - auth/session baseline
-- Telegram ingest baseline
+- Telegram ingest baseline (owner validation, xor text/voice)
 - bot-facing failure notification endpoints
-- review/failure/approved API baseline
+- review/failure/approved API baseline with filter/sort query params
 - item detail/update baseline
-- category CRUD baseline
+- category CRUD baseline (rename cascades to items, delete blocks when non-empty)
 
 ### Phase 2 — frontend shell
 
 - login page
 - app shell
-- needs review page
-- failures page
-- approved items page
+- needs review page with backend-backed filter/sort
+- failures page with backend-backed filter/sort
+- approved items page with backend-backed filter/sort
+- item detail panel (AI output vs human-facing comparison)
+- category sidebar (collapsible 3-level tree)
+- category management UI (create, rename, delete)
 - API client
 
 Current shell status:
-- present as a review-first starter
+- all present as a backend-backed review-first workspace
 - default landing is Needs Review
-- approved list is approved-only
-- category sidebar is present
-- approved search/filter/sort remains client-side
+- all three views use backend query params (not client-side filtering)
+- filter params: keyword, type, priority, status, category path, createdFrom, createdTo, sort
+- sort format: `field-direction` (e.g. `createdAt-desc`)
 
 ### Phase 3 — telegram bot adapter
 
@@ -54,9 +57,15 @@ Current shell status:
 Current adapter status:
 - present as a Kotlin thin adapter
 - unified ingest contract is in place
-- failure notifications are polled from backend
+- failure notifications are polled from backend and delivered/acknowledged
 
 ### Phase 4 — persistence upgrade
 
 - replace in-memory item storage with MongoDB persistence
 - keep API shape stable
+
+### Phase 5 — processing pipeline
+
+- transcription integration
+- AI cleanup/classification integration
+- replace stub heuristics in `ItemProcessingService`
