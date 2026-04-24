@@ -9,6 +9,7 @@ Backend is Memora's source of truth.
 - item lifecycle
 - auth/session handling
 - telegram ingest API
+- bot-facing failure notification delivery
 - review queue APIs
 - category CRUD baseline
 - future client-agnostic business logic
@@ -39,6 +40,9 @@ Do not drift back into a broad global technical-layer structure.
 - do not move deployment/runtime concerns here
 - keep category paths exactly 3 levels in V1
 - preserve original AI output separately from latest human-facing item values
+- keep direct `PATCH /api/items/{itemId}` approved-only
+- use `edit-and-approve` for reviewable edits
+- keep unified Telegram ingest at one backend endpoint with nested voice payload
 - use in-memory stores until a task explicitly upgrades persistence
 - current narrow backend validation is usually:
   - `cd backend && ./gradlew compileKotlin`

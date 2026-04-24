@@ -18,6 +18,7 @@ Implement **Memora V1 MVP** exactly as defined in `docs/requirements/`, while pr
 - Telegram is an adapter, not the center of the architecture.
 - Do not add out-of-scope features.
 - Do not over-engineer.
+- The current compact contract snapshot lives in `docs/ai/current-bootstrap-state.md` and `docs/ai/api-surface.md`.
 
 ## Structural rule
 
@@ -43,9 +44,10 @@ Those technical building blocks may exist **inside a feature package**, but shou
 
 1. `docs/requirements/README.md`
 2. the smallest exact requirement file(s) for the task
-3. `docs/ai/README.md`
-4. `docs/ai/current-bootstrap-state.md`
-5. the smallest relevant subproject guide:
+3. `docs/ai/current-bootstrap-state.md`
+4. `docs/ai/api-surface.md` when the task touches backend/client contracts
+5. `docs/ai/README.md` when you need the doc map
+6. the smallest relevant subproject guide:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`
    - `telegram-bot/AGENTS.md`
@@ -77,3 +79,10 @@ Use the legacy lower-case requirement files only when a task explicitly referenc
   - `docs/ai/api-surface.md`
   - `docs/ai/repo-map.md`
   - `docs/ai/change-playbook.md`
+- Preserve these stable V1 contracts unless the requirements change:
+  - unified Telegram ingest at `POST /api/capture/telegram/ingest`
+  - bot-facing failure notification polling and delivery acknowledgement
+  - review-first workflow with separate Needs Review, Failures, and approved areas
+  - direct `PATCH /api/items/{itemId}` for approved items only
+  - reviewable edits through `POST /api/review/{itemId}/edit-and-approve`
+  - exact 3-level category paths

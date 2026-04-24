@@ -43,8 +43,9 @@ Owns production/deployment/runtime truth.
 - review/search/edit UI
 
 ### Telegram bot
-- Python-based thin adapter
+- Kotlin-based thin adapter
 - forwards accepted messages to backend
+- polls backend failure notifications for operator-facing follow-up
 
 ## Architectural priorities
 
@@ -53,6 +54,7 @@ Owns production/deployment/runtime truth.
 - review-first trust model must remain visible everywhere
 - original AI output and latest human-approved values must remain separately visible
 - category model must stay exactly 3 levels in V1
+- direct item edits must not bypass review semantics
 - simplicity > flexibility theater
 - requirements > stale comments
 - Vault runtime truth > source-repo guesses

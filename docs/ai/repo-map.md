@@ -25,9 +25,11 @@
 - `frontend/AGENTS.md`
 - `frontend/README.md`
 - `frontend/src/app/`
+- `frontend/src/features/auth/`
+- `frontend/src/features/review/`
 - `frontend/src/shared/`
 
 ## Telegram bot
 - `telegram-bot/AGENTS.md`
 - `telegram-bot/README.md`
-- `telegram-bot/src/memora_bot/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/`

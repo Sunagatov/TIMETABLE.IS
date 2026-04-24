@@ -1,5 +1,7 @@
 # Implementation Order
 
+This is a short index. Prefer `current-bootstrap-state.md` and `implementation-sequence.md` for the real current picture.
+
 ## Recommended order
 
 ### Phase 1 — backend foundation
@@ -21,6 +23,7 @@ Already present in backend:
 - in-memory item/session/category stores
 - auth/session baseline
 - Telegram ingest baseline
+- bot-facing failure notification endpoints
 - review/failure/approved API baseline
 - item detail/update baseline
 - category CRUD baseline
@@ -34,12 +37,24 @@ Already present in backend:
 - approved items page
 - API client
 
+Current shell status:
+- present as a review-first starter
+- default landing is Needs Review
+- approved list is approved-only
+- category sidebar is present
+- approved search/filter/sort remains client-side
+
 ### Phase 3 — telegram bot adapter
 
 - owner user validation
 - backend forwarder
 - accepted message
 - failure message
+
+Current adapter status:
+- present as a Kotlin thin adapter
+- unified ingest contract is in place
+- failure notifications are polled from backend
 
 ### Phase 4 — persistence upgrade
 

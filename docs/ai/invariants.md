@@ -10,6 +10,7 @@
 - review-first trust model
 - approved list separate from review/failure areas
 - one message = one item
+- direct edits must not bypass review semantics for unapproved items
 
 ## Model invariants
 
@@ -28,6 +29,8 @@
   - Rejected/deleted terminal states
 - approved items remain approved after later human edits in V1
 - voice items must preserve Telegram traceability metadata sufficient for operator recovery attempts
+- Telegram ingest uses a unified text-or-voice request shape with nested voice payload
+- bot-facing failure notifications are acknowledged after delivery instead of being re-delivered forever
 
 ## V1 non-features / limitations
 
@@ -41,6 +44,7 @@
 - no view-count sorting in V1
 - no Memora-owned transcription implementation yet in current bootstrap backend
 - no Mongo persistence yet in current bootstrap backend
+- no frontend category CRUD management UI yet
 
 ## Boundary invariants
 

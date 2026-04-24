@@ -29,8 +29,16 @@ For production/deployment/runtime truth, use Vault.
 - review/search/edit UI
 
 ### Telegram bot
-- Python-based thin adapter
+- Kotlin-based thin adapter
 - transport-focused
+- current relevant source-repo bot config keys:
+  - `BACKEND_BASE_URL`
+  - `BACKEND_BOT_INGEST_TOKEN`
+  - `OWNER_TELEGRAM_USER_ID`
+  - `BACKEND_TELEGRAM_INGEST_PATH`
+  - `BACKEND_FAILURE_NOTIFICATIONS_PATH`
+  - `BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE`
+  - `FAILURE_POLL_INTERVAL_SECONDS`
 
 ## Production/deployment truth lives in Vault
 

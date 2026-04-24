@@ -23,22 +23,31 @@ Current backend endpoint:
 
 Current request shape:
 - exactly one of `text` or `voice`
-- `telegramUserId`
-- `telegramChatId`
-- `telegramMessageId`
+- `telegramUserId` as a string
+- `telegramChatId` as a string
+- `telegramMessageId` as a string
 - `voice.fileId`
 - `voice.fileUniqueId`
-- optional voice media metadata
+- optional voice media metadata: `durationSeconds`, `mimeType`
 
 Current behavior:
 - owner Telegram user ID is validated in backend
-- returns backend item ID as `memoraId`
+- returns backend item ID as `memoraId` on accept responses only
 - text ingest lands in Needs Review
 - voice ingest persists traceability metadata and currently lands in visible transcription failure
+- bot-facing failure notifications are exposed for polling and delivery acknowledgement
 
 Current bot-facing failure notification endpoints:
 - `GET /api/capture/telegram/failure-notifications`
 - `POST /api/capture/telegram/failure-notifications/{notificationId}/delivered`
+
+Current failure notification payload:
+- `notificationId`
+- `telegramChatId`
+- `memoraId`
+- `failedStage`
+- `summary`
+- `retryContext`
 
 ## Review
 
@@ -51,6 +60,10 @@ Current backend endpoints:
 - `DELETE /api/review/{itemId}/trash`
 - `POST /api/review/{itemId}/retry`
 
+Current behavior:
+- `edit-and-approve` is the review-safe edit path
+- direct item edits are not a replacement for review workflow
+
 ## Items
 
 Current backend endpoints:
@@ -61,6 +74,8 @@ Current backend endpoints:
 Current behavior:
 - approved item edits stay approved in V1
 - current editable fields include title, cleaned text, raw transcript, type, 3-level category path, priority
+- `PATCH /api/items/{itemId}` is approved-only
+- `MemoraItem` uses `id` as the primary item identifier; `memoraId` only appears in accept/notification payloads
 
 ## Category management
 

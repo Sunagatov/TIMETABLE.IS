@@ -13,7 +13,8 @@ Read:
 - `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/*`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
-- `telegram-bot/src/memora_bot/*`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/*`
+- `docs/ai/api-surface.md`
 
 ## If changing review behavior
 Read:
@@ -22,6 +23,7 @@ Read:
 - `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/review/*`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
+- `docs/ai/api-surface.md`
 
 ## If changing category behavior
 Read:
@@ -29,6 +31,7 @@ Read:
 - `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/category/*`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
+- `docs/ai/api-surface.md`
 
 ## If changing deployment or runtime
 Do not start here.

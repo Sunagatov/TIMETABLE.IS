@@ -11,6 +11,9 @@ Telegram bot is a thin Memora transport adapter.
 - keep it transport-focused
 - do not move core domain logic here
 - follow feature/area structure similar to Festiva-style bot organization
+- current implementation is Kotlin
+- use the unified backend ingest contract and nested voice payload
+- poll backend failure notifications instead of inventing local retry state
 
 ## Current areas
 - `config`

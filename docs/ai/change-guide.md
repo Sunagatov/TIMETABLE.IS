@@ -8,6 +8,7 @@ Also review:
 - telegram-bot backend forwarder
 - relevant requirements docs
 - `docs/ai/api-surface.md`
+- `docs/ai/current-bootstrap-state.md`
 
 ## If you change item lifecycle or statuses
 
@@ -20,6 +21,7 @@ Also review:
 - bot failure messaging
 - `docs/ai/current-bootstrap-state.md`
 - `docs/ai/invariants.md`
+- direct item patch approval rules
 
 ## If you change category behavior
 
@@ -30,6 +32,7 @@ Also review:
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/category/*`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
 - `docs/ai/api-surface.md`
+- `docs/ai/current-bootstrap-state.md`
 
 ## If you change auth/session or config keys
 
@@ -39,6 +42,7 @@ Also review:
 - `backend/src/main/resources/application.yml`
 - `docs/ai/env-runtime-reference.md`
 - telegram-bot/frontend only if external contract changed
+- `docs/ai/api-surface.md` if a contract is renamed
 
 ## If you change stack/tooling versions
 

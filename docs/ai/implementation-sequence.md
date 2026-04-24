@@ -22,8 +22,9 @@ Current status:
 
 Current status:
 - owner validation and message acceptance are present
-- text and voice ingest contracts exist
-- full async orchestration and bot acknowledgement flows are still later work
+- unified text and voice ingest contract exists
+- bot-facing failure notification polling and delivery acknowledgement exist
+- full async orchestration remains later work
 
 ## Phase 3 — processing pipeline
 - raw input persistence
@@ -41,11 +42,22 @@ Current status:
 - search/filter/sort
 - category sidebar
 
+Current status:
+- present as a review-first starter
+- default landing is Needs Review
+- approved list is approved-only by default
+- category sidebar is present
+- approved search/filter/sort remains a client-side shell
+
 ## Phase 5 — category management
 - create
 - rename
 - move items
 - delete empty categories
+
+Current status:
+- backend category CRUD baseline exists
+- category management UI is still future work
 
 ## Rule
 

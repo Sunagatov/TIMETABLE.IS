@@ -42,7 +42,8 @@ Read Vault docs first.
 ## Unclear task
 Start narrow:
 1. `AGENTS.md`
-2. `.claude/generated/request-routing.md`
-3. one scoped file
-4. one or two compact docs
-5. exact code only after that
+2. `docs/ai/repo-map.md`
+3. `docs/ai/current-bootstrap-state.md`
+4. `docs/ai/api-surface.md`
+5. one scoped file
+6. exact code only after that

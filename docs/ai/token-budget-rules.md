@@ -34,6 +34,8 @@ Before opening more code, prefer:
 - `docs/ai/architecture.md`
 - `docs/ai/invariants.md`
 - `docs/ai/current-bootstrap-state.md`
+- `docs/ai/api-surface.md` when working on endpoints or DTOs
+- `docs/ai/implementation-sequence.md` over `implementation-order.md` unless you only need the shorthand summary
 
 ## Editing strategy
 
