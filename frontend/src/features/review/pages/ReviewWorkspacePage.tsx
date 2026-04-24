@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   approveItem,
+  createCategory,
+  deleteCategory,
   editAndApproveItem,
   fetchApproved,
   fetchCategories,
   fetchFailures,
   fetchItem,
   fetchNeedsReview,
+  renameCategory,
   rejectItem,
   retryItem,
   trashItem,
@@ -17,7 +20,14 @@ import { ApprovedFiltersBar } from "../components/ApprovedFiltersBar";
 import { ItemDetailPanel } from "../components/ItemDetailPanel";
 import { ReviewQueueList } from "../components/ReviewQueueList";
 import { ReviewSidebar } from "../components/ReviewSidebar";
-import type { ApprovedSort, MemoraItem, UpdateItemRequest } from "../types/reviewTypes";
+import type {
+  ApprovedSort,
+  CategoryPathFilter,
+  CreateCategoryRequest,
+  MemoraItem,
+  RenameCategoryRequest,
+  UpdateItemRequest
+} from "../types/reviewTypes";
 
 type View = "needs-review" | "failures" | "approved";
 
@@ -25,14 +35,23 @@ type Props = {
   onLoggedOut: () => void | Promise<void>;
 };
 
+const EMPTY_CATEGORY_FILTER: CategoryPathFilter = {
+  category: "",
+  subcategory: "",
+  subsubcategory: ""
+};
+
 export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   const [view, setView] = useState<View>("needs-review");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [approvedKeyword, setApprovedKeyword] = useState("");
   const [approvedType, setApprovedType] = useState("ALL");
   const [approvedPriority, setApprovedPriority] = useState("ALL");
+  const [approvedStatus, setApprovedStatus] = useState("ALL");
+  const [approvedDateFrom, setApprovedDateFrom] = useState("");
+  const [approvedDateTo, setApprovedDateTo] = useState("");
   const [approvedSort, setApprovedSort] = useState<ApprovedSort>("createdAt-desc");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryPathFilter>(EMPTY_CATEGORY_FILTER);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -63,53 +82,68 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
         ? failures.data ?? []
         : approved.data ?? [];
 
-  const selectedCategory = categories.data?.find((entry) => entry.id === selectedCategoryId) ?? null;
-
   const items = useMemo(() => {
     let nextItems = baseItems;
 
-    if (selectedCategory) {
-      nextItems = nextItems.filter(
-        (item) =>
-          item.categoryPath.category === selectedCategory.path.category &&
-          item.categoryPath.subcategory === selectedCategory.path.subcategory &&
-          item.categoryPath.subsubcategory === selectedCategory.path.subsubcategory
-      );
+    if (view === "approved") {
+      nextItems = nextItems.filter((item) => {
+        if (approvedKeyword.trim()) {
+          const keyword = approvedKeyword.trim().toLowerCase();
+          const haystack = [
+            item.title,
+            item.cleanedText,
+            item.rawTranscript ?? "",
+            item.rawInputText ?? ""
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          if (!haystack.includes(keyword)) {
+            return false;
+          }
+        }
+
+        if (approvedType !== "ALL" && item.type !== approvedType) {
+          return false;
+        }
+
+        if (approvedPriority !== "ALL" && item.priority !== approvedPriority) {
+          return false;
+        }
+
+        if (approvedStatus !== "ALL" && item.status !== approvedStatus) {
+          return false;
+        }
+
+        if (!matchesCategoryFilter(item, categoryFilter)) {
+          return false;
+        }
+
+        if (approvedDateFrom && new Date(item.createdAt) < startOfDay(approvedDateFrom)) {
+          return false;
+        }
+
+        return !(approvedDateTo && new Date(item.createdAt) > endOfDay(approvedDateTo));
+
+
+      });
+
+      nextItems = [...nextItems].sort((left, right) => compareItems(left, right, approvedSort));
     }
 
-    if (view !== "approved") {
-      return nextItems;
-    }
-
-    const keyword = approvedKeyword.trim().toLowerCase();
-
-    nextItems = nextItems.filter((item) => {
-      if (approvedType !== "ALL" && item.type !== approvedType) {
-        return false;
-      }
-
-      if (approvedPriority !== "ALL" && item.priority !== approvedPriority) {
-        return false;
-      }
-
-      if (!keyword) {
-        return true;
-      }
-
-      const haystack = [
-        item.title,
-        item.cleanedText,
-        item.rawTranscript ?? "",
-        item.rawInputText ?? ""
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(keyword);
-    });
-
-    return [...nextItems].sort((left, right) => compareItems(left, right, approvedSort));
-  }, [approvedKeyword, approvedPriority, approvedSort, approvedType, baseItems, selectedCategory, view]);
+    return nextItems;
+  }, [
+    approvedDateFrom,
+    approvedDateTo,
+    approvedKeyword,
+    approvedPriority,
+    approvedSort,
+    approvedStatus,
+    approvedType,
+    baseItems,
+    categoryFilter,
+    view
+  ]);
 
   useEffect(() => {
     if (!items.length) {
@@ -144,11 +178,25 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
         keyword={approvedKeyword}
         type={approvedType}
         priority={approvedPriority}
+        status={approvedStatus}
+        dateFrom={approvedDateFrom}
+        dateTo={approvedDateTo}
+        category={categoryFilter.category}
+        subcategory={categoryFilter.subcategory}
+        subsubcategory={categoryFilter.subsubcategory}
         sort={approvedSort}
+        categories={categories.data ?? []}
         onKeywordChange={setApprovedKeyword}
         onTypeChange={setApprovedType}
         onPriorityChange={setApprovedPriority}
+        onStatusChange={setApprovedStatus}
+        onDateFromChange={setApprovedDateFrom}
+        onDateToChange={setApprovedDateTo}
+        onCategoryChange={handleCategoryChange}
+        onSubcategoryChange={handleSubcategoryChange}
+        onSubsubcategoryChange={handleSubsubcategoryChange}
         onSortChange={setApprovedSort}
+        onResetFilters={resetApprovedFilters}
       />
     ) : null;
 
@@ -160,43 +208,121 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     ]);
   }
 
-  async function runAction(action: string, itemId: string, handler: () => Promise<unknown>) {
+  async function runItemAction(
+    action: string,
+    itemId: string,
+    handler: () => Promise<unknown>,
+    clearSelection = true
+  ) {
     setBusyAction(action);
 
     try {
       await handler();
       await refreshAll();
-
-      if (selectedItemId === itemId) {
-        setSelectedItemId(null);
+      if (clearSelection) {
+        setSelectedItemId((current) => (current === itemId ? null : current));
       }
     } finally {
       setBusyAction(null);
     }
   }
 
+  async function runCategoryAction(action: string, handler: () => Promise<unknown>) {
+    setBusyAction(action);
+
+    try {
+      await handler();
+      await refreshAll();
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
   async function handleApprove(itemId: string) {
-    await runAction("approve", itemId, () => approveItem(itemId));
+    await runItemAction("approve", itemId, () => approveItem(itemId));
   }
 
   async function handleEditAndApprove(itemId: string, request: UpdateItemRequest) {
-    await runAction("edit-approve", itemId, () => editAndApproveItem(itemId, request));
+    await runItemAction("edit-approve", itemId, () => editAndApproveItem(itemId, request));
   }
 
   async function handleSave(itemId: string, request: UpdateItemRequest) {
-    await runAction("save", itemId, () => updateItem(itemId, request));
+    await runItemAction("save", itemId, () => updateItem(itemId, request), false);
   }
 
   async function handleReject(itemId: string) {
-    await runAction("reject", itemId, () => rejectItem(itemId));
+    await runItemAction("reject", itemId, () => rejectItem(itemId));
   }
 
   async function handleDelete(itemId: string) {
-    await runAction("delete", itemId, () => trashItem(itemId));
+    await runItemAction("delete", itemId, () => trashItem(itemId));
   }
 
   async function handleRetry(itemId: string) {
-    await runAction("retry", itemId, () => retryItem(itemId));
+    await runItemAction("retry", itemId, () => retryItem(itemId));
+  }
+
+  async function handleCreateCategory(request: CreateCategoryRequest) {
+    await runCategoryAction("category-create", () => createCategory(request));
+  }
+
+  async function handleRenameCategory(categoryId: string, request: RenameCategoryRequest) {
+    const original = categories.data?.find((entry) => entry.id === categoryId)?.path ?? null;
+
+    await runCategoryAction("category-rename", async () => {
+      await renameCategory(categoryId, request);
+
+      if (
+        original &&
+        categoryFilter.category === original.category &&
+        categoryFilter.subcategory === original.subcategory &&
+        categoryFilter.subsubcategory === original.subsubcategory
+      ) {
+        setCategoryFilter({
+          category: request.path.category,
+          subcategory: request.path.subcategory,
+          subsubcategory: request.path.subsubcategory
+        });
+      }
+    });
+  }
+
+  async function handleDeleteCategory(categoryId: string) {
+    await runCategoryAction("category-delete", () => deleteCategory(categoryId));
+  }
+
+  function handleCategoryChange(category: string) {
+    setCategoryFilter({
+      category,
+      subcategory: "",
+      subsubcategory: ""
+    });
+  }
+
+  function handleSubcategoryChange(subcategory: string) {
+    setCategoryFilter((current) => ({
+      ...current,
+      subcategory,
+      subsubcategory: ""
+    }));
+  }
+
+  function handleSubsubcategoryChange(subsubcategory: string) {
+    setCategoryFilter((current) => ({
+      ...current,
+      subsubcategory
+    }));
+  }
+
+  function resetApprovedFilters() {
+    setApprovedKeyword("");
+    setApprovedType("ALL");
+    setApprovedPriority("ALL");
+    setApprovedStatus("ALL");
+    setApprovedDateFrom("");
+    setApprovedDateTo("");
+    setApprovedSort("createdAt-desc");
+    setCategoryFilter(EMPTY_CATEGORY_FILTER);
   }
 
   return (
@@ -207,8 +333,12 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
           onChange={setView}
           onLoggedOut={() => void onLoggedOut()}
           categories={categories.data ?? []}
-          selectedCategoryId={selectedCategoryId}
-          onCategoryChange={setSelectedCategoryId}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          busyAction={busyAction}
+          onCreateCategory={handleCreateCategory}
+          onRenameCategory={handleRenameCategory}
+          onDeleteCategory={handleDeleteCategory}
         />
         <ReviewQueueList
           title={title}
@@ -235,6 +365,14 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   );
 }
 
+function matchesCategoryFilter(item: MemoraItem, filter: CategoryPathFilter) {
+  return (
+    (!filter.category || item.categoryPath.category === filter.category) &&
+    (!filter.subcategory || item.categoryPath.subcategory === filter.subcategory) &&
+    (!filter.subsubcategory || item.categoryPath.subsubcategory === filter.subsubcategory)
+  );
+}
+
 function compareItems(left: MemoraItem, right: MemoraItem, sort: ApprovedSort) {
   if (sort === "createdAt-asc") {
     return left.createdAt.localeCompare(right.createdAt);
@@ -258,4 +396,12 @@ function compareItems(left: MemoraItem, right: MemoraItem, sort: ApprovedSort) {
   return sort === "category-asc"
     ? leftCategory.localeCompare(rightCategory)
     : rightCategory.localeCompare(leftCategory);
+}
+
+function startOfDay(date: string) {
+  return new Date(`${date}T00:00:00.000`);
+}
+
+function endOfDay(date: string) {
+  return new Date(`${date}T23:59:59.999`);
 }

@@ -52,6 +52,20 @@ export type CategoryPathRequest = {
   subsubcategory: string;
 };
 
+export type CategoryPathFilter = {
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+};
+
+export type CreateCategoryRequest = {
+  path: CategoryPathRequest;
+};
+
+export type RenameCategoryRequest = {
+  path: CategoryPathRequest;
+};
+
 export type UpdateItemRequest = {
   title?: string;
   cleanedText?: string;

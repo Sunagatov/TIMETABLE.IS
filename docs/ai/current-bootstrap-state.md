@@ -20,7 +20,7 @@ It is not yet the full target V1 implementation.
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend in-memory stores for items, sessions, and categories
 - frontend session-aware login + review workspace starter
-- frontend review workspace now includes default Needs Review landing, Failures, approved list, category sidebar, edit panel, and client-side approved search/filter/sort shell
+- frontend review workspace now includes default Needs Review landing, Failures, approved list, category sidebar, category CRUD shell, edit panel, and client-side approved search/filter/sort shell
 - Kotlin telegram bot starter
 - stable stack versions
 
@@ -29,7 +29,7 @@ It is not yet the full target V1 implementation.
 - Mongo persistence is not implemented yet
 - transcription is not implemented yet
 - AI integration is not implemented yet
-- category CRUD management UI is not implemented yet
+- category CRUD management UI is present as a shell
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter
@@ -50,7 +50,7 @@ It is not yet the full target V1 implementation.
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID
-- current frontend behavior stays review-first: default landing is Needs Review, approved list is approved-only, and approved search/filter/sort is still client-side
+- current frontend behavior stays review-first: default landing is Needs Review, approved list is approved-only, approved search/filter/sort is client-side, and status/date/category filters are exposed in the approved shell
 
 ## Default backend validation
 

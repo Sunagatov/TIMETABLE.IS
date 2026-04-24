@@ -1,7 +1,9 @@
 import { httpClient } from "../../../shared/api/httpClient";
 import type {
+  CreateCategoryRequest,
   MemoraCategory,
   MemoraItem,
+  RenameCategoryRequest,
   UpdateItemRequest
 } from "../types/reviewTypes";
 
@@ -49,5 +51,22 @@ export async function retryItem(itemId: string): Promise<MemoraItem> {
 }
 
 export async function fetchCategories(): Promise<MemoraCategory[]> {
-  return httpClient.get("/api/categories");
+  return httpClient.get<MemoraCategory[]>("/api/categories");
+}
+
+export async function createCategory(
+  request: CreateCategoryRequest
+): Promise<MemoraCategory> {
+  return httpClient.post<MemoraCategory>("/api/categories", request);
+}
+
+export async function renameCategory(
+  categoryId: string,
+  request: RenameCategoryRequest
+): Promise<MemoraCategory> {
+  return httpClient.patch<MemoraCategory>(`/api/categories/${categoryId}`, request);
+}
+
+export async function deleteCategory(categoryId: string): Promise<void> {
+  return httpClient.delete<void>(`/api/categories/${categoryId}`);
 }
