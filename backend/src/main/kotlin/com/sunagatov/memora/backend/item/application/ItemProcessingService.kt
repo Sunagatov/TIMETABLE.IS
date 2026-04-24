@@ -11,6 +11,8 @@ import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.SourceType
 import com.sunagatov.memora.backend.item.store.ItemStore
+import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTranscriptionService
+import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import java.time.Instant
 import java.util.concurrent.ExecutorService
 import org.springframework.stereotype.Service
@@ -20,14 +22,28 @@ class ItemProcessingService(
     private val itemStore: ItemStore,
     private val categoryService: CategoryService,
     private val aiPort: MemoraAiPort,
+    private val voiceTranscriptionService: VoiceTranscriptionService,
     private val properties: MemoraProperties,
     private val executor: ExecutorService
 ) {
 
+    constructor(
+        itemStore: ItemStore,
+        categoryService: CategoryService,
+        aiPort: MemoraAiPort,
+        properties: MemoraProperties,
+        executor: ExecutorService
+    ) : this(
+        itemStore = itemStore,
+        categoryService = categoryService,
+        aiPort = aiPort,
+        voiceTranscriptionService = DisabledVoiceTranscriptionService(),
+        properties = properties,
+        executor = executor
+    )
+
     fun enqueue(itemId: String) {
-        executor.submit {
-            process(itemId)
-        }
+        executor.submit { process(itemId) }
     }
 
     fun retry(itemId: String) {
@@ -58,70 +74,36 @@ class ItemProcessingService(
         val rawInputText = item.rawInputText?.takeIf { it.isNotBlank() }
             ?: return failAsAiProcessing(item, "Accepted text item is missing raw input text")
 
-        val outcome = runWithRetries(properties.aiAutoRetryAttempts) {
-            val draft = aiPort.generateAllDraft(
-                AiTextInput(
-                    rawText = rawInputText,
-                    existingCategoryPaths = categoryService.list().map { it.path },
-                    defaultCategoryPath = categoryService.defaultPath()
-                )
-            )
-            val now = Instant.now()
-
-            itemStore.save(
-                item.copy(
-                    rawInputText = rawInputText,
-                    rawTranscript = null,
-                    aiTitle = draft.textDraft.title,
-                    aiCleanedText = draft.textDraft.cleanedText,
-                    aiType = draft.textDraft.type,
-                    aiCategoryPath = draft.categoryDraft.aiCategoryPath,
-                    proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
-                    proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
-                    aiPriority = draft.textDraft.priority,
-                    aiAnswer = draft.answerDraft.answer,
-                    title = draft.textDraft.title,
-                    cleanedText = draft.textDraft.cleanedText,
-                    type = draft.textDraft.type,
-                    categoryPath = draft.categoryDraft.currentCategoryPath,
-                    priority = draft.textDraft.priority,
-                    answer = draft.answerDraft.answer,
-                    answerStatus = draft.answerDraft.answerStatus,
-                    answerFailureStage = if (draft.answerDraft.answerStatus == AnswerStatus.FAILED) FailureStage.AI_PROCESSING else null,
-                    answerFailureReason = draft.answerDraft.failureReason,
-                    status = ItemStatus.AI_PROCESSED_UNREVIEWED,
-                    failureStage = null,
-                    failureReason = null,
-                    updatedAt = now
-                )
-            )
+        val aiOutcome = runWithRetries(properties.aiAutoRetryAttempts) {
+            createAiProcessedItem(item = item, sourceText = rawInputText, rawTranscript = null)
         }
 
-        if (!outcome.success) {
-            failAsAiProcessing(
-                item,
-                "AI processing failed after ${outcome.attempts} attempt(s)" +
-                    outcome.lastErrorMessageSuffix()
-            )
+        if (aiOutcome.success) {
+            itemStore.save(aiOutcome.value!!)
+            return
         }
+
+        failAsAiProcessing(
+            item = item,
+            reason = "AI processing failed after ${aiOutcome.attempts} attempt(s)${aiOutcome.lastErrorMessageSuffix()}"
+        )
     }
 
     private fun processVoice(item: MemoraItem) {
-        val outcome = runWithRetries(properties.transcriptionAutoRetryAttempts) {
-            throw IllegalStateException("Voice transcription is not implemented in the backend foundation yet")
+        val transcriptionOutcome = runWithRetries(properties.transcriptionAutoRetryAttempts) {
+            voiceTranscriptionService.transcribe(item)
         }
 
-        if (!outcome.success) {
+        if (!transcriptionOutcome.success) {
             itemStore.save(
                 item.copy(
                     status = ItemStatus.TRANSCRIPTION_FAILED,
                     failureStage = FailureStage.TRANSCRIPTION,
                     failureReason = buildString {
-                        append("Voice transcription is not implemented in the backend foundation yet")
-                        append(" after ")
-                        append(outcome.attempts)
+                        append("Voice transcription failed after ")
+                        append(transcriptionOutcome.attempts)
                         append(" attempt(s)")
-                        outcome.lastErrorMessage?.let {
+                        transcriptionOutcome.lastErrorMessage?.let {
                             append(": ")
                             append(it)
                         }
@@ -129,7 +111,80 @@ class ItemProcessingService(
                     updatedAt = Instant.now()
                 )
             )
+            return
         }
+
+        val rawTranscript = transcriptionOutcome.value!!
+        val transcribedItem = itemStore.save(
+            item.copy(
+                rawTranscript = rawTranscript,
+                failureStage = null,
+                failureReason = null,
+                updatedAt = Instant.now()
+            )
+        )
+
+        val aiOutcome = runWithRetries(properties.aiAutoRetryAttempts) {
+            createAiProcessedItem(
+                item = transcribedItem,
+                sourceText = rawTranscript,
+                rawTranscript = rawTranscript
+            )
+        }
+
+        if (aiOutcome.success) {
+            itemStore.save(aiOutcome.value!!)
+            return
+        }
+
+        failAsAiProcessing(
+            item = transcribedItem,
+            reason = "AI processing failed after ${aiOutcome.attempts} attempt(s)${aiOutcome.lastErrorMessageSuffix()}"
+        )
+    }
+
+    private fun createAiProcessedItem(
+        item: MemoraItem,
+        sourceText: String,
+        rawTranscript: String?
+    ): MemoraItem {
+        val draft = aiPort.generateAllDraft(
+            AiTextInput(
+                rawText = sourceText,
+                existingCategoryPaths = categoryService.list().map { it.path },
+                defaultCategoryPath = categoryService.defaultPath()
+            )
+        )
+        val now = Instant.now()
+
+        return item.copy(
+            rawTranscript = rawTranscript,
+            aiTitle = draft.textDraft.title,
+            aiCleanedText = draft.textDraft.cleanedText,
+            aiType = draft.textDraft.type,
+            aiCategoryPath = draft.categoryDraft.aiCategoryPath,
+            proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
+            proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
+            aiPriority = draft.textDraft.priority,
+            aiAnswer = draft.answerDraft.answer,
+            title = draft.textDraft.title,
+            cleanedText = draft.textDraft.cleanedText,
+            type = draft.textDraft.type,
+            categoryPath = draft.categoryDraft.currentCategoryPath,
+            priority = draft.textDraft.priority,
+            answer = draft.answerDraft.answer,
+            answerStatus = draft.answerDraft.answerStatus,
+            answerFailureStage = if (draft.answerDraft.answerStatus == AnswerStatus.FAILED) {
+                FailureStage.AI_PROCESSING
+            } else {
+                null
+            },
+            answerFailureReason = draft.answerDraft.failureReason,
+            status = ItemStatus.AI_PROCESSED_UNREVIEWED,
+            failureStage = null,
+            failureReason = null,
+            updatedAt = now
+        )
     }
 
     private fun regenerateText(itemId: String): MemoraItem {
@@ -158,6 +213,7 @@ class ItemProcessingService(
 
         val draft = aiPort.generateAnswerDraft(item.cleanedText)
         val now = Instant.now()
+
         return itemStore.save(
             item.copy(
                 answer = draft.answer,
@@ -238,31 +294,35 @@ class ItemProcessingService(
             ?: item.rawTranscript?.takeIf { it.isNotBlank() }
             ?: item.cleanedText
 
-    private data class RetryOutcome(
+    private data class RetryOutcome<T>(
         val success: Boolean,
         val attempts: Int,
+        val value: T? = null,
         val lastErrorMessage: String? = null
     )
 
-    private inline fun runWithRetries(
+    private inline fun <T> runWithRetries(
         maxAttempts: Int,
-        block: () -> Unit
-    ): RetryOutcome {
+        block: () -> T
+    ): RetryOutcome<T> {
         require(maxAttempts >= 1) { "Retry attempts must be at least 1" }
 
         var lastErrorMessage: String? = null
-        repeat(maxAttempts) {
+        repeat(maxAttempts) { attempt ->
             try {
-                block()
-                return RetryOutcome(success = true, attempts = it + 1)
+                return RetryOutcome(success = true, attempts = attempt + 1, value = block())
             } catch (exception: RuntimeException) {
                 lastErrorMessage = exception.message
             }
         }
 
-        return RetryOutcome(success = false, attempts = maxAttempts, lastErrorMessage = lastErrorMessage)
+        return RetryOutcome(
+            success = false,
+            attempts = maxAttempts,
+            lastErrorMessage = lastErrorMessage
+        )
     }
 
-    private fun RetryOutcome.lastErrorMessageSuffix(): String =
+    private fun RetryOutcome<*>.lastErrorMessageSuffix(): String =
         lastErrorMessage?.let { ": $it" } ?: ""
 }
