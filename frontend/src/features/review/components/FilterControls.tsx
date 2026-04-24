@@ -9,12 +9,12 @@ export function FilterSelect(props: {
   emptyLabel?: string;
 }) {
   return (
-    <label className="block text-sm text-stone-600">
-      <span className="mb-2 block font-medium text-stone-700">{props.label}</span>
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold text-stone-500">{props.label}</span>
       <select
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
-        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-400"
       >
         {props.options.map((opt) => (
           <option key={opt || props.emptyLabel || "all"} value={opt}>
@@ -32,13 +32,13 @@ export function DateField(props: {
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="block text-sm text-stone-600">
-      <span className="mb-2 block font-medium text-stone-700">{props.label}</span>
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold text-stone-500">{props.label}</span>
       <input
         type="date"
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
-        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-stone-400"
       />
     </label>
   );
@@ -50,9 +50,9 @@ export function ResetButton(props: { onClick: () => void }) {
       <button
         type="button"
         onClick={props.onClick}
-        className="rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700 transition hover:border-stone-500 hover:text-stone-900"
+        className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-600 transition hover:border-stone-400 hover:text-stone-900"
       >
-        Reset
+        Reset filters
       </button>
     </div>
   );
@@ -87,7 +87,6 @@ export function CategoryCascade(props: {
           .filter((c) => {
             if (props.category && c.path.category !== props.category) return false;
             return !(props.subcategory && c.path.subcategory !== props.subcategory);
-
           })
           .map((c) => c.path.subsubcategory)
       ),
@@ -95,7 +94,7 @@ export function CategoryCascade(props: {
   );
 
   return (
-    <div className="grid gap-3 md:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-3">
       <FilterSelect
         label="Category"
         value={props.category}
@@ -111,7 +110,7 @@ export function CategoryCascade(props: {
         emptyLabel="All subcategories"
       />
       <FilterSelect
-        label="Subsubcategory"
+        label="Sub-subcategory"
         value={props.subsubcategory}
         options={["", ...subsubcategoryOptions]}
         onChange={props.onSubsubcategoryChange}

@@ -10,9 +10,10 @@ type Props = {
   filter: CategoryPathFilter;
   onSelect: (filter: CategoryPathFilter) => void;
   onClearFilter: () => void;
+  dark?: boolean;
 };
 
-export function CategoryTree({ categories, loading, errorMessage, filter, onSelect, onClearFilter }: Props) {
+export function CategoryTree({ categories, loading, errorMessage, filter, onSelect, onClearFilter, dark }: Props) {
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   const tree = useMemo(() => buildTree(categories), [categories]);
 
@@ -29,17 +30,26 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
     .filter(Boolean)
     .join(" / ");
 
+  const labelClass = dark ? "text-stone-500" : "text-stone-500";
+  const activeLabelClass = dark ? "text-stone-300" : "text-stone-600";
+  const emptyClass = dark ? "text-stone-600" : "text-stone-400";
+  const loadingClass = dark ? "text-stone-500" : "text-stone-400";
+  const errorClass = dark ? "text-red-400" : "text-red-600";
+  const clearBtnClass = dark
+    ? "text-stone-500 hover:text-stone-300"
+    : "text-stone-500 hover:text-stone-900";
+
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${labelClass}`}>
           Categories
         </p>
         {activeLabel ? (
           <button
             type="button"
             onClick={onClearFilter}
-            className="text-xs font-medium text-stone-500 hover:text-stone-900"
+            className={`text-[11px] font-medium transition ${clearBtnClass}`}
           >
             Clear
           </button>
@@ -47,17 +57,17 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
       </div>
 
       {activeLabel ? (
-        <p className="mb-3 truncate text-xs text-stone-600">{activeLabel}</p>
+        <p className={`mb-2 truncate text-xs ${activeLabelClass}`}>{activeLabel}</p>
       ) : (
-        <p className="mb-3 text-xs text-stone-400">All categories</p>
+        <p className={`mb-2 text-xs ${emptyClass}`}>All categories</p>
       )}
 
       {loading ? (
-        <p className="text-sm text-stone-400">Loading categories...</p>
+        <p className={`text-xs ${loadingClass}`}>Loading…</p>
       ) : errorMessage ? (
-        <p className="text-sm text-red-600">{errorMessage}</p>
+        <p className={`text-xs ${errorClass}`}>{errorMessage}</p>
       ) : !tree.size ? (
-        <p className="text-sm text-stone-400">No categories yet.</p>
+        <p className={`text-xs ${emptyClass}`}>No categories yet.</p>
       ) : (
         <div className="space-y-0.5">
           {[...tree.entries()]
@@ -67,25 +77,29 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
               const catOpen = expandedKeys.has(catKey);
               const catActive = filter.category === category;
 
+              const catBtnClass = dark
+                ? catActive
+                  ? "bg-amber-500/15 text-amber-300"
+                  : "text-stone-400 hover:bg-white/6 hover:text-stone-200"
+                : catActive
+                  ? "bg-stone-200 text-stone-900"
+                  : "text-stone-700 hover:bg-stone-100";
+
               return (
                 <div key={category}>
                   <button
                     type="button"
-                    onClick={() => toggle(catKey)}
-                    className={`flex w-full items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-left text-sm font-semibold transition ${
-                      catActive
-                        ? "bg-stone-200 text-stone-900"
-                        : "text-stone-700 hover:bg-stone-100"
-                    }`}
+                    onClick={() => { toggle(catKey); if (!catOpen && !catActive) onSelect({ category, subcategory: "", subsubcategory: "" }); }}
+                    className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs font-semibold transition ${catBtnClass}`}
                   >
-                    <span className="w-3 shrink-0 text-xs text-stone-400">
+                    <span className={`w-3 shrink-0 text-[10px] ${dark ? "text-stone-600" : "text-stone-400"}`}>
                       {catOpen ? "▼" : "▶"}
                     </span>
                     <span className="truncate">{category}</span>
                   </button>
 
                   {catOpen && (
-                    <div className="ml-3 mt-0.5 space-y-0.5 border-l border-stone-200 pl-2">
+                    <div className={`ml-3 mt-0.5 space-y-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`}>
                       {[...subMap.entries()]
                         .sort(([a], [b]) => a.localeCompare(b))
                         .map(([subcategory, leaves]) => {
@@ -93,25 +107,29 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                           const subOpen = expandedKeys.has(subKey);
                           const subActive = catActive && filter.subcategory === subcategory;
 
+                          const subBtnClass = dark
+                            ? subActive
+                              ? "text-amber-300 font-semibold"
+                              : "text-stone-500 hover:bg-white/6 hover:text-stone-300"
+                            : subActive
+                              ? "font-medium text-stone-900"
+                              : "text-stone-600 hover:bg-stone-100";
+
                           return (
                             <div key={subcategory}>
                               <button
                                 type="button"
                                 onClick={() => toggle(subKey)}
-                                className={`flex w-full items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-left text-sm transition ${
-                                  subActive
-                                    ? "font-medium text-stone-900"
-                                    : "text-stone-600 hover:bg-stone-100"
-                                }`}
+                                className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${subBtnClass}`}
                               >
-                                <span className="w-3 shrink-0 text-xs text-stone-400">
+                                <span className={`w-3 shrink-0 text-[10px] ${dark ? "text-stone-600" : "text-stone-400"}`}>
                                   {subOpen ? "▼" : "▶"}
                                 </span>
                                 <span className="truncate">{subcategory}</span>
                               </button>
 
                               {subOpen && (
-                                <div className="ml-3 mt-0.5 space-y-0.5 border-l border-stone-200 pl-2">
+                                <div className={`ml-3 mt-0.5 space-y-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`}>
                                   {leaves
                                     .sort((a, b) =>
                                       a.path.subsubcategory.localeCompare(b.path.subsubcategory)
@@ -120,6 +138,14 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                                       const leafActive =
                                         subActive &&
                                         filter.subsubcategory === cat.path.subsubcategory;
+
+                                      const leafClass = dark
+                                        ? leafActive
+                                          ? "bg-amber-500/20 text-amber-300 font-semibold"
+                                          : "text-stone-500 hover:bg-white/6 hover:text-stone-300"
+                                        : leafActive
+                                          ? "bg-stone-900 font-medium text-white"
+                                          : "text-stone-600 hover:bg-stone-100";
 
                                       return (
                                         <button
@@ -132,11 +158,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                                               subsubcategory: cat.path.subsubcategory
                                             })
                                           }
-                                          className={`w-full truncate rounded-xl px-2.5 py-1.5 text-left text-sm transition ${
-                                            leafActive
-                                              ? "bg-stone-900 font-medium text-white"
-                                              : "text-stone-600 hover:bg-stone-100"
-                                          }`}
+                                          className={`w-full truncate rounded-lg px-2.5 py-1.5 text-left text-xs transition ${leafClass}`}
                                         >
                                           {cat.path.subsubcategory}
                                         </button>

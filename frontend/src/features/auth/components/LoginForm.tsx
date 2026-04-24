@@ -38,7 +38,7 @@ export function LoginForm({ onLoggedIn }: Props) {
         <label className="mb-2 block text-sm font-medium text-stone-700">Password</label>
         <input
           type="password"
-          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+          className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
           {...register("password")}
         />
         {errors.password ? (
@@ -49,7 +49,7 @@ export function LoginForm({ onLoggedIn }: Props) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-2xl bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
+        className="w-full rounded-xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:opacity-60"
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>

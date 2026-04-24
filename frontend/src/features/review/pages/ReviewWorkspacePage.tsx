@@ -28,6 +28,7 @@ import type {
 } from "../types/reviewTypes";
 
 type View = "needs-review" | "failures" | "approved";
+type MobilePanel = "sidebar" | "list" | "detail";
 
 type Props = {
   onLoggedOut: () => void | Promise<void>;
@@ -78,6 +79,7 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   const [failFilters, setFailFilters] = useState<FailuresFilters>(DEFAULT_FAIL_FILTERS);
   const [approvedFilters, setApprovedFilters] = useState<ApprovedFilters>(DEFAULT_APPROVED_FILTERS);
   const [categoryFilter, setCategoryFilter] = useState<CategoryPathFilter>(EMPTY_CATEGORY_FILTER);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("list");
   const queryClient = useQueryClient();
 
   const nrParams = toListParams(nrFilters);
@@ -183,6 +185,16 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     }
   }
 
+  function handleSelectItem(itemId: string) {
+    setSelectedItemId(itemId);
+    setMobilePanel("detail");
+  }
+
+  function handleViewChange(next: View) {
+    setView(next);
+    setMobilePanel("list");
+  }
+
   const title =
     view === "needs-review" ? "Needs Review" : view === "failures" ? "Failures" : "Approved";
 
@@ -198,6 +210,11 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     failures: failures.data?.length ?? 0,
     approved: approved.data?.length ?? 0
   };
+
+  const activeCount =
+    view === "needs-review" ? counts.needsReview
+    : view === "failures" ? counts.failures
+    : counts.approved;
 
   const toolbar =
     view === "needs-review" ? (
@@ -224,69 +241,164 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     );
 
   return (
-    <main className="min-h-screen bg-[#f4efe6] text-stone-900">
-      <div className="grid min-h-screen xl:grid-cols-[300px_420px_minmax(0,1fr)]">
-        <ReviewSidebar
-          view={view}
-          onChange={setView}
-          onLoggedOut={() => void onLoggedOut()}
-          categories={categories.data ?? []}
-          categoriesLoading={categories.isPending}
-          categoriesError={categories.error instanceof Error ? categories.error.message : null}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={handleCategoryFilterChange}
-          busyAction={busyAction}
-          counts={counts}
-          onCreateCategory={handleCreateCategory}
-          onRenameCategory={handleRenameCategory}
-          onDeleteCategory={handleDeleteCategory}
-        />
-        <ReviewQueueList
-          title={title}
-          description={description}
-          items={items}
-          selectedItemId={selectedItemId}
-          onSelect={setSelectedItemId}
-          toolbar={toolbar}
-          view={view}
-          isLoading={
-            view === "needs-review"
-              ? needsReview.isPending
-              : view === "failures"
-                ? failures.isPending
-                : approved.isPending
-          }
-          errorMessage={
-            (view === "needs-review" && needsReview.error instanceof Error
-              ? needsReview.error.message
-              : null) ??
-            (view === "failures" && failures.error instanceof Error ? failures.error.message : null) ??
-            (view === "approved" && approved.error instanceof Error ? approved.error.message : null)
-          }
-        />
-        <ItemDetailPanel
-          view={view}
-          item={selectedItem.data}
-          categories={categories.data ?? []}
-          busyAction={busyAction}
-          actionError={actionError}
-          isLoading={selectedItem.isPending}
-          errorMessage={selectedItem.error instanceof Error ? selectedItem.error.message : null}
-          onApprove={handleApprove}
-          onEditAndApprove={handleEditAndApprove}
-          onSave={handleSave}
-          onReject={handleReject}
-          onDelete={handleDelete}
-          onRetry={handleRetry}
-          onApproveCategoryProposal={handleApproveCategoryProposal}
-          onRejectCategoryProposal={handleRejectCategoryProposal}
-          onRegenerateCleanedText={handleRegenerateCleanedText}
-          onRegenerateAnswer={handleRegenerateAnswer}
-          onRegenerateCategoryProposal={handleRegenerateCategoryProposal}
-          onRegenerateAll={handleRegenerateAll}
-        />
+    <main className="min-h-screen bg-[#f5f0e8] text-stone-900">
+      <div className="lg:grid lg:h-screen lg:overflow-hidden lg:grid-cols-[280px_400px_minmax(0,1fr)]">
+        <div className={`${mobilePanel === "sidebar" ? "flex" : "hidden"} lg:flex flex-col h-[calc(100dvh-4rem)] lg:h-screen`}>
+          <ReviewSidebar
+            view={view}
+            onChange={handleViewChange}
+            onLoggedOut={() => void onLoggedOut()}
+            categories={categories.data ?? []}
+            categoriesLoading={categories.isPending}
+            categoriesError={categories.error instanceof Error ? categories.error.message : null}
+            categoryFilter={categoryFilter}
+            onCategoryFilterChange={(f) => { handleCategoryFilterChange(f); setMobilePanel("list"); }}
+            busyAction={busyAction}
+            counts={counts}
+            onCreateCategory={handleCreateCategory}
+            onRenameCategory={handleRenameCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        </div>
+
+        <div className={`${mobilePanel === "list" ? "flex" : "hidden"} lg:flex flex-col h-[calc(100dvh-4rem)] lg:h-screen`}>
+          <ReviewQueueList
+            title={title}
+            description={description}
+            items={items}
+            selectedItemId={selectedItemId}
+            onSelect={handleSelectItem}
+            toolbar={toolbar}
+            view={view}
+            isLoading={
+              view === "needs-review"
+                ? needsReview.isPending
+                : view === "failures"
+                  ? failures.isPending
+                  : approved.isPending
+            }
+            errorMessage={
+              (view === "needs-review" && needsReview.error instanceof Error
+                ? needsReview.error.message
+                : null) ??
+              (view === "failures" && failures.error instanceof Error ? failures.error.message : null) ??
+              (view === "approved" && approved.error instanceof Error ? approved.error.message : null)
+            }
+          />
+        </div>
+
+        <div className={`${mobilePanel === "detail" ? "flex" : "hidden"} lg:flex flex-col h-[calc(100dvh-4rem)] lg:h-screen`}>
+          <ItemDetailPanel
+            view={view}
+            item={selectedItem.data}
+            categories={categories.data ?? []}
+            busyAction={busyAction}
+            actionError={actionError}
+            isLoading={selectedItem.isPending}
+            errorMessage={selectedItem.error instanceof Error ? selectedItem.error.message : null}
+            onApprove={handleApprove}
+            onEditAndApprove={handleEditAndApprove}
+            onSave={handleSave}
+            onReject={handleReject}
+            onDelete={handleDelete}
+            onRetry={handleRetry}
+            onApproveCategoryProposal={handleApproveCategoryProposal}
+            onRejectCategoryProposal={handleRejectCategoryProposal}
+            onRegenerateCleanedText={handleRegenerateCleanedText}
+            onRegenerateAnswer={handleRegenerateAnswer}
+            onRegenerateCategoryProposal={handleRegenerateCategoryProposal}
+            onRegenerateAll={handleRegenerateAll}
+            onMobileBack={() => setMobilePanel("list")}
+          />
+        </div>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 items-stretch border-t border-stone-200/80 bg-white/96 shadow-[0_-1px_8px_rgba(0,0,0,0.06)] backdrop-blur-sm lg:hidden">
+        <MobileNavTab
+          active={mobilePanel === "sidebar"}
+          onClick={() => setMobilePanel("sidebar")}
+        >
+          <MenuIcon />
+          <span>Menu</span>
+        </MobileNavTab>
+        <MobileNavTab
+          active={mobilePanel === "list"}
+          onClick={() => setMobilePanel("list")}
+        >
+          <ListIcon />
+          <span>{title}{activeCount > 0 ? ` · ${activeCount}` : ""}</span>
+        </MobileNavTab>
+        <MobileNavTab
+          active={mobilePanel === "detail"}
+          onClick={() => { if (selectedItemId) setMobilePanel("detail"); }}
+          disabled={!selectedItemId}
+        >
+          <DetailIcon />
+          <span>Detail</span>
+        </MobileNavTab>
+      </nav>
     </main>
+  );
+}
+
+function MobileNavTab({
+  active,
+  onClick,
+  disabled,
+  children
+}: {
+  active: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex flex-1 flex-col items-center justify-center gap-0.5 px-2 text-[11px] font-medium transition ${
+        active
+          ? "text-amber-600"
+          : disabled
+            ? "cursor-default text-stone-300"
+            : "text-stone-500 hover:text-stone-800"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <line x1="3" y1="5" x2="17" y2="5" />
+      <line x1="3" y1="10" x2="17" y2="10" />
+      <line x1="3" y1="15" x2="17" y2="15" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <rect x="3" y="4" width="14" height="3" rx="1" />
+      <rect x="3" y="9" width="14" height="3" rx="1" />
+      <rect x="3" y="14" width="14" height="3" rx="1" />
+    </svg>
+  );
+}
+
+function DetailIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <rect x="3" y="3" width="14" height="14" rx="2" />
+      <line x1="7" y1="8" x2="13" y2="8" />
+      <line x1="7" y1="11" x2="13" y2="11" />
+      <line x1="7" y1="14" x2="10" y2="14" />
+    </svg>
   );
 }
 
