@@ -3,36 +3,36 @@ package com.sunagatov.memora.backend.item.store
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
-import java.util.concurrent.ConcurrentHashMap
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!mongo")
-class InMemoryItemStore : ItemStore {
-
-    private val items = ConcurrentHashMap<String, MemoraItem>()
+@Profile("mongo")
+class MongoItemStore(private val repository: MongoItemRepository) : ItemStore {
 
     override fun save(item: MemoraItem): MemoraItem {
-        items[item.id] = item
+        repository.save(item.toDocument())
         return item
     }
 
     override fun findAll(): List<MemoraItem> =
-        items.values.sortedByDescending { it.createdAt }
+        repository.findAll()
+            .map { it.toDomain() }
+            .sortedByDescending { it.createdAt }
 
-    override fun findById(id: String): MemoraItem? = items[id]
+    override fun findById(id: String): MemoraItem? =
+        repository.findById(id).orElse(null)?.toDomain()
 
     override fun findByStatuses(statuses: Set<ItemStatus>): List<MemoraItem> =
-        items.values
-            .filter { it.status in statuses }
+        repository.findByStatusIn(statuses)
+            .map { it.toDomain() }
             .sortedByDescending { it.createdAt }
 
     override fun findByCategoryPath(path: CategoryPath): List<MemoraItem> =
-        items.values
-            .filter { it.categoryPath == path }
+        repository.findByCategoryPathFields(path.category, path.subcategory, path.subsubcategory)
+            .map { it.toDomain() }
             .sortedByDescending { it.createdAt }
 
     override fun countByCategoryPath(path: CategoryPath): Long =
-        items.values.count { it.categoryPath == path }.toLong()
+        repository.countByCategoryPathFields(path.category, path.subcategory, path.subsubcategory)
 }

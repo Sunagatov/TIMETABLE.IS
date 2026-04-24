@@ -3,9 +3,11 @@ package com.sunagatov.memora.backend.category.store
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.category.model.MemoraCategory
 import java.util.concurrent.ConcurrentHashMap
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("!mongo")
 class InMemoryCategoryStore : CategoryStore {
 
     private val categories = ConcurrentHashMap<String, MemoraCategory>()

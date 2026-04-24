@@ -19,11 +19,13 @@ import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.application.ItemQueryService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
+import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
 import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
@@ -380,6 +382,146 @@ class FoundationServicesTests {
         assertFailsWith<IllegalArgumentException> {
             categoryService.delete(customCategory.id)
         }
+    }
+
+    // T7: retry increments the correct retry counter
+    @Test
+    fun `retry increments transcription retry counter`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-retry-ctr-1",
+                voice = TelegramVoicePayload(fileId = "f-ctr", fileUniqueId = "u-ctr")
+            )
+        )
+
+        val afterIngest = itemStore.findById(ingested.id)!!
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, afterIngest.status)
+        assertEquals(0, afterIngest.retryCountTranscription)
+
+        reviewService.retry(ingested.id)
+
+        val afterRetry = itemStore.findById(ingested.id)!!
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, afterRetry.status)
+        assertEquals(1, afterRetry.retryCountTranscription)
+    }
+
+    // T8: failure notification shows incremented retry counter after retry and re-fail
+    @Test
+    fun `failure notification shows incremented retry counter after retry and re-fail`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val notificationStore = InMemoryFailureNotificationStore()
+        val notificationService = TelegramFailureNotificationService(itemStore, notificationStore, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-redelivery",
+                telegramMessageId = "msg-redelivery",
+                voice = TelegramVoicePayload(fileId = "f-rd", fileUniqueId = "u-rd")
+            )
+        )
+
+        val firstPoll = notificationService.listPending()
+        assertEquals(1, firstPoll.size)
+        assertEquals("transcriptionRetries=0/3, aiRetries=0/2", firstPoll.single().retryContext)
+
+        // Retry — re-processes and re-fails — retryCountTranscription becomes 1
+        reviewService.retry(ingested.id)
+
+        val afterRetry = itemStore.findById(ingested.id)!!
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, afterRetry.status)
+        assertEquals(1, afterRetry.retryCountTranscription)
+
+        // The notificationId may be the same or different depending on timing;
+        // what matters is the retry context reflects the incremented counter.
+        // Use a fresh notificationStore so we get the current notification regardless.
+        val freshNotificationService = TelegramFailureNotificationService(
+            itemStore = itemStore,
+            notificationStore = InMemoryFailureNotificationStore(),
+            properties = testProperties()
+        )
+        val secondPoll = freshNotificationService.listPending()
+        assertEquals(1, secondPoll.size)
+        assertEquals("transcriptionRetries=1/3, aiRetries=0/2", secondPoll.single().retryContext)
+    }
+
+    // T9: query filters by category path level
+    @Test
+    fun `query filters approved items by category path`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        categoryService.create(CreateCategoryRequest(CategoryPathRequest("Work", "Code", "Kotlin")))
+
+        val inDefault = captureService.ingest(
+            TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-catflt-1", text = "default inbox item")
+        )
+        reviewService.approve(inDefault.id)
+
+        val inWork = captureService.ingest(
+            TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-catflt-2", text = "work kotlin item")
+        )
+        reviewService.editAndApprove(inWork.id, EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Code", "Kotlin")))
+
+        val all = itemService.listApproved()
+        assertEquals(2, all.size)
+
+        val workOnly = itemService.listApproved(ItemListQueryRequest(category = "Work"))
+        assertEquals(1, workOnly.size)
+        assertEquals(inWork.id, workOnly.single().id)
+
+        val defaultOnly = itemService.listApproved(
+            ItemListQueryRequest(category = "Default", subcategory = "General", subsubcategory = "Inbox")
+        )
+        assertEquals(1, defaultOnly.size)
+        assertEquals(inDefault.id, defaultOnly.single().id)
+    }
+
+    // T10: query filters by type using the type inferred during processing
+    @Test
+    fun `query filters approved items by type`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val reminderItem = captureService.ingest(
+            TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-typeflt-1", text = "remember to call dentist")
+        )
+        reviewService.approve(reminderItem.id)
+
+        val ideaItem = captureService.ingest(
+            TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-typeflt-2", text = "idea for a new feature")
+        )
+        reviewService.approve(ideaItem.id)
+
+        val reminders = itemService.listApproved(ItemListQueryRequest(type = ItemType.REMINDER))
+        assertEquals(1, reminders.size)
+        assertEquals(reminderItem.id, reminders.single().id)
+
+        val ideas = itemService.listApproved(ItemListQueryRequest(type = ItemType.IDEA))
+        assertEquals(1, ideas.size)
+        assertEquals(ideaItem.id, ideas.single().id)
     }
 
     private fun createCategoryService(itemStore: InMemoryItemStore): CategoryService =

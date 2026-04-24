@@ -1,19 +1,18 @@
 package com.sunagatov.memora.backend.capture.store
 
-import java.util.concurrent.ConcurrentHashMap
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!mongo")
-class InMemoryFailureNotificationStore : FailureNotificationStore {
-
-    private val delivered = ConcurrentHashMap.newKeySet<String>()
+@Profile("mongo")
+class MongoFailureNotificationStore(
+    private val repository: MongoDeliveredNotificationRepository
+) : FailureNotificationStore {
 
     override fun isDelivered(notificationId: String): Boolean =
-        delivered.contains(notificationId)
+        repository.existsById(notificationId)
 
     override fun markDelivered(notificationId: String) {
-        delivered += notificationId
+        repository.save(MongoDeliveredNotificationDocument(notificationId))
     }
 }

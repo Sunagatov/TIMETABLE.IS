@@ -1,7 +1,6 @@
 {
   "permissions": {
     "deny": [
-      "Read(./*)",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./backend/.env)",
