@@ -4,8 +4,8 @@ import com.sunagatov.memora.backend.capture.api.TelegramIngestRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
-import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.ItemStatus
+import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.Priority
 import com.sunagatov.memora.backend.item.model.SourceType
@@ -24,9 +24,7 @@ class TelegramCaptureService(
 ) {
 
     fun ingest(request: TelegramIngestRequest): MemoraItem {
-        require(request.telegramUserId == properties.ownerTelegramUserId) {
-            "Telegram user is not allowed to ingest items"
-        }
+        validateOwner(request)
 
         val now = Instant.now()
         val itemId = UUID.randomUUID().toString()
@@ -68,5 +66,16 @@ class TelegramCaptureService(
         val saved = itemStore.save(item)
         itemProcessingService.enqueue(saved.id)
         return saved
+    }
+
+    private fun validateOwner(request: TelegramIngestRequest) {
+        val configuredOwnerId = properties.ownerTelegramUserId.toLongOrNull()
+        if (configuredOwnerId == null || configuredOwnerId <= 0) {
+            return
+        }
+
+        require(request.telegramUserId == properties.ownerTelegramUserId) {
+            "Telegram user is not allowed to ingest items"
+        }
     }
 }

@@ -14,7 +14,7 @@ data class BotSettings(
         fun fromEnvironment(): BotSettings =
             BotSettings(
                 token = env("TELEGRAM_BOT_TOKEN"),
-                backendBaseUrl = envOrDefault("BACKEND_BASE_URL", "http://localhost:8080"),
+                backendBaseUrl = backendBaseUrl(),
                 backendBotIngestToken = env("BACKEND_BOT_INGEST_TOKEN"),
                 ownerTelegramUserId = env("OWNER_TELEGRAM_USER_ID").toLong(),
                 ingestPath = envOrDefault(
@@ -34,6 +34,12 @@ data class BotSettings(
                     "5"
                 ).toLong()
             )
+
+        private fun backendBaseUrl(): String =
+            envOrDefault("BACKEND_BASE_URL", "http://localhost:8080")
+                .trim()
+                .ifBlank { "http://localhost:8080" }
+                .removeSuffix("/")
 
         private fun env(name: String): String =
             System.getenv(name)?.takeIf { it.isNotBlank() }

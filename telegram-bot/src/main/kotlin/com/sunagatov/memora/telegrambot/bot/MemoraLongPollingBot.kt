@@ -2,13 +2,9 @@ package com.sunagatov.memora.telegrambot.bot
 
 import com.sunagatov.memora.telegrambot.backend.BackendClient
 import com.sunagatov.memora.telegrambot.config.BotSettings
+import com.sunagatov.memora.telegrambot.ingest.TelegramAcceptedResponse
 import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
-import com.sunagatov.memora.telegrambot.ingest.TelegramIngestRequest
 import com.sunagatov.memora.telegrambot.ingest.TelegramUpdateMapper
-import java.net.ConnectException
-import java.net.UnknownHostException
-import java.net.http.HttpTimeoutException
-import java.nio.channels.UnresolvedAddressException
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer
@@ -38,41 +34,39 @@ class MemoraLongPollingBot(
             return
         }
 
-        val textRequest = updateMapper.toTextIngestRequest(update)
-        if (textRequest != null) {
-            acceptText(chatId, textRequest)
+        updateMapper.toTextIngestRequest(update)?.let {
+            acceptIngest(chatId, "backend-ingest-text") { backendClient.ingestText(it) }
             return
         }
 
-        val voiceRequest = updateMapper.toVoiceIngestRequest(update)
-        if (voiceRequest != null) {
-            acceptVoice(chatId, voiceRequest)
+        updateMapper.toVoiceIngestRequest(update)?.let {
+            acceptIngest(chatId, "backend-ingest-voice") { backendClient.ingestVoice(it) }
         }
     }
 
-    private fun acceptText(
+    private fun acceptIngest(
         chatId: String,
-        request: TelegramIngestRequest
+        stage: String,
+        action: () -> TelegramAcceptedResponse
     ) {
         try {
-            val accepted = backendClient.ingestText(request)
-            sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
+            val accepted = action()
+            sendMessage(
+                chatId,
+                "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}"
+            )
         } catch (exception: Exception) {
-            logger.error("Failed to ingest Telegram text update", exception)
-            sendMessage(chatId, backendUnavailableMessageOrDefault(exception))
-        }
-    }
-
-    private fun acceptVoice(
-        chatId: String,
-        request: TelegramIngestRequest
-    ) {
-        try {
-            val accepted = backendClient.ingestVoice(request)
-            sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
-        } catch (exception: Exception) {
-            logger.error("Failed to ingest Telegram voice update", exception)
-            sendMessage(chatId, backendUnavailableMessageOrDefault(exception))
+            logger.error("Failed to process Telegram update at stage={}", stage, exception)
+            sendMessage(
+                chatId,
+                buildString {
+                    append("Failed to process message.")
+                    append("\nStage: ")
+                    append(stage)
+                    append("\nReason: ")
+                    append(exception.message ?: "unknown")
+                }
+            )
         }
     }
 
@@ -83,14 +77,7 @@ class MemoraLongPollingBot(
                 backendClient.acknowledgeFailureNotification(notification.notificationId)
             }
         } catch (exception: Exception) {
-            if (isBackendUnavailable(exception)) {
-                logger.warn(
-                    "Skipping failure notification poll because backend is unreachable at {}",
-                    settings.backendBaseUrl
-                )
-            } else {
-                logger.error("Failed to deliver backend failure notifications", exception)
-            }
+            logger.error("Failed to deliver backend failure notifications", exception)
         }
     }
 
@@ -116,20 +103,4 @@ class MemoraLongPollingBot(
                 .build()
         )
     }
-
-    private fun backendUnavailableMessageOrDefault(exception: Exception): String =
-        if (isBackendUnavailable(exception)) {
-            "Memora backend is unavailable right now. Please retry in a moment."
-        } else {
-            "Memora could not accept this message right now. Please retry."
-        }
-
-    private fun isBackendUnavailable(exception: Throwable): Boolean =
-        generateSequence(exception) { it.cause }
-            .any {
-                it is ConnectException ||
-                    it is UnknownHostException ||
-                    it is HttpTimeoutException ||
-                    it is UnresolvedAddressException
-            }
 }

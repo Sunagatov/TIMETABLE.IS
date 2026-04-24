@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(prefix = "memora", name = ["storage"], havingValue = "in-memory")
+@ConditionalOnProperty(prefix = "memora.storage", name = ["mode"], havingValue = "in-memory")
 class InMemoryItemStore : ItemStore {
 
     private val items = ConcurrentHashMap<String, MemoraItem>()

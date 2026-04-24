@@ -15,8 +15,10 @@ management:
         include: health
 
 memora:
-  storage: ${MEMORA_STORAGE:mongo}
+  storage:
+    mode: ${MEMORA_STORAGE_MODE:mongo}
   allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}
+  app-password: ${BACKEND_APP_PASSWORD:}
   app-password-hash: ${BACKEND_APP_PASSWORD_HASH:$2y$10$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza}
   session-days: ${BACKEND_SESSION_DAYS:30}
   bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}

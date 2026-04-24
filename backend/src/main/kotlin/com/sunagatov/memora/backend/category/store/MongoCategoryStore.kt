@@ -2,11 +2,16 @@ package com.sunagatov.memora.backend.category.store
 
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.category.model.MemoraCategory
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("mongo")
+@ConditionalOnProperty(
+    prefix = "memora.storage",
+    name = ["mode"],
+    havingValue = "mongo",
+    matchIfMissing = true
+)
 class MongoCategoryStore(private val repository: MongoCategoryRepository) : CategoryStore {
 
     override fun save(category: MemoraCategory): MemoraCategory {
@@ -30,7 +35,9 @@ class MongoCategoryStore(private val repository: MongoCategoryRepository) : Cate
 
     override fun findByPath(path: CategoryPath): MemoraCategory? =
         repository.findByCategoryAndSubcategoryAndSubsubcategory(
-            path.category, path.subcategory, path.subsubcategory
+            path.category,
+            path.subcategory,
+            path.subsubcategory
         )?.toDomain()
 
     override fun delete(id: String) {

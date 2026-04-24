@@ -14,7 +14,7 @@ class SessionService(
 ) {
 
     fun login(password: String): String {
-        if (!passwordEncoder.matches(password, properties.appPasswordHash)) {
+        if (!passwordMatches(password)) {
             throw IllegalArgumentException("Invalid password")
         }
 
@@ -31,5 +31,15 @@ class SessionService(
         if (sessionId != null) {
             store.delete(sessionId)
         }
+    }
+
+    private fun passwordMatches(password: String): Boolean {
+        val plainTextPassword = properties.appPassword?.takeIf { it.isNotBlank() }
+
+        if (plainTextPassword != null && password == plainTextPassword) {
+            return true
+        }
+
+        return passwordEncoder.matches(password, properties.appPasswordHash)
     }
 }

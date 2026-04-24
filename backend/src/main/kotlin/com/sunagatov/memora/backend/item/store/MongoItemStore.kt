@@ -3,11 +3,16 @@ package com.sunagatov.memora.backend.item.store
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("mongo")
+@ConditionalOnProperty(
+    prefix = "memora.storage",
+    name = ["mode"],
+    havingValue = "mongo",
+    matchIfMissing = true
+)
 class MongoItemStore(private val repository: MongoItemRepository) : ItemStore {
 
     override fun save(item: MemoraItem): MemoraItem {
