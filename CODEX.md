@@ -18,11 +18,12 @@ Compact guidance for Codex CLI.
 
 1. read `AGENTS.md`
 2. read `docs/ai/current-bootstrap-state.md`
-3. read `docs/ai/api-surface.md` when contracts matter
-4. read `docs/ai/request-routing-guide.md`
-5. identify the smallest affected domain area
-6. implement one clear slice
-7. update docs if behavior changed
+3. read `docs/ai/api-surface.md` when contracts, filter params, or state guards matter
+4. read `docs/ai/invariants.md` when touching state transitions, category behavior
+5. read `docs/ai/request-routing-guide.md`
+6. identify the smallest affected domain area
+7. implement one clear slice
+8. update docs if behavior changed
 
 ## Preferred style
 
@@ -35,9 +36,31 @@ Compact guidance for Codex CLI.
 
 - current backend packages: `auth`, `capture`, `category`, `common`, `config`, `health`, `item`, `review`
 - `MemoraItem` preserves original AI output and latest human-facing state separately
-- category paths are exact 3-level leaf paths, not arbitrary-depth trees
-- approved items stay approved after human edits in V1
+- category paths are exact 3-level leaf paths, not arbitrary-depth trees; rename cascades to items; `aiCategoryPath` is NOT updated
+- approved items stay approved after human edits in V1 (direct PATCH → `HUMAN_EDITED_APPROVED`)
 - unified Telegram ingest uses `POST /api/capture/telegram/ingest` with text or nested voice payload
 - Telegram bot currently uses long polling; bot failure notifications are an explicit backend contract delivered by backend polling and delivery acknowledgement
 - direct item patch is approved-only; reviewable edits use `edit-and-approve`
 - voice ingest is accepted and persisted, but full transcription remains future work
+- filter params for list endpoints: keyword, type, priority, status, category, subcategory, subsubcategory, `createdFrom`, `createdTo`, sort
+- sort format: `field-direction` e.g. `createdAt-desc`, `title-asc`
+- state guards enforced by backend services (not Spring Security):
+  - approve/reject/edit-and-approve: only `AI_PROCESSED_UNREVIEWED`
+  - retry: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
+  - PATCH: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
+
+## Current frontend reality
+
+- React 19 + TypeScript + Vite 7 + TanStack React Query v5 + Tailwind v4
+- all 3 list views use backend-backed queries (not client-side filtering)
+- filter date params: `createdFrom`/`createdTo` — must match backend exactly
+- "ALL" sentinel in filter state is stripped by `buildQuery()` before sending to backend
+- `useReviewActions` hook for all item actions
+- `FilterControls.tsx` shared: FilterSelect, DateField, ResetButton, CategoryCascade
+- collapsible 3-level CategoryTree in sidebar + category management section
+
+## Critical naming to preserve
+
+- date filter params: `createdFrom` and `createdTo` (NOT `dateFrom`/`dateTo`)
+- sort format: `createdAt-asc`, `createdAt-desc`, `title-asc`, `title-desc`, `category-asc`, `category-desc`
+- failure notification ID: `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll
