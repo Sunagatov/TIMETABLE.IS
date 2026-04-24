@@ -24,15 +24,38 @@
 - category tree is exactly 3 levels in V1
 - original AI output and latest human version both remain visible
 - item status groups must stay conceptually separate:
-  - Needs Review
-  - Failures
-  - Approved
-  - Rejected/deleted terminal states
+  - Needs Review (`AI_PROCESSED_UNREVIEWED`)
+  - Failures (`TRANSCRIPTION_FAILED`, `AI_PROCESSING_FAILED`)
+  - Approved (`HUMAN_APPROVED`, `HUMAN_EDITED_APPROVED`)
+  - Terminal states (`REJECTED`, `DELETED`)
 - approved items remain approved after later human edits in V1
-- voice items must preserve Telegram traceability metadata sufficient for operator recovery attempts
+- voice items must preserve Telegram traceability metadata sufficient for operator recovery
 - voice retry in V1 is intentionally bounded by the lack of Memora-owned audio storage
 - Telegram ingest uses a unified text-or-voice request shape with nested voice payload
-- bot-facing failure notifications are acknowledged after delivery instead of being re-delivered forever
+- bot-facing failure notifications are acknowledged after delivery; re-delivery uses new notificationId when item updatedAt changes
+
+## State transition guards — all enforced in backend
+
+- `approve`: only `AI_PROCESSED_UNREVIEWED`
+- `reject`: only `AI_PROCESSED_UNREVIEWED`
+- `edit-and-approve`: only `AI_PROCESSED_UNREVIEWED`
+- `retry`: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
+- direct `PATCH /api/items/{itemId}`: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
+- `DELETE /api/review/{itemId}/trash`: any status
+
+## Category invariants
+
+- exactly 3 levels required: category, subcategory, subsubcategory — all non-blank
+- category rename cascades `categoryPath` on linked items; `aiCategoryPath` is NOT updated (preserves original AI output)
+- category delete blocked when any item uses that path
+- category delete blocked for the default category path
+
+## Filter/query param invariants
+
+- date range params are `createdFrom` and `createdTo` (ISO date YYYY-MM-DD)
+- sort format is `field-direction` (e.g. `createdAt-desc`, `title-asc`, `category-desc`)
+- frontend never sends "ALL" to backend; `buildQuery()` strips it
+- all three list endpoints use the same `ItemListQueryRequest` model
 
 ## V1 non-features / limitations
 
@@ -46,7 +69,6 @@
 - no view-count sorting in V1
 - no Memora-owned transcription implementation yet in current bootstrap backend
 - no Mongo persistence yet in current bootstrap backend
-- no frontend category CRUD management UI yet
 
 ## Boundary invariants
 

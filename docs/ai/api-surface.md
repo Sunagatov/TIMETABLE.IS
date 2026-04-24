@@ -13,8 +13,8 @@ Current backend endpoints:
 
 Behavior notes:
 - backend-managed session cookie
-- single password checked against configured password hash
-- session lifetime is configurable in days
+- single password checked against configured bcrypt hash
+- session lifetime is configurable in days (default 30)
 
 ## Capture ingestion
 
@@ -22,7 +22,7 @@ Current backend endpoint:
 - `POST /api/capture/telegram/ingest`
 
 Current request shape:
-- exactly one of `text` or `voice`
+- exactly one of `text` or `voice` (xor enforced at request construction)
 - `telegramUserId` as a string
 - `telegramChatId` as a string
 - `telegramMessageId` as a string
@@ -31,25 +31,26 @@ Current request shape:
 - optional voice media metadata: `durationSeconds`, `mimeType`
 
 Current behavior:
-- owner Telegram user ID is validated in backend
+- owner Telegram user ID validated in backend against `MEMORA_OWNER_TELEGRAM_USER_ID` config
+- `telegramUserId` in request must equal the configured owner string exactly
 - returns backend item ID as `memoraId` on accept responses only
-- accepted items are first stored as `RECEIVED`
-- text items are then processed asynchronously into Needs Review
-- voice items persist traceability metadata and currently end in visible transcription failure after bounded retries
-- bot-facing failure notifications are exposed for polling and delivery acknowledgement
-- current Telegram bot transport is long polling, and the backend capture/failure endpoints are authenticated with `X-Memora-Bot-Token`
+- accepted items first stored as `RECEIVED`
+- text items processed asynchronously into Needs Review (`AI_PROCESSED_UNREVIEWED`)
+- voice items persist traceability metadata and currently always end in `TRANSCRIPTION_FAILED`
+- bot-facing failure notifications exposed for polling and delivery acknowledgement
+- capture endpoints authenticated with `X-Memora-Bot-Token`
 
 Current bot-facing failure notification endpoints:
 - `GET /api/capture/telegram/failure-notifications`
 - `POST /api/capture/telegram/failure-notifications/{notificationId}/delivered`
 
 Current failure notification payload:
-- `notificationId`
+- `notificationId` — format `"${item.id}:${item.updatedAt.epochSecond}"` (re-derived each poll)
 - `telegramChatId`
 - `memoraId`
 - `failedStage`
 - `summary`
-- `retryContext`
+- `retryContext` — format `"transcriptionRetries=N/MAX, aiRetries=N/MAX"`
 
 ## Review
 
@@ -62,11 +63,14 @@ Current backend endpoints:
 - `DELETE /api/review/{itemId}/trash`
 - `POST /api/review/{itemId}/retry`
 
+State guards:
+- `approve`, `reject`, `edit-and-approve` — only `AI_PROCESSED_UNREVIEWED` items
+- `retry` — only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED` items
+- `trash` — any status
+
 Current behavior:
-- `edit-and-approve` is the review-safe edit path
-- direct item edits are not a replacement for review workflow
+- `edit-and-approve` is the review-safe edit path for reviewable items
 - retry requeues failed items back through the same backend-owned processing path
-- list endpoints accept query params for keyword, type, status, priority, category path, created date range, and sort
 
 ## Items
 
@@ -75,12 +79,37 @@ Current backend endpoints:
 - `GET /api/items/{itemId}`
 - `PATCH /api/items/{itemId}`
 
+State guards:
+- `PATCH` — only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED` items; always transitions to `HUMAN_EDITED_APPROVED`
+
 Current behavior:
-- approved item edits stay approved in V1
-- current editable fields include title, cleaned text, raw transcript, type, 3-level category path, priority
-- `PATCH /api/items/{itemId}` is approved-only
-- `MemoraItem` uses `id` as the primary item identifier; `memoraId` only appears in accept/notification payloads
-- approved list endpoint accepts the same query params as review lists
+- approved item edits stay approved in V1 (result is always `HUMAN_EDITED_APPROVED`)
+- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority
+- `MemoraItem` uses `id` as primary identifier; `memoraId` only appears in accept/notification payloads
+- approved list endpoint returns only `HUMAN_APPROVED` and `HUMAN_EDITED_APPROVED` items
+
+## Search/filter/sort — query params
+
+All three list endpoints accept these query params via `ItemListQueryRequest`:
+
+| Param | Type | Notes |
+|-------|------|-------|
+| `keyword` | string | searches title, cleanedText, rawTranscript, rawInputText |
+| `type` | enum | IDEA, THOUGHT, REMINDER, OTHER |
+| `status` | enum | exact ItemStatus value |
+| `priority` | enum | URGENT_IMPORTANT, URGENT_NOT_IMPORTANT, NOT_URGENT_IMPORTANT, NOT_URGENT_NOT_IMPORTANT, NOT_APPLICABLE |
+| `category` | string | exact level-1 match |
+| `subcategory` | string | exact level-2 match |
+| `subsubcategory` | string | exact level-3 match |
+| `createdFrom` | date | ISO date YYYY-MM-DD, inclusive (UTC day start) |
+| `createdTo` | date | ISO date YYYY-MM-DD, inclusive (UTC day end) |
+| `sort` | string | format `field-direction`, e.g. `createdAt-desc` |
+
+Sort fields: `createdAt`, `title`, `category`
+Sort directions: `asc`, `desc`
+Default sort: `createdAt-desc`
+
+**Critical naming:** date params are `createdFrom`/`createdTo` — NOT `dateFrom`/`dateTo`.
 
 ## Category management
 
@@ -91,17 +120,12 @@ Current backend endpoints:
 - `DELETE /api/categories/{categoryId}`
 
 Current behavior:
-- category paths are exact 3-level leaf paths only
-- default category path is bootstrapped automatically
-- category delete is blocked if the path is still used by items
-- category rename updates linked item category assignments
-
-## Search/filter/sort
-
-Current backend support:
-- keyword search
-- filter by type/category/path/priority/status/date range
-- sort by title/category/date
+- category paths are exact 3-level leaf paths only (category/subcategory/subsubcategory, all non-blank)
+- default category path is bootstrapped automatically (`Default/General/Inbox`)
+- category delete blocked if path is still used by any item
+- category delete blocked for the default category path
+- category rename cascades `categoryPath` on all linked items
+- category rename does NOT update `aiCategoryPath` (preserves original AI output)
 
 ## Health
 
