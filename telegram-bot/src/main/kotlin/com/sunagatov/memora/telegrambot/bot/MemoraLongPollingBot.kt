@@ -5,6 +5,10 @@ import com.sunagatov.memora.telegrambot.config.BotSettings
 import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
 import com.sunagatov.memora.telegrambot.ingest.TelegramIngestRequest
 import com.sunagatov.memora.telegrambot.ingest.TelegramUpdateMapper
+import java.net.ConnectException
+import java.net.UnknownHostException
+import java.net.http.HttpTimeoutException
+import java.nio.channels.UnresolvedAddressException
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer
@@ -55,7 +59,7 @@ class MemoraLongPollingBot(
             sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
         } catch (exception: Exception) {
             logger.error("Failed to ingest Telegram text update", exception)
-            sendMessage(chatId, "Memora could not accept this message right now. Please retry.")
+            sendMessage(chatId, backendUnavailableMessageOrDefault(exception))
         }
     }
 
@@ -68,7 +72,7 @@ class MemoraLongPollingBot(
             sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
         } catch (exception: Exception) {
             logger.error("Failed to ingest Telegram voice update", exception)
-            sendMessage(chatId, "Memora could not accept this message right now. Please retry.")
+            sendMessage(chatId, backendUnavailableMessageOrDefault(exception))
         }
     }
 
@@ -79,7 +83,14 @@ class MemoraLongPollingBot(
                 backendClient.acknowledgeFailureNotification(notification.notificationId)
             }
         } catch (exception: Exception) {
-            logger.error("Failed to deliver backend failure notifications", exception)
+            if (isBackendUnavailable(exception)) {
+                logger.warn(
+                    "Skipping failure notification poll because backend is unreachable at {}",
+                    settings.backendBaseUrl
+                )
+            } else {
+                logger.error("Failed to deliver backend failure notifications", exception)
+            }
         }
     }
 
@@ -105,4 +116,20 @@ class MemoraLongPollingBot(
                 .build()
         )
     }
+
+    private fun backendUnavailableMessageOrDefault(exception: Exception): String =
+        if (isBackendUnavailable(exception)) {
+            "Memora backend is unavailable right now. Please retry in a moment."
+        } else {
+            "Memora could not accept this message right now. Please retry."
+        }
+
+    private fun isBackendUnavailable(exception: Throwable): Boolean =
+        generateSequence(exception) { it.cause }
+            .any {
+                it is ConnectException ||
+                    it is UnknownHostException ||
+                    it is HttpTimeoutException ||
+                    it is UnresolvedAddressException
+            }
 }

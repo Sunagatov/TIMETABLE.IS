@@ -10,11 +10,14 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.Duration
 
 class BackendClient(
     private val settings: BotSettings
 ) {
-    private val httpClient = HttpClient.newHttpClient()
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(5))
+        .build()
     private val mapper = jacksonObjectMapper()
 
     fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse =
@@ -33,6 +36,7 @@ class BackendClient(
         val response = send(
             HttpRequest.newBuilder()
                 .uri(uri(settings.failureNotificationsPath))
+                .timeout(Duration.ofSeconds(10))
                 .header("Accept", "application/json")
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .GET()
@@ -53,6 +57,7 @@ class BackendClient(
         send(
             HttpRequest.newBuilder()
                 .uri(uri(settings.failureNotificationAckPathTemplate.format(notificationId)))
+                .timeout(Duration.ofSeconds(10))
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build()
@@ -64,6 +69,7 @@ class BackendClient(
         val response = send(
             HttpRequest.newBuilder()
                 .uri(uri(path))
+                .timeout(Duration.ofSeconds(15))
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
@@ -83,9 +89,12 @@ class BackendClient(
         return response
     }
 
-    private fun uri(path: String): URI =
-        HttpRequest.newBuilder()
-            .uri(URI.create("${settings.backendBaseUrl.trimEnd('/')}$path"))
-            .build()
-            .uri()
+    private fun uri(pathOrUrl: String): URI {
+        val value = pathOrUrl.trim()
+        return if (value.startsWith("http://") || value.startsWith("https://")) {
+            URI.create(value)
+        } else {
+            URI.create("${settings.backendBaseUrl.trimEnd('/')}/${value.trimStart('/')}")
+        }
+    }
 }

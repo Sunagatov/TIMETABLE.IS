@@ -1,11 +1,11 @@
 package com.sunagatov.memora.backend.capture.store
 
 import java.util.concurrent.ConcurrentHashMap
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!mongo")
+@ConditionalOnProperty(prefix = "memora", name = ["storage"], havingValue = "in-memory")
 class InMemoryFailureNotificationStore : FailureNotificationStore {
 
     private val delivered = ConcurrentHashMap.newKeySet<String>()

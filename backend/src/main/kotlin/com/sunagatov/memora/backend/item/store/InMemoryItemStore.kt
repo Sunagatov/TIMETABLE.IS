@@ -4,11 +4,11 @@ import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import java.util.concurrent.ConcurrentHashMap
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!mongo")
+@ConditionalOnProperty(prefix = "memora", name = ["storage"], havingValue = "in-memory")
 class InMemoryItemStore : ItemStore {
 
     private val items = ConcurrentHashMap<String, MemoraItem>()

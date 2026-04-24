@@ -14,7 +14,7 @@ data class BotSettings(
         fun fromEnvironment(): BotSettings =
             BotSettings(
                 token = env("TELEGRAM_BOT_TOKEN"),
-                backendBaseUrl = env("BACKEND_BASE_URL"),
+                backendBaseUrl = envOrDefault("BACKEND_BASE_URL", "http://localhost:8080"),
                 backendBotIngestToken = env("BACKEND_BOT_INGEST_TOKEN"),
                 ownerTelegramUserId = env("OWNER_TELEGRAM_USER_ID").toLong(),
                 ingestPath = envOrDefault(
