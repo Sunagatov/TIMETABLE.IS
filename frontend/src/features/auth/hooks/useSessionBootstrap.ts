@@ -12,6 +12,13 @@ export function useSessionBootstrap() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    const handleUnauthorized = () => setAuthenticated(false);
+
+    window.addEventListener("memora:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("memora:unauthorized", handleUnauthorized);
+  }, []);
+
   return {
     authenticated,
     loading,

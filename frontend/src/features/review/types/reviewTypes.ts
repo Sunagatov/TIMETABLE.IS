@@ -1,0 +1,71 @@
+export type CategoryPath = {
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+};
+
+export type TelegramVoiceTrace = {
+  telegramUserId: string;
+  telegramChatId: string;
+  telegramMessageId: string;
+  telegramFileId: string | null;
+  telegramFileUniqueId: string | null;
+  durationSeconds: number | null;
+  mimeType: string | null;
+};
+
+export type MemoraItem = {
+  id: string;
+  memoraId: string;
+  sourceType: string;
+  rawInputText: string | null;
+  rawTranscript: string | null;
+  aiTitle: string;
+  aiCleanedText: string;
+  aiType: string;
+  aiCategoryPath: CategoryPath;
+  aiPriority: string;
+  title: string;
+  cleanedText: string;
+  type: string;
+  categoryPath: CategoryPath;
+  priority: string;
+  status: string;
+  retryCountTranscription: number;
+  retryCountAi: number;
+  failureStage: string | null;
+  failureReason: string | null;
+  telegramTrace: TelegramVoiceTrace | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MemoraCategory = {
+  id: string;
+  path: CategoryPath;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CategoryPathRequest = {
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+};
+
+export type UpdateItemRequest = {
+  title?: string;
+  cleanedText?: string;
+  rawTranscript?: string;
+  type?: string;
+  categoryPath?: CategoryPathRequest;
+  priority?: string;
+};
+
+export type ApprovedSort =
+  | "createdAt-desc"
+  | "createdAt-asc"
+  | "title-asc"
+  | "title-desc"
+  | "category-asc"
+  | "category-desc";

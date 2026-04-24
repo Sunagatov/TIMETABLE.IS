@@ -1,5 +1,33 @@
 @import "tailwindcss";
 
+html {
+  background: #f4efe6;
+}
+
 body {
-  color: #0f172a;
+  margin: 0;
+  color: #1c1917;
+  font-family:
+    "IBM Plex Sans",
+    "Avenir Next",
+    "Segoe UI",
+    sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

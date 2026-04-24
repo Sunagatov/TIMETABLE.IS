@@ -6,7 +6,11 @@ export default function App() {
   const { authenticated, loading, onLoggedIn, onLoggedOut } = useSessionBootstrap();
 
   if (loading) {
-    return <div className="p-6 text-slate-700">Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f4efe6] p-6 text-stone-700">
+        Loading Memora...
+      </div>
+    );
   }
 
   if (!authenticated) {

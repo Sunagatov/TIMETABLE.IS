@@ -4,32 +4,38 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 class TelegramUpdateMapper {
 
-    fun toIngestRequest(update: Update): TelegramIngestRequest? {
+    fun toTextIngestRequest(update: Update): TelegramTextIngestRequest? {
         val message = update.message ?: return null
         val from = message.from ?: return null
         val chat = message.chat ?: return null
-
-        return when {
-            !message.text.isNullOrBlank() -> TelegramIngestRequest(
-                telegramUserId = from.id.toString(),
-                telegramChatId = chat.id.toString(),
-                telegramMessageId = message.messageId.toString(),
-                text = message.text
-            )
-
-            message.voice != null -> TelegramIngestRequest(
-                telegramUserId = from.id.toString(),
-                telegramChatId = chat.id.toString(),
-                telegramMessageId = message.messageId.toString(),
-                voice = TelegramVoiceMetadata(
-                    fileId = message.voice.fileId,
-                    fileUniqueId = message.voice.fileUniqueId,
-                    durationSeconds = message.voice.duration,
-                    mimeType = message.voice.mimeType
-                )
-            )
-
-            else -> null
+        val text = message.text ?: return null
+        if (text.isBlank()) {
+            return null
         }
+
+        return TelegramTextIngestRequest(
+            telegramUserId = from.id,
+            telegramChatId = chat.id,
+            telegramMessageId = message.messageId,
+            text = text
+        )
+    }
+
+    fun toVoiceIngestRequest(update: Update): TelegramVoiceIngestRequest? {
+        val message = update.message ?: return null
+        val from = message.from ?: return null
+        val chat = message.chat ?: return null
+        val voice = message.voice ?: return null
+
+        return TelegramVoiceIngestRequest(
+            telegramUserId = from.id,
+            telegramChatId = chat.id,
+            telegramMessageId = message.messageId,
+            telegramFileId = voice.fileId,
+            telegramFileUniqueId = voice.fileUniqueId,
+            durationSeconds = voice.duration,
+            mimeType = voice.mimeType,
+            fileSizeBytes = voice.fileSize
+        )
     }
 }

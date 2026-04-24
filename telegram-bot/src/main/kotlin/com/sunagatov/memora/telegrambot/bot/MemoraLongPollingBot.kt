@@ -1,8 +1,8 @@
 package com.sunagatov.memora.telegrambot.bot
 
 import com.sunagatov.memora.telegrambot.backend.BackendClient
-import com.sunagatov.memora.telegrambot.command.StartCommandHandler
 import com.sunagatov.memora.telegrambot.config.BotSettings
+import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
 import com.sunagatov.memora.telegrambot.ingest.TelegramUpdateMapper
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
@@ -14,7 +14,6 @@ class MemoraLongPollingBot(
     private val settings: BotSettings,
     private val telegramClient: OkHttpTelegramClient,
     private val backendClient: BackendClient,
-    private val startCommandHandler: StartCommandHandler,
     private val updateMapper: TelegramUpdateMapper
 ) : LongPollingUpdateConsumer {
 
@@ -29,54 +28,80 @@ class MemoraLongPollingBot(
         val from = message.from ?: return
         val chatId = message.chatId.toString()
 
-        if (from.id.toString() != settings.ownerTelegramUserId) {
+        if (from.id != settings.ownerTelegramUserId) {
             logger.warn("Ignoring update from unauthorized Telegram user id={}", from.id)
             return
         }
 
-        val text = message.text?.trim()
-
-        if (text == "/start") {
-            telegramClient.execute(
-                SendMessage.builder()
-                    .chatId(chatId)
-                    .text(startCommandHandler.buildMessage())
-                    .build()
-            )
+        val textRequest = updateMapper.toTextIngestRequest(update)
+        if (textRequest != null) {
+            acceptText(chatId, textRequest)
             return
         }
 
-        val request = updateMapper.toIngestRequest(update)
-        if (request == null) {
-            telegramClient.execute(
-                SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Unsupported message type for now.")
-                    .build()
-            )
-            return
+        val voiceRequest = updateMapper.toVoiceIngestRequest(update)
+        if (voiceRequest != null) {
+            acceptVoice(chatId, voiceRequest)
         }
+    }
 
+    private fun acceptText(
+        chatId: String,
+        request: com.sunagatov.memora.telegrambot.ingest.TelegramTextIngestRequest
+    ) {
         try {
-            val itemId = backendClient.ingest(request)
-            telegramClient.execute(
-                SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Accepted. Processing asynchronously. Item ID: $itemId")
-                    .build()
-            )
+            val accepted = backendClient.ingestText(request)
+            sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
         } catch (exception: Exception) {
-            logger.error("Failed to ingest Telegram update", exception)
-            telegramClient.execute(
-                SendMessage.builder()
-                    .chatId(chatId)
-                    .text(
-                        "Failed to process message. " +
-                            "Stage: backend-ingest. " +
-                            "Reason: ${exception.message ?: "unknown"}"
-                    )
-                    .build()
-            )
+            logger.error("Failed to ingest Telegram text update", exception)
+            sendMessage(chatId, "Memora could not accept this message right now. Please retry.")
         }
+    }
+
+    private fun acceptVoice(
+        chatId: String,
+        request: com.sunagatov.memora.telegrambot.ingest.TelegramVoiceIngestRequest
+    ) {
+        try {
+            val accepted = backendClient.ingestVoice(request)
+            sendMessage(chatId, "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}")
+        } catch (exception: Exception) {
+            logger.error("Failed to ingest Telegram voice update", exception)
+            sendMessage(chatId, "Memora could not accept this message right now. Please retry.")
+        }
+    }
+
+    fun deliverFailureNotifications() {
+        try {
+            backendClient.fetchFailureNotifications().forEach { notification ->
+                sendFailureNotification(notification)
+                backendClient.acknowledgeFailureNotification(notification.notificationId)
+            }
+        } catch (exception: Exception) {
+            logger.error("Failed to deliver backend failure notifications", exception)
+        }
+    }
+
+    private fun sendFailureNotification(notification: TelegramFailureNotification) {
+        val lines = mutableListOf(
+            "Processing failed.",
+            "Memora ID: ${notification.memoraId}",
+            "Failed stage: ${notification.failedStage}",
+            "Summary: ${notification.summary}"
+        )
+        notification.retryContext
+            ?.takeIf { it.isNotBlank() }
+            ?.let { lines += "Retry context: $it" }
+
+        sendMessage(notification.telegramChatId.toString(), lines.joinToString("\n"))
+    }
+
+    private fun sendMessage(chatId: String, text: String) {
+        telegramClient.execute(
+            SendMessage.builder()
+                .chatId(chatId)
+                .text(text)
+                .build()
+        )
     }
 }

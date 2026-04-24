@@ -35,21 +35,21 @@ export function LoginForm({ onLoggedIn }: Props) {
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <label className="mb-1 block text-sm font-medium">Password</label>
+        <label className="mb-2 block text-sm font-medium text-stone-700">Password</label>
         <input
           type="password"
-          className="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
           {...register("password")}
         />
         {errors.password ? (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
         ) : null}
       </div>
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-xl bg-slate-900 px-4 py-2 text-white hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-2xl bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
