@@ -93,8 +93,8 @@ export type ListParams = {
   category?: string;
   subcategory?: string;
   subsubcategory?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  createdFrom?: string;
+  createdTo?: string;
   sort?: string;
 };
 
@@ -105,8 +105,8 @@ export type NeedsReviewFilters = {
   category: string;
   subcategory: string;
   subsubcategory: string;
-  dateFrom: string;
-  dateTo: string;
+  createdFrom: string;
+  createdTo: string;
   sort: ListSort;
 };
 
@@ -115,8 +115,8 @@ export type FailuresFilters = {
   category: string;
   subcategory: string;
   subsubcategory: string;
-  dateFrom: string;
-  dateTo: string;
+  createdFrom: string;
+  createdTo: string;
 };
 
 export type ApprovedFilters = {
@@ -127,7 +127,7 @@ export type ApprovedFilters = {
   category: string;
   subcategory: string;
   subsubcategory: string;
-  dateFrom: string;
-  dateTo: string;
+  createdFrom: string;
+  createdTo: string;
   sort: ListSort;
 };

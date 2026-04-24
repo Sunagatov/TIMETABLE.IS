@@ -81,13 +81,13 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
       <div className="grid gap-3 md:grid-cols-2">
         <DateField
           label="Created from"
-          value={filters.dateFrom}
-          onChange={(v) => set({ dateFrom: v })}
+          value={filters.createdFrom}
+          onChange={(v) => set({ createdFrom: v })}
         />
         <DateField
           label="Created to"
-          value={filters.dateTo}
-          onChange={(v) => set({ dateTo: v })}
+          value={filters.createdTo}
+          onChange={(v) => set({ createdTo: v })}
         />
       </div>
       <ResetButton onClick={onReset} />
