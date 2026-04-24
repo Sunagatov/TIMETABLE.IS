@@ -46,7 +46,7 @@ class ItemProcessingService(
     private fun processText(item: MemoraItem) {
         val rawInputText = item.rawInputText?.takeIf { it.isNotBlank() }
             ?: return failAsAiProcessing(item, "Accepted text item is missing raw input text")
-        val success = runWithRetries(properties.aiAutoRetryAttempts) {
+        val outcome = runWithRetries(properties.aiAutoRetryAttempts) {
             val normalizedText = normalizeText(rawInputText)
             val itemType = inferType(normalizedText)
             val title = buildTitle(normalizedText)
@@ -75,22 +75,35 @@ class ItemProcessingService(
             )
         }
 
-        if (!success) {
-            failAsAiProcessing(item, "AI processing failed after ${properties.aiAutoRetryAttempts} attempts")
+        if (!outcome.success) {
+            failAsAiProcessing(
+                item,
+                "AI processing failed after ${outcome.attempts} attempt(s)" +
+                    outcome.lastErrorMessageSuffix()
+            )
         }
     }
 
     private fun processVoice(item: MemoraItem) {
-        val success = runWithRetries(properties.transcriptionAutoRetryAttempts) {
+        val outcome = runWithRetries(properties.transcriptionAutoRetryAttempts) {
             throw IllegalStateException("Voice transcription is not implemented in the backend foundation yet")
         }
 
-        if (!success) {
+        if (!outcome.success) {
             itemStore.save(
                 item.copy(
                     status = ItemStatus.TRANSCRIPTION_FAILED,
                     failureStage = FailureStage.TRANSCRIPTION,
-                    failureReason = "Voice transcription is not implemented in the backend foundation yet",
+                    failureReason = buildString {
+                        append("Voice transcription is not implemented in the backend foundation yet")
+                        append(" after ")
+                        append(outcome.attempts)
+                        append(" attempt(s)")
+                        outcome.lastErrorMessage?.let {
+                            append(": ")
+                            append(it)
+                        }
+                    },
                     updatedAt = Instant.now()
                 )
             )
@@ -108,22 +121,30 @@ class ItemProcessingService(
         )
     }
 
+    private data class RetryOutcome(
+        val success: Boolean,
+        val attempts: Int,
+        val lastErrorMessage: String? = null
+    )
+
     private inline fun runWithRetries(
         maxAttempts: Int,
         block: () -> Unit
-    ): Boolean {
+    ): RetryOutcome {
         require(maxAttempts >= 1) { "Retry attempts must be at least 1" }
 
+        var lastErrorMessage: String? = null
         repeat(maxAttempts) {
             try {
                 block()
-                return true
-            } catch (_: RuntimeException) {
+                return RetryOutcome(success = true, attempts = it + 1)
+            } catch (exception: RuntimeException) {
+                lastErrorMessage = exception.message
                 // Try again until the configured retry budget is exhausted.
             }
         }
 
-        return false
+        return RetryOutcome(success = false, attempts = maxAttempts, lastErrorMessage = lastErrorMessage)
     }
 
     private fun normalizeText(raw: String): String =
@@ -148,4 +169,7 @@ class ItemProcessingService(
             .take(6)
             .joinToString(" ")
             .ifBlank { "Untitled item" }
+
+    private fun RetryOutcome.lastErrorMessageSuffix(): String =
+        lastErrorMessage?.let { ": $it" } ?: ""
 }

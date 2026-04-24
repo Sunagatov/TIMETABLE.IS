@@ -6,6 +6,7 @@ import com.sunagatov.memora.backend.item.model.MemoraItem
 
 interface ItemStore {
     fun save(item: MemoraItem): MemoraItem
+    fun findAll(): List<MemoraItem>
     fun findById(id: String): MemoraItem?
     fun findByStatuses(statuses: Set<ItemStatus>): List<MemoraItem>
     fun findByCategoryPath(path: CategoryPath): List<MemoraItem>

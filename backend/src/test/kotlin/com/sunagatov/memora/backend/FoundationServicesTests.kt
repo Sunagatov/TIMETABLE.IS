@@ -11,8 +11,10 @@ import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.config.MemoraProperties
+import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
+import com.sunagatov.memora.backend.item.application.ItemQueryService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
@@ -88,8 +90,8 @@ class FoundationServicesTests {
         val categoryService = createCategoryService(itemStore)
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
-        val itemService = ItemService(itemStore, categoryService)
-        val reviewService = ReviewService(itemStore, itemService, processingService)
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
 
         val customCategory = categoryService.create(
             CreateCategoryRequest(
@@ -139,6 +141,51 @@ class FoundationServicesTests {
     }
 
     @Test
+    fun `approved query supports keyword status and sort filters`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val first = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-5",
+                text = "alpha note first"
+            )
+        )
+        reviewService.approve(first.id)
+
+        val second = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-6",
+                text = "zulu note second"
+            )
+        )
+        reviewService.approve(second.id)
+
+        val filtered = itemService.listApproved(
+            ItemListQueryRequest(
+                keyword = "zulu",
+                status = ItemStatus.HUMAN_APPROVED,
+                sort = "title-desc"
+            )
+        )
+
+        assertEquals(1, filtered.size)
+        assertEquals(second.id, filtered.single().id)
+
+        val sorted = itemService.listApproved(ItemListQueryRequest(sort = "title-asc"))
+        assertEquals(first.id, sorted.first().id)
+        assertEquals(second.id, sorted.last().id)
+    }
+
+    @Test
     fun `failed telegram items are exposed once through failure notifications until acknowledged`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
@@ -146,7 +193,8 @@ class FoundationServicesTests {
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val notificationService = TelegramFailureNotificationService(
             itemStore = itemStore,
-            notificationStore = InMemoryFailureNotificationStore()
+            notificationStore = InMemoryFailureNotificationStore(),
+            properties = testProperties()
         )
 
         val failed = captureService.ingest(
@@ -164,6 +212,7 @@ class FoundationServicesTests {
         val notifications = notificationService.listPending()
         assertEquals(1, notifications.size)
         assertEquals(failed.id, notifications.single().memoraId)
+        assertEquals("transcriptionRetries=0/3, aiRetries=0/2", notifications.single().retryContext)
 
         notificationService.markDelivered(notifications.single().notificationId)
 

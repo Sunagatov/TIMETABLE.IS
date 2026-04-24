@@ -2,6 +2,7 @@ package com.sunagatov.memora.backend.review.api
 
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
+import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.review.application.ReviewService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -17,10 +19,12 @@ class ReviewController(
 ) {
 
     @GetMapping("/api/review/needs-review")
-    fun getNeedsReview(): List<MemoraItem> = reviewService.getNeedsReview()
+    fun getNeedsReview(@ModelAttribute query: ItemListQueryRequest): List<MemoraItem> =
+        reviewService.getNeedsReview(query)
 
     @GetMapping("/api/review/failures")
-    fun getFailures(): List<MemoraItem> = reviewService.getFailures()
+    fun getFailures(@ModelAttribute query: ItemListQueryRequest): List<MemoraItem> =
+        reviewService.getFailures(query)
 
     @PostMapping("/api/review/{itemId}/approve")
     fun approve(@PathVariable itemId: String): MemoraItem =

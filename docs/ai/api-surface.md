@@ -66,6 +66,7 @@ Current behavior:
 - `edit-and-approve` is the review-safe edit path
 - direct item edits are not a replacement for review workflow
 - retry requeues failed items back through the same backend-owned processing path
+- list endpoints accept query params for keyword, type, status, priority, category path, created date range, and sort
 
 ## Items
 
@@ -79,6 +80,7 @@ Current behavior:
 - current editable fields include title, cleaned text, raw transcript, type, 3-level category path, priority
 - `PATCH /api/items/{itemId}` is approved-only
 - `MemoraItem` uses `id` as the primary item identifier; `memoraId` only appears in accept/notification payloads
+- approved list endpoint accepts the same query params as review lists
 
 ## Category management
 
@@ -96,13 +98,10 @@ Current behavior:
 
 ## Search/filter/sort
 
-Current frontend shell:
+Current backend support:
 - keyword search
-- filter by type/category/path/priority
+- filter by type/category/path/priority/status/date range
 - sort by title/category/date
-
-Current backend limitation:
-- approved search/filter/sort is still client-side because backend does not expose query endpoints yet
 
 ## Health
 

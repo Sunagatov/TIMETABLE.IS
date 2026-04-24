@@ -1,8 +1,10 @@
 package com.sunagatov.memora.backend.review.application
 
 import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
+import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
+import com.sunagatov.memora.backend.item.application.ItemQueryService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
@@ -14,14 +16,23 @@ import org.springframework.stereotype.Service
 class ReviewService(
     private val itemStore: ItemStore,
     private val itemService: ItemService,
-    private val itemProcessingService: ItemProcessingService
+    private val itemProcessingService: ItemProcessingService,
+    private val itemQueryService: ItemQueryService
 ) {
 
-    fun getNeedsReview(): List<MemoraItem> =
-        itemStore.findByStatuses(ItemStatus.reviewableStatuses())
+    fun getNeedsReview(query: ItemListQueryRequest = ItemListQueryRequest()): List<MemoraItem> =
+        itemQueryService.query(
+            items = itemStore.findAll(),
+            request = query,
+            allowedStatuses = ItemStatus.reviewableStatuses()
+        )
 
-    fun getFailures(): List<MemoraItem> =
-        itemStore.findByStatuses(ItemStatus.failureStatuses())
+    fun getFailures(query: ItemListQueryRequest = ItemListQueryRequest()): List<MemoraItem> =
+        itemQueryService.query(
+            items = itemStore.findAll(),
+            request = query,
+            allowedStatuses = ItemStatus.failureStatuses()
+        )
 
     fun approve(itemId: String): MemoraItem {
         val item = requireItem(itemId)

@@ -47,7 +47,7 @@ Current status:
 - default landing is Needs Review
 - approved list is approved-only by default
 - category sidebar is present
-- approved search/filter/sort remains a client-side shell
+- approved/review/failure lists now accept backend query params for keyword, type, status, category path, priority, date range, and sort
 
 ## Phase 5 — category management
 - create

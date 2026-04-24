@@ -16,6 +16,9 @@ class InMemoryItemStore : ItemStore {
         return item
     }
 
+    override fun findAll(): List<MemoraItem> =
+        items.values.sortedByDescending { it.createdAt }
+
     override fun findById(id: String): MemoraItem? = items[id]
 
     override fun findByStatuses(statuses: Set<ItemStatus>): List<MemoraItem> =

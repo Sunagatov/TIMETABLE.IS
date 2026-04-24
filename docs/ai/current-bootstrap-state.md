@@ -51,7 +51,7 @@ It is not yet the full target V1 implementation.
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID
 - Telegram bot currently uses Telegram long polling, not webhook delivery
-- current frontend behavior stays review-first: default landing is Needs Review, approved list is approved-only, approved search/filter/sort is client-side, and status/date/category filters are exposed in the approved shell
+- current frontend behavior stays review-first: default landing is Needs Review, approved list is approved-only, and the approved shell exposes status/date/category filters while backend lists now accept matching query params
 
 ## Default backend validation
 

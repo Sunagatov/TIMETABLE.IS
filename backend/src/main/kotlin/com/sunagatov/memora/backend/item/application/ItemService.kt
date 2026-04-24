@@ -1,6 +1,7 @@
 package com.sunagatov.memora.backend.item.application
 
 import com.sunagatov.memora.backend.category.application.CategoryService
+import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
@@ -11,11 +12,16 @@ import org.springframework.stereotype.Service
 @Service
 class ItemService(
     private val itemStore: ItemStore,
-    private val categoryService: CategoryService
+    private val categoryService: CategoryService,
+    private val itemQueryService: ItemQueryService
 ) {
 
-    fun listApproved(): List<MemoraItem> =
-        itemStore.findByStatuses(ItemStatus.approvedStatuses())
+    fun listApproved(query: ItemListQueryRequest = ItemListQueryRequest()): List<MemoraItem> =
+        itemQueryService.query(
+            items = itemStore.findAll(),
+            request = query,
+            allowedStatuses = ItemStatus.approvedStatuses()
+        )
 
     fun getById(itemId: String): MemoraItem = requireItem(itemId)
 
