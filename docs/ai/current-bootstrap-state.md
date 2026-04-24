@@ -16,7 +16,8 @@ It is not yet the full target V1 implementation.
 - backend review queue APIs for Needs Review, Failures, and approved items
 - backend 3-level category model and CRUD baseline
 - backend explicit item lifecycle/status model
-- backend separation of original AI output vs latest human-facing item values (including aiAnswer vs answer for QUESTION items)
+- backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
+- backend deterministic placeholder AI port for cleaned text, type, category proposal, answer generation, and regeneration actions
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend in-memory stores for items, sessions, and categories
 - frontend session-aware login + review workspace
@@ -47,13 +48,14 @@ It is not yet the full target V1 implementation.
   - `review`
 - voice ingest persists Telegram traceability metadata, is durably accepted first, and then reaches visible retryable transcription failure after bounded retries
 - backend exposes bot-facing failure notification polling + delivery acknowledgement endpoints for failed Telegram items
-- text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), optional answer generation, and default category path
+- text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), answer generation or answer failure visibility, and category proposal support
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID
 - Telegram bot currently uses Telegram long polling, not webhook delivery
 - all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `subsubcategory`, `createdFrom`, `createdTo`, `sort`
+- review endpoints now include category-proposal approval/rejection and AI output regeneration actions
 
 ## Default backend validation
 

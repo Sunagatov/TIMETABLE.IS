@@ -22,9 +22,16 @@ type Props = {
   onChange: (next: View) => void;
   onLoggedOut: () => void;
   categories: MemoraCategory[];
+  categoriesLoading: boolean;
+  categoriesError: string | null;
   categoryFilter: CategoryPathFilter;
   onCategoryFilterChange: (next: CategoryPathFilter) => void;
   busyAction: string | null;
+  counts: {
+    needsReview: number;
+    failures: number;
+    approved: number;
+  };
   onCreateCategory: (request: CreateCategoryRequest) => Promise<void>;
   onRenameCategory: (categoryId: string, request: RenameCategoryRequest) => Promise<void>;
   onDeleteCategory: (categoryId: string) => Promise<void>;
@@ -35,9 +42,12 @@ export function ReviewSidebar({
   onChange,
   onLoggedOut,
   categories,
+  categoriesLoading,
+  categoriesError,
   categoryFilter,
   onCategoryFilterChange,
   busyAction,
+  counts,
   onCreateCategory,
   onRenameCategory,
   onDeleteCategory
@@ -107,13 +117,16 @@ export function ReviewSidebar({
 
       <nav className="px-5 space-y-2">
         <SidebarButton active={view === "needs-review"} onClick={() => onChange("needs-review")}>
-          Needs Review
+          <span>Needs Review</span>
+          <span className="text-xs opacity-80">{counts.needsReview}</span>
         </SidebarButton>
         <SidebarButton active={view === "failures"} onClick={() => onChange("failures")}>
-          Failures
+          <span>Failures</span>
+          <span className="text-xs opacity-80">{counts.failures}</span>
         </SidebarButton>
         <SidebarButton active={view === "approved"} onClick={() => onChange("approved")}>
-          Approved
+          <span>Approved</span>
+          <span className="text-xs opacity-80">{counts.approved}</span>
         </SidebarButton>
       </nav>
 
@@ -121,6 +134,8 @@ export function ReviewSidebar({
         <div className="rounded-3xl border border-stone-200 bg-white/80 p-4">
           <CategoryTree
             categories={categories}
+            loading={categoriesLoading}
+            errorMessage={categoriesError}
             filter={categoryFilter}
             onSelect={onCategoryFilterChange}
             onClearFilter={() => onCategoryFilterChange({ category: "", subcategory: "", subsubcategory: "" })}
@@ -224,7 +239,7 @@ function SidebarButton(props: { active: boolean; onClick: () => void; children: 
       type="button"
       onClick={props.onClick}
       className={
-        "w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition " +
+        "flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium transition " +
         (props.active
           ? "bg-stone-900 text-white"
           : "border border-stone-300 bg-white text-stone-800 hover:border-stone-400 hover:bg-stone-100")

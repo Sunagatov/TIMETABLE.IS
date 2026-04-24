@@ -11,6 +11,8 @@ type Props = {
   onSelect: (itemId: string) => void;
   toolbar?: ReactNode;
   view?: View;
+  isLoading: boolean;
+  errorMessage: string | null;
 };
 
 export function ReviewQueueList({
@@ -20,7 +22,9 @@ export function ReviewQueueList({
   selectedItemId,
   onSelect,
   toolbar,
-  view
+  view,
+  isLoading,
+  errorMessage
 }: Props) {
   return (
     <section className="flex h-screen flex-col border-r border-stone-200 bg-[#fbf8f2]">
@@ -34,7 +38,15 @@ export function ReviewQueueList({
       </header>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {items.length === 0 ? (
+        {isLoading ? (
+          <div className="rounded-3xl border border-dashed border-stone-300 bg-white/80 p-8 text-center text-sm leading-6 text-stone-500">
+            Loading items...
+          </div>
+        ) : errorMessage ? (
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-sm leading-6 text-red-700">
+            {errorMessage}
+          </div>
+        ) : items.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-stone-300 bg-white/80 p-8 text-center text-sm leading-6 text-stone-500">
             No items match the current filters.
           </div>
@@ -84,8 +96,32 @@ export function ReviewQueueList({
                               ? "bg-red-400/30 text-red-100"
                               : "bg-red-50 text-red-700")
                           }
-                        >
+                          >
                           {item.failureStage.replace(/_/g, " ")}
+                        </span>
+                      ) : null}
+                      {item.type === "QUESTION" || item.aiType === "QUESTION" ? (
+                        <span
+                          className={
+                            "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] " +
+                            (selected
+                              ? "bg-amber-400/20 text-amber-100"
+                              : "bg-amber-50 text-amber-700")
+                          }
+                        >
+                          Question
+                        </span>
+                      ) : null}
+                      {item.proposedCategoryStatus === "PENDING_REVIEW" ? (
+                        <span
+                          className={
+                            "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] " +
+                            (selected
+                              ? "bg-blue-400/20 text-blue-100"
+                              : "bg-blue-50 text-blue-700")
+                          }
+                        >
+                          Category proposal
                         </span>
                       ) : null}
                     </div>
@@ -113,6 +149,12 @@ export function ReviewQueueList({
                     <span>{item.priority}</span>
                     <span>·</span>
                     <span>{item.categoryPath.category}</span>
+                    {item.answerStatus === "FAILED" ? (
+                      <>
+                        <span>·</span>
+                        <span>answer failed</span>
+                      </>
+                    ) : null}
                   </div>
                 </button>
               );

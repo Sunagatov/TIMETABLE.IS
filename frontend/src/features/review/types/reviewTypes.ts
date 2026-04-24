@@ -23,7 +23,8 @@ export type MemoraItem = {
   aiCleanedText: string;
   aiType: string;
   aiCategoryPath: CategoryPath;
-  aiCategoryPathIsProposal: boolean;
+  proposedCategoryPath: CategoryPath | null;
+  proposedCategoryStatus: string;
   aiPriority: string;
   aiAnswer: string | null;
   title: string;
@@ -32,6 +33,9 @@ export type MemoraItem = {
   categoryPath: CategoryPath;
   priority: string;
   answer: string | null;
+  answerStatus: string;
+  answerFailureStage: string | null;
+  answerFailureReason: string | null;
   status: string;
   retryCountTranscription: number;
   retryCountAi: number;
@@ -77,6 +81,7 @@ export type UpdateItemRequest = {
   categoryPath?: CategoryPathRequest;
   priority?: string;
   answer?: string;
+  answerStatus?: string;
 };
 
 export type ListSort =

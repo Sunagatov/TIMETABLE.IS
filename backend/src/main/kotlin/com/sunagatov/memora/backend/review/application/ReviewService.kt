@@ -1,5 +1,6 @@
 package com.sunagatov.memora.backend.review.application
 
+import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.application.ItemService
@@ -8,6 +9,7 @@ import com.sunagatov.memora.backend.item.application.ItemQueryService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
+import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
 import com.sunagatov.memora.backend.item.store.ItemStore
 import java.time.Instant
 import org.springframework.stereotype.Service
@@ -17,7 +19,8 @@ class ReviewService(
     private val itemStore: ItemStore,
     private val itemService: ItemService,
     private val itemProcessingService: ItemProcessingService,
-    private val itemQueryService: ItemQueryService
+    private val itemQueryService: ItemQueryService,
+    private val categoryService: CategoryService
 ) {
 
     fun getNeedsReview(query: ItemListQueryRequest = ItemListQueryRequest()): List<MemoraItem> =
@@ -48,6 +51,32 @@ class ReviewService(
 
     fun editAndApprove(itemId: String, request: EditAndApproveRequest): MemoraItem =
         itemService.editAndApprove(itemId, request.toUpdateItemRequest())
+
+    fun approveCategoryProposal(itemId: String): MemoraItem {
+        val item = requireItem(itemId)
+        val proposedCategoryPath = item.proposedCategoryPath
+            ?: throw IllegalArgumentException("Item does not have a proposed category path")
+
+        categoryService.ensureReusablePath(proposedCategoryPath)
+        return itemStore.save(
+            item.copy(
+                categoryPath = proposedCategoryPath,
+                proposedCategoryStatus = ProposedCategoryStatus.APPROVED,
+                updatedAt = Instant.now()
+            )
+        )
+    }
+
+    fun rejectCategoryProposal(itemId: String): MemoraItem {
+        val item = requireItem(itemId)
+        require(item.proposedCategoryPath != null) { "Item does not have a proposed category path" }
+        return itemStore.save(
+            item.copy(
+                proposedCategoryStatus = ProposedCategoryStatus.REJECTED,
+                updatedAt = Instant.now()
+            )
+        )
+    }
 
     fun reject(itemId: String): MemoraItem {
         val item = requireItem(itemId)
@@ -98,6 +127,18 @@ class ReviewService(
         itemProcessingService.retry(saved.id)
         return saved
     }
+
+    fun regenerateCleanedText(itemId: String): MemoraItem =
+        itemProcessingService.regenerateCleanedText(itemId)
+
+    fun regenerateAnswer(itemId: String): MemoraItem =
+        itemProcessingService.regenerateAnswer(itemId)
+
+    fun regenerateCategoryProposal(itemId: String): MemoraItem =
+        itemProcessingService.regenerateCategoryProposal(itemId)
+
+    fun regenerateAll(itemId: String): MemoraItem =
+        itemProcessingService.regenerateAll(itemId)
 
     private fun requireItem(itemId: String): MemoraItem =
         itemStore.findById(itemId)

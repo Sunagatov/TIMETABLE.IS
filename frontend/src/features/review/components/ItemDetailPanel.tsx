@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type {
-  MemoraCategory,
-  MemoraItem,
-  UpdateItemRequest
-} from "../types/reviewTypes";
+import type { MemoraCategory, MemoraItem, UpdateItemRequest } from "../types/reviewTypes";
 
 type View = "needs-review" | "failures" | "approved";
 
@@ -13,12 +9,21 @@ type Props = {
   item: MemoraItem | undefined;
   categories: MemoraCategory[];
   busyAction: string | null;
+  actionError: string | null;
+  isLoading: boolean;
+  errorMessage: string | null;
   onApprove: (itemId: string) => Promise<void>;
   onEditAndApprove: (itemId: string, request: UpdateItemRequest) => Promise<void>;
   onSave: (itemId: string, request: UpdateItemRequest) => Promise<void>;
   onReject: (itemId: string) => Promise<void>;
   onDelete: (itemId: string) => Promise<void>;
   onRetry: (itemId: string) => Promise<void>;
+  onApproveCategoryProposal: (itemId: string) => Promise<void>;
+  onRejectCategoryProposal: (itemId: string) => Promise<void>;
+  onRegenerateCleanedText: (itemId: string) => Promise<void>;
+  onRegenerateAnswer: (itemId: string) => Promise<void>;
+  onRegenerateCategoryProposal: (itemId: string) => Promise<void>;
+  onRegenerateAll: (itemId: string) => Promise<void>;
 };
 
 type FormState = {
@@ -29,19 +34,31 @@ type FormState = {
   priority: string;
   categoryId: string;
   answer: string;
+  answerStatus: string;
 };
+
+const ANSWER_STATUS_OPTIONS = ["NONE", "GENERATED", "EDITED", "REJECTED", "DELETED"];
 
 export function ItemDetailPanel({
   view,
   item,
   categories,
   busyAction,
+  actionError,
+  isLoading,
+  errorMessage,
   onApprove,
   onEditAndApprove,
   onSave,
   onReject,
   onDelete,
-  onRetry
+  onRetry,
+  onApproveCategoryProposal,
+  onRejectCategoryProposal,
+  onRegenerateCleanedText,
+  onRegenerateAnswer,
+  onRegenerateCategoryProposal,
+  onRegenerateAll
 }: Props) {
   const [formState, setFormState] = useState<FormState>({
     title: "",
@@ -50,7 +67,8 @@ export function ItemDetailPanel({
     type: "OTHER",
     priority: "NOT_APPLICABLE",
     categoryId: "",
-    answer: ""
+    answer: "",
+    answerStatus: "NONE"
   });
 
   useEffect(() => {
@@ -72,12 +90,14 @@ export function ItemDetailPanel({
       type: item.type,
       priority: item.priority,
       categoryId: matchingCategory?.id ?? "",
-      answer: item.answer ?? ""
+      answer: item.answer ?? "",
+      answerStatus: item.answerStatus
     });
   }, [categories, item]);
 
   const request = useMemo<UpdateItemRequest>(() => {
     const category = categories.find((entry) => entry.id === formState.categoryId);
+    const normalizedAnswerStatus = normalizeAnswerStatus(formState.answerStatus, formState.answer);
 
     return {
       title: formState.title,
@@ -86,29 +106,67 @@ export function ItemDetailPanel({
       type: formState.type,
       priority: formState.priority,
       categoryPath: category?.path,
-      answer: formState.answer || undefined
+      answer:
+        normalizedAnswerStatus === "GENERATED" || normalizedAnswerStatus === "EDITED"
+          ? formState.answer
+          : undefined,
+      answerStatus: normalizedAnswerStatus
     };
   }, [categories, formState]);
 
-  if (!item) {
+  if (isLoading) {
     return (
       <section className="flex h-screen items-center justify-center bg-white p-10">
-        <div className="max-w-md rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-8 text-center text-sm leading-6 text-stone-500">
-          Select an item to inspect backend data, compare AI output, and take review actions.
-        </div>
+        <LoadingCard title="Loading item" body="Fetching the selected item from the backend." />
       </section>
     );
   }
 
+  if (errorMessage) {
+    return (
+      <section className="flex h-screen items-center justify-center bg-white p-10">
+        <ErrorCard title="Failed to load item" body={errorMessage} />
+      </section>
+    );
+  }
+
+  if (!item) {
+    return (
+      <section className="flex h-screen items-center justify-center bg-white p-10">
+        <EmptyCard
+          title="No item selected"
+          body="Select an item to inspect backend data, compare AI output, and take review actions."
+        />
+      </section>
+    );
+  }
+
+  const isQuestion = item.type === "QUESTION" || item.aiType === "QUESTION";
+  const hasPendingProposal =
+    item.proposedCategoryPath != null && item.proposedCategoryStatus === "PENDING_REVIEW";
+  const showProposalControls = Boolean(item.proposedCategoryPath);
+  const answerFailureMessage =
+    item.answerStatus === "FAILED"
+      ? item.answerFailureReason || "Answer generation failed"
+      : null;
+  const answerStatusOptions =
+    formState.answerStatus === "FAILED" ? ["FAILED", ...ANSWER_STATUS_OPTIONS] : ANSWER_STATUS_OPTIONS;
+
   return (
     <section className="h-screen overflow-y-auto bg-white">
       <div className="mx-auto max-w-5xl p-8">
+        {actionError ? (
+          <div className="mb-6 rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {actionError}
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
               {item.id}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-stone-950">{item.title}</h2>
+            <h2 className="mt-2 text-3xl font-semibold text-stone-950">{item.title || "Untitled"}</h2>
             <p className="mt-2 text-sm leading-6 text-stone-600">
               {item.status.replace(/_/g, " ")} · {item.sourceType.replace(/_/g, " ")}
             </p>
@@ -125,13 +183,43 @@ export function ItemDetailPanel({
               <Field label="AI Title" value={item.aiTitle} />
               <Field label="AI Cleaned Text" value={item.aiCleanedText} multiline />
               <Field label="AI Type" value={item.aiType} />
+              <Field label="AI Category" value={formatCategoryPath(item.aiCategoryPath)} />
               <Field
-                label="AI Category"
-                value={`${formatCategoryPath(item.aiCategoryPath)}${item.aiCategoryPathIsProposal ? " (proposed — pending approval)" : ""}`}
+                label="AI Priority"
+                value={item.aiPriority}
               />
-              <Field label="AI Priority" value={item.aiPriority} />
-              {item.aiType === "QUESTION" ? (
+              <Field
+                label="Proposed Category"
+                value={
+                  item.proposedCategoryPath
+                    ? `${formatCategoryPath(item.proposedCategoryPath)} (${item.proposedCategoryStatus.replace(/_/g, " ").toLowerCase()})`
+                    : "No proposal"
+                }
+              />
+              {isQuestion ? (
                 <Field label="AI Answer" value={item.aiAnswer} multiline />
+              ) : null}
+            </InfoCard>
+
+            <InfoCard title="Current Working Values">
+              <Field label="Title" value={formState.title} />
+              <Field label="Cleaned Text" value={formState.cleanedText} multiline />
+              <Field label="Raw Input Text" value={item.rawInputText} multiline />
+              <Field label="Raw Transcript" value={item.rawTranscript} multiline />
+              <Field label="Type" value={formState.type} />
+              <Field label="Priority" value={formState.priority} />
+              <Field
+                label="Category Path"
+                value={displaySelectedCategory(categories, formState.categoryId, item.categoryPath)}
+              />
+              <Field
+                label="Answer"
+                value={formState.answer || item.answer || null}
+                multiline
+              />
+              <Field label="Answer Status" value={formState.answerStatus} />
+              {answerFailureMessage ? (
+                <Field label="Answer Failure" value={answerFailureMessage} multiline />
               ) : null}
             </InfoCard>
 
@@ -260,75 +348,227 @@ export function ItemDetailPanel({
                 </FormField>
               </div>
 
-              {formState.type === "QUESTION" ? (
-                <FormField label="Answer">
-                  <textarea
-                    rows={6}
-                    value={formState.answer}
-                    onChange={(event) =>
-                      setFormState((current) => ({ ...current, answer: event.target.value }))
-                    }
-                    placeholder="Edit or verify the AI-generated answer…"
-                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
-                  />
-                </FormField>
+              {showProposalControls ? (
+                <div className="rounded-3xl border border-stone-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
+                    AI Category Proposal
+                  </p>
+                  <p className="mt-2 text-sm text-stone-700">
+                    {item.proposedCategoryPath
+                      ? `${formatCategoryPath(item.proposedCategoryPath)} · ${proposalLabel(item.proposedCategoryStatus)}`
+                      : "No proposal"}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <ActionButton
+                      label="Approve Proposed Category"
+                      busy={busyAction === "category-approve"}
+                      disabled={!hasPendingProposal || busyAction !== null}
+                      onClick={() => onApproveCategoryProposal(item.id)}
+                      tone="primary"
+                    />
+                    <ActionButton
+                      label="Reject Proposed Category"
+                      busy={busyAction === "category-reject"}
+                      disabled={!item.proposedCategoryPath || busyAction !== null}
+                      onClick={() => onRejectCategoryProposal(item.id)}
+                      tone="secondary"
+                    />
+                  </div>
+                </div>
+              ) : null}
+
+              {isQuestion ? (
+                <div className="rounded-3xl border border-stone-200 bg-white p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
+                      Answer Controls
+                    </p>
+                    <ActionButton
+                      label="Regenerate Answer"
+                      busy={busyAction === "regen-answer"}
+                      disabled={busyAction !== null}
+                      onClick={() => onRegenerateAnswer(item.id)}
+                      tone="accent"
+                    />
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <FormField label="Answer Status">
+                      <select
+                        value={formState.answerStatus}
+                        onChange={(event) =>
+                          setFormState((current) => ({ ...current, answerStatus: event.target.value }))
+                        }
+                        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+                      >
+                        {answerStatusOptions.map((option) => (
+                          <option key={option} value={option} disabled={option === "FAILED"}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </FormField>
+                    <FormField label="Answer">
+                      <textarea
+                        rows={5}
+                        value={formState.answer}
+                        onChange={(event) =>
+                          setFormState((current) => ({ ...current, answer: event.target.value }))
+                        }
+                        placeholder="Edit or verify the AI-generated answer…"
+                        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+                      />
+                    </FormField>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <SmallButton
+                      label="Use AI Answer"
+                      disabled={busyAction !== null}
+                      onClick={() =>
+                        setFormState((current) => ({
+                          ...current,
+                          answerStatus: "GENERATED",
+                          answer: item.aiAnswer ?? current.answer
+                        }))
+                      }
+                    />
+                    <SmallButton
+                      label="Mark Edited"
+                      disabled={busyAction !== null}
+                      onClick={() => setFormState((current) => ({ ...current, answerStatus: "EDITED" }))}
+                    />
+                    <SmallButton
+                      label="Clear Answer"
+                      disabled={busyAction !== null}
+                      onClick={() =>
+                        setFormState((current) => ({ ...current, answerStatus: "NONE", answer: "" }))
+                      }
+                    />
+                    <SmallButton
+                      label="Reject Answer"
+                      disabled={busyAction !== null}
+                      onClick={() =>
+                        setFormState((current) => ({ ...current, answerStatus: "REJECTED", answer: "" }))
+                      }
+                    />
+                    <SmallButton
+                      label="Delete Answer"
+                      disabled={busyAction !== null}
+                      onClick={() =>
+                        setFormState((current) => ({ ...current, answerStatus: "DELETED", answer: "" }))
+                      }
+                    />
+                  </div>
+                  {answerFailureMessage ? (
+                    <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {answerFailureMessage}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 space-y-3">
               {view === "needs-review" ? (
                 <>
-                  <ActionButton
-                    label="Approve As Is"
-                    busy={busyAction === "approve"}
-                    onClick={() => onApprove(item.id)}
-                    tone="primary"
-                  />
-                  <ActionButton
-                    label="Edit Then Approve"
-                    busy={busyAction === "edit-approve"}
-                    onClick={() => onEditAndApprove(item.id, request)}
-                    tone="accent"
-                  />
-                  <ActionButton
-                    label="Reject"
-                    busy={busyAction === "reject"}
-                    onClick={() => onReject(item.id)}
-                    tone="secondary"
-                  />
-                  <ActionButton
-                    label="Delete"
-                    busy={busyAction === "delete"}
-                    onClick={() => onDelete(item.id)}
-                    tone="danger"
-                  />
+                  <div className="flex flex-wrap gap-3">
+                    <ActionButton
+                      label="Approve As Is"
+                      busy={busyAction === "approve"}
+                      disabled={busyAction !== null}
+                      onClick={() => onApprove(item.id)}
+                      tone="primary"
+                    />
+                    <ActionButton
+                      label="Edit Then Approve"
+                      busy={busyAction === "edit-approve"}
+                      disabled={busyAction !== null}
+                      onClick={() => onEditAndApprove(item.id, request)}
+                      tone="accent"
+                    />
+                    <ActionButton
+                      label="Reject"
+                      busy={busyAction === "reject"}
+                      disabled={busyAction !== null}
+                      onClick={() => onReject(item.id)}
+                      tone="secondary"
+                    />
+                    <ActionButton
+                      label="Delete"
+                      busy={busyAction === "delete"}
+                      disabled={busyAction !== null}
+                      onClick={() => onDelete(item.id)}
+                      tone="danger"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <ActionButton
+                      label="Regenerate All AI Output"
+                      busy={busyAction === "regen-all"}
+                      disabled={busyAction !== null}
+                      onClick={() => onRegenerateAll(item.id)}
+                      tone="primary"
+                    />
+                    <ActionButton
+                      label="Regenerate Cleaned Text"
+                      busy={busyAction === "regen-cleaned"}
+                      disabled={busyAction !== null}
+                      onClick={() => onRegenerateCleanedText(item.id)}
+                      tone="secondary"
+                    />
+                    <ActionButton
+                      label="Regenerate Category Proposal"
+                      busy={busyAction === "regen-category"}
+                      disabled={busyAction !== null}
+                      onClick={() => onRegenerateCategoryProposal(item.id)}
+                      tone="secondary"
+                    />
+                  </div>
                 </>
               ) : null}
 
               {view === "failures" ? (
-                <>
+                <div className="flex flex-wrap gap-3">
                   <ActionButton
                     label="Retry"
                     busy={busyAction === "retry"}
+                    disabled={busyAction !== null}
                     onClick={() => onRetry(item.id)}
                     tone="primary"
                   />
                   <ActionButton
                     label="Delete"
                     busy={busyAction === "delete"}
+                    disabled={busyAction !== null}
                     onClick={() => onDelete(item.id)}
                     tone="danger"
                   />
-                </>
+                </div>
               ) : null}
 
               {view === "approved" ? (
-                <ActionButton
-                  label="Save Changes"
-                  busy={busyAction === "save"}
-                  onClick={() => onSave(item.id, request)}
-                  tone="primary"
-                />
+                <div className="flex flex-wrap gap-3">
+                  <ActionButton
+                    label="Save Changes"
+                    busy={busyAction === "save"}
+                    disabled={busyAction !== null}
+                    onClick={() => onSave(item.id, request)}
+                    tone="primary"
+                  />
+                  <ActionButton
+                    label="Regenerate All AI Output"
+                    busy={busyAction === "regen-all"}
+                    disabled={busyAction !== null}
+                    onClick={() => onRegenerateAll(item.id)}
+                    tone="secondary"
+                  />
+                  <ActionButton
+                    label="Regenerate Cleaned Text"
+                    busy={busyAction === "regen-cleaned"}
+                    disabled={busyAction !== null}
+                    onClick={() => onRegenerateCleanedText(item.id)}
+                    tone="secondary"
+                  />
+                </div>
               ) : null}
             </div>
 
@@ -344,6 +584,13 @@ export function ItemDetailPanel({
   );
 }
 
+function normalizeAnswerStatus(status: string, answer: string): string | undefined {
+  if (status === "FAILED") {
+    return answer.trim() ? "EDITED" : undefined;
+  }
+  return ANSWER_STATUS_OPTIONS.includes(status) ? status : answer.trim() ? "EDITED" : "NONE";
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
@@ -355,9 +602,26 @@ function formatCategoryPath(path: { category: string; subcategory: string; subsu
   return `${path.category} / ${path.subcategory} / ${path.subsubcategory}`;
 }
 
+function displaySelectedCategory(
+  categories: MemoraCategory[],
+  categoryId: string,
+  fallbackPath: { category: string; subcategory: string; subsubcategory: string }
+) {
+  const category = categories.find((entry) => entry.id === categoryId);
+  return category ? formatCategoryPath(category.path) : formatCategoryPath(fallbackPath);
+}
+
+function proposalLabel(status: string) {
+  if (status === "PENDING_REVIEW") return "pending review";
+  if (status === "APPROVED") return "approved";
+  if (status === "REJECTED") return "rejected";
+  return "none";
+}
+
 function ActionButton(props: {
   label: string;
   busy: boolean;
+  disabled?: boolean;
   onClick: () => Promise<void>;
   tone: "primary" | "accent" | "secondary" | "danger";
 }) {
@@ -373,11 +637,24 @@ function ActionButton(props: {
   return (
     <button
       type="button"
-      disabled={props.busy}
+      disabled={props.busy || props.disabled}
       onClick={() => void props.onClick()}
       className={`rounded-2xl px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${toneClass}`}
     >
       {props.busy ? "Working..." : props.label}
+    </button>
+  );
+}
+
+function SmallButton(props: { label: string; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      disabled={props.disabled}
+      className="rounded-full border border-stone-300 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700 transition hover:border-stone-500 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {props.label}
     </button>
   );
 }
@@ -410,5 +687,32 @@ function FormField(props: { label: string; children: ReactNode }) {
       <span className="mb-2 block font-medium text-stone-700">{props.label}</span>
       {props.children}
     </label>
+  );
+}
+
+function LoadingCard(props: { title: string; body: string }) {
+  return (
+    <div className="max-w-md rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-8 text-center">
+      <p className="text-lg font-semibold text-stone-900">{props.title}</p>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{props.body}</p>
+    </div>
+  );
+}
+
+function ErrorCard(props: { title: string; body: string }) {
+  return (
+    <div className="max-w-md rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+      <p className="text-lg font-semibold text-red-900">{props.title}</p>
+      <p className="mt-2 text-sm leading-6 text-red-700">{props.body}</p>
+    </div>
+  );
+}
+
+function EmptyCard(props: { title: string; body: string }) {
+  return (
+    <div className="max-w-md rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-8 text-center text-sm leading-6 text-stone-500">
+      <p className="text-lg font-semibold text-stone-900">{props.title}</p>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{props.body}</p>
+    </div>
   );
 }

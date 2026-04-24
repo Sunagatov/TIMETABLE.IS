@@ -1,6 +1,7 @@
 package com.sunagatov.memora.backend.item.api
 
 import com.sunagatov.memora.backend.category.api.CategoryPathRequest
+import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.Priority
@@ -16,7 +17,8 @@ data class UpdateItemRequest(
     @field:Valid
     val categoryPath: CategoryPathRequest? = null,
     val priority: Priority? = null,
-    val answer: String? = null
+    val answer: String? = null,
+    val answerStatus: AnswerStatus? = null
 )
 
 data class EditAndApproveRequest(
@@ -27,7 +29,8 @@ data class EditAndApproveRequest(
     @field:Valid
     val categoryPath: CategoryPathRequest? = null,
     val priority: Priority? = null,
-    val answer: String? = null
+    val answer: String? = null,
+    val answerStatus: AnswerStatus? = null
 ) {
     fun toUpdateItemRequest(): UpdateItemRequest =
         UpdateItemRequest(
@@ -37,7 +40,8 @@ data class EditAndApproveRequest(
             type = type,
             categoryPath = categoryPath,
             priority = priority,
-            answer = answer
+            answer = answer,
+            answerStatus = answerStatus
         )
 }
 

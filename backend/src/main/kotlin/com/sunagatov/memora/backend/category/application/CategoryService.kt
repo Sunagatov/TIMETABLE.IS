@@ -73,6 +73,19 @@ class CategoryService(
             ?: throw IllegalArgumentException("Category path does not exist")
     }
 
+    fun ensureReusablePath(path: CategoryPath): MemoraCategory {
+        ensureCategoryExists(defaultCategoryPath)
+        return categoryStore.findByPath(path)
+            ?: categoryStore.save(
+                MemoraCategory(
+                    id = UUID.randomUUID().toString(),
+                    path = path,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now()
+                )
+            )
+    }
+
     fun defaultPath(): CategoryPath {
         ensureCategoryExists(defaultCategoryPath)
         return defaultCategoryPath

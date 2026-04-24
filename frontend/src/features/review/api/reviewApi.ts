@@ -47,6 +47,14 @@ export async function editAndApproveItem(
   return httpClient.post(`/api/review/${itemId}/edit-and-approve`, request);
 }
 
+export async function approveCategoryProposal(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/category-proposal/approve`);
+}
+
+export async function rejectCategoryProposal(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/category-proposal/reject`);
+}
+
 export async function rejectItem(itemId: string): Promise<MemoraItem> {
   return httpClient.post(`/api/review/${itemId}/reject`);
 }
@@ -57,6 +65,22 @@ export async function trashItem(itemId: string): Promise<MemoraItem> {
 
 export async function retryItem(itemId: string): Promise<MemoraItem> {
   return httpClient.post(`/api/review/${itemId}/retry`);
+}
+
+export async function regenerateCleanedText(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/regenerate-cleaned-text`);
+}
+
+export async function regenerateAnswer(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/regenerate-answer`);
+}
+
+export async function regenerateCategoryProposal(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/regenerate-category-proposal`);
+}
+
+export async function regenerateAll(itemId: string): Promise<MemoraItem> {
+  return httpClient.post(`/api/review/${itemId}/regenerate-all`);
 }
 
 export async function fetchCategories(): Promise<MemoraCategory[]> {

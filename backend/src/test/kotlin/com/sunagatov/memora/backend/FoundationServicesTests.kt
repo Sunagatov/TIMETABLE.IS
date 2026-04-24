@@ -11,15 +11,26 @@ import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.config.MemoraProperties
+import com.sunagatov.memora.backend.item.ai.AiAllDraft
+import com.sunagatov.memora.backend.item.ai.AiAnswerDraft
+import com.sunagatov.memora.backend.item.ai.AiCategoryDraft
+import com.sunagatov.memora.backend.item.ai.AiTextDraft
+import com.sunagatov.memora.backend.item.ai.AiTextInput
 import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.api.UpdateItemRequest
+import com.sunagatov.memora.backend.item.ai.DeterministicMemoraAiPort
+import com.sunagatov.memora.backend.item.ai.MemoraAiPort
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.application.ItemQueryService
+import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.ItemType
+import com.sunagatov.memora.backend.item.model.Priority
+import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
+import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
 import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
@@ -95,7 +106,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val customCategory = categoryService.create(
             CreateCategoryRequest(
@@ -151,7 +162,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val first = captureService.ingest(
             TelegramIngestRequest(
@@ -302,7 +313,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val ingested = captureService.ingest(
             TelegramIngestRequest(
@@ -328,7 +339,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val ingested = captureService.ingest(
             TelegramIngestRequest(
@@ -353,7 +364,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val customCategory = categoryService.create(
             CreateCategoryRequest(
@@ -391,7 +402,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val ingested = captureService.ingest(
             TelegramIngestRequest(
@@ -423,7 +434,7 @@ class FoundationServicesTests {
         val notificationStore = InMemoryFailureNotificationStore()
         val notificationService = TelegramFailureNotificationService(itemStore, notificationStore, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val ingested = captureService.ingest(
             TelegramIngestRequest(
@@ -466,7 +477,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         categoryService.create(CreateCategoryRequest(CategoryPathRequest("Work", "Code", "Kotlin")))
 
@@ -551,7 +562,7 @@ class FoundationServicesTests {
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val question = captureService.ingest(
             TelegramIngestRequest(
@@ -572,13 +583,243 @@ class FoundationServicesTests {
     }
 
     @Test
+    fun `question answer failure stays visible and can be regenerated`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val aiPort = object : MemoraAiPort {
+            private val delegate = DeterministicMemoraAiPort()
+
+            override fun generateTextDraft(input: AiTextInput) = delegate.generateTextDraft(input)
+
+            override fun generateCategoryDraft(input: AiTextInput) = delegate.generateCategoryDraft(input)
+
+            override fun generateAnswerDraft(cleanedText: String): AiAnswerDraft =
+                AiAnswerDraft(
+                    answer = "Recovered answer from regeneration",
+                    answerStatus = AnswerStatus.GENERATED
+                )
+
+            override fun generateAllDraft(input: AiTextInput): AiAllDraft =
+                AiAllDraft(
+                    textDraft = delegate.generateTextDraft(input),
+                    categoryDraft = delegate.generateCategoryDraft(input),
+                    answerDraft = AiAnswerDraft(
+                        answer = null,
+                        answerStatus = AnswerStatus.FAILED,
+                        failureReason = "forced answer failure"
+                    )
+                )
+        }
+        val processingService = createProcessingService(itemStore, categoryService, aiPort)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-q4",
+                text = "What is answer fail?"
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
+        assertEquals(AnswerStatus.FAILED, stored.answerStatus)
+        assertEquals("forced answer failure", stored.answerFailureReason)
+
+        reviewService.regenerateAnswer(item.id)
+
+        val regenerated = itemStore.findById(item.id)!!
+        assertEquals(AnswerStatus.GENERATED, regenerated.answerStatus)
+        assertEquals("Recovered answer from regeneration", regenerated.answer)
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, regenerated.status)
+    }
+
+    @Test
+    fun `category proposal can be approved and becomes reusable`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-cat-proposal",
+                text = "finance project idea"
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
+        assertEquals(AnswerStatus.NONE, stored.answerStatus)
+        assertEquals("Default", stored.categoryPath.category)
+        assertEquals(ProposedCategoryStatus.PENDING_REVIEW, stored.proposedCategoryStatus)
+        assertNotNull(stored.proposedCategoryPath)
+
+        val approved = reviewService.approveCategoryProposal(item.id)
+        assertEquals(ProposedCategoryStatus.APPROVED, approved.proposedCategoryStatus)
+        assertEquals(approved.proposedCategoryPath, approved.categoryPath)
+        assertNotNull(categoryService.list().firstOrNull { it.path == approved.categoryPath })
+
+        val followUp = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-cat-proposal-2",
+                text = "finance project idea"
+            )
+        )
+
+        val followUpStored = itemStore.findById(followUp.id)!!
+        assertEquals(approved.categoryPath, followUpStored.categoryPath)
+        assertEquals(ProposedCategoryStatus.NONE, followUpStored.proposedCategoryStatus)
+    }
+
+    @Test
+    fun `regenerate all ai output updates current values and preserves original ai output`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val aiPort = object : MemoraAiPort {
+            private var calls = 0
+
+            override fun generateTextDraft(input: AiTextInput): AiTextDraft =
+                if (calls == 0) {
+                    AiTextDraft("First title", "First cleaned", ItemType.THOUGHT, Priority.NOT_APPLICABLE)
+                } else {
+                    AiTextDraft("Second title", "Second cleaned", ItemType.IDEA, Priority.URGENT_IMPORTANT)
+                }
+
+            override fun generateCategoryDraft(input: AiTextInput): AiCategoryDraft =
+                if (calls == 0) {
+                    AiCategoryDraft(
+                        aiCategoryPath = CategoryPath("Default", "General", "Inbox"),
+                        proposedCategoryPath = null,
+                        proposedCategoryStatus = ProposedCategoryStatus.NONE,
+                        currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                    )
+                } else {
+                    AiCategoryDraft(
+                        aiCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                        proposedCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                        proposedCategoryStatus = ProposedCategoryStatus.PENDING_REVIEW,
+                        currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                    )
+                }
+
+            override fun generateAnswerDraft(cleanedText: String): AiAnswerDraft =
+                AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
+
+            override fun generateAllDraft(input: AiTextInput): AiAllDraft {
+                val result = if (calls++ == 0) {
+                    AiAllDraft(
+                        textDraft = AiTextDraft("First title", "First cleaned", ItemType.THOUGHT, Priority.NOT_APPLICABLE),
+                        categoryDraft = AiCategoryDraft(
+                            aiCategoryPath = CategoryPath("Default", "General", "Inbox"),
+                            proposedCategoryPath = null,
+                            proposedCategoryStatus = ProposedCategoryStatus.NONE,
+                            currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                        ),
+                        answerDraft = AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
+                    )
+                } else {
+                    AiAllDraft(
+                        textDraft = AiTextDraft("Second title", "Second cleaned", ItemType.IDEA, Priority.URGENT_IMPORTANT),
+                        categoryDraft = AiCategoryDraft(
+                            aiCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                            proposedCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                            proposedCategoryStatus = ProposedCategoryStatus.PENDING_REVIEW,
+                            currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                        ),
+                        answerDraft = AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
+                    )
+                }
+                return result
+            }
+        }
+        val processingService = createProcessingService(itemStore, categoryService, aiPort)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-regenerate-all",
+                text = "placeholder"
+            )
+        )
+
+        val original = itemStore.findById(item.id)!!
+        assertEquals("First title", original.aiTitle)
+        assertEquals("First cleaned", original.aiCleanedText)
+        assertEquals("First title", original.title)
+
+        val regenerated = reviewService.regenerateAll(item.id)
+        assertEquals("First title", regenerated.aiTitle)
+        assertEquals("First cleaned", regenerated.aiCleanedText)
+        assertEquals("Second title", regenerated.title)
+        assertEquals("Second cleaned", regenerated.cleanedText)
+        assertEquals(ItemType.IDEA, regenerated.type)
+        assertEquals(Priority.URGENT_IMPORTANT, regenerated.priority)
+    }
+
+    @Test
+    fun `approved question answer can be cleared rejected and deleted without removing the item`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-answer-clear",
+                text = "What is Kotlin?"
+            )
+        )
+        reviewService.approve(item.id)
+
+        val cleared = itemService.updateItem(
+            item.id,
+            UpdateItemRequest(answerStatus = AnswerStatus.NONE)
+        )
+        assertEquals(AnswerStatus.NONE, cleared.answerStatus)
+        assertEquals(null, cleared.answer)
+        assertEquals(ItemStatus.HUMAN_EDITED_APPROVED, cleared.status)
+
+        val rejected = itemService.updateItem(
+            item.id,
+            UpdateItemRequest(answerStatus = AnswerStatus.REJECTED)
+        )
+        assertEquals(AnswerStatus.REJECTED, rejected.answerStatus)
+        assertEquals(null, rejected.answer)
+
+        val deleted = itemService.updateItem(
+            item.id,
+            UpdateItemRequest(answerStatus = AnswerStatus.DELETED)
+        )
+        assertEquals(AnswerStatus.DELETED, deleted.answerStatus)
+        assertEquals(null, deleted.answer)
+    }
+
+    @Test
     fun `query filters approved items by type`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
         val processingService = createProcessingService(itemStore, categoryService)
         val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
-        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
         val reminderItem = captureService.ingest(
             TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-typeflt-1", text = "remember to call dentist")
@@ -617,13 +858,29 @@ class FoundationServicesTests {
 
     private fun createProcessingService(
         itemStore: InMemoryItemStore,
-        categoryService: CategoryService
+        categoryService: CategoryService,
+        aiPort: MemoraAiPort = DeterministicMemoraAiPort()
     ): ItemProcessingService =
         ItemProcessingService(
             itemStore = itemStore,
             categoryService = categoryService,
+            aiPort = aiPort,
             properties = testProperties(),
             executor = directExecutor()
+        )
+
+    private fun createReviewService(
+        itemStore: InMemoryItemStore,
+        itemService: ItemService,
+        processingService: ItemProcessingService,
+        categoryService: CategoryService
+    ): ReviewService =
+        ReviewService(
+            itemStore = itemStore,
+            itemService = itemService,
+            itemProcessingService = processingService,
+            itemQueryService = ItemQueryService(),
+            categoryService = categoryService
         )
 
     private fun directExecutor(): ExecutorService =

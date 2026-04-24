@@ -5,12 +5,14 @@ type TreeData = Map<string, Map<string, MemoraCategory[]>>;
 
 type Props = {
   categories: MemoraCategory[];
+  loading: boolean;
+  errorMessage: string | null;
   filter: CategoryPathFilter;
   onSelect: (filter: CategoryPathFilter) => void;
   onClearFilter: () => void;
 };
 
-export function CategoryTree({ categories, filter, onSelect, onClearFilter }: Props) {
+export function CategoryTree({ categories, loading, errorMessage, filter, onSelect, onClearFilter }: Props) {
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   const tree = useMemo(() => buildTree(categories), [categories]);
 
@@ -50,7 +52,11 @@ export function CategoryTree({ categories, filter, onSelect, onClearFilter }: Pr
         <p className="mb-3 text-xs text-stone-400">All categories</p>
       )}
 
-      {!tree.size ? (
+      {loading ? (
+        <p className="text-sm text-stone-400">Loading categories...</p>
+      ) : errorMessage ? (
+        <p className="text-sm text-red-600">{errorMessage}</p>
+      ) : !tree.size ? (
         <p className="text-sm text-stone-400">No categories yet.</p>
       ) : (
         <div className="space-y-0.5">

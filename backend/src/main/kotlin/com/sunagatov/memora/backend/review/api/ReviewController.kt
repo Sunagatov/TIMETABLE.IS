@@ -36,6 +36,14 @@ class ReviewController(
         @Valid @RequestBody request: EditAndApproveRequest
     ): MemoraItem = reviewService.editAndApprove(itemId, request)
 
+    @PostMapping("/api/review/{itemId}/category-proposal/approve")
+    fun approveCategoryProposal(@PathVariable itemId: String): MemoraItem =
+        reviewService.approveCategoryProposal(itemId)
+
+    @PostMapping("/api/review/{itemId}/category-proposal/reject")
+    fun rejectCategoryProposal(@PathVariable itemId: String): MemoraItem =
+        reviewService.rejectCategoryProposal(itemId)
+
     @PostMapping("/api/review/{itemId}/reject")
     fun reject(@PathVariable itemId: String): MemoraItem =
         reviewService.reject(itemId)
@@ -47,4 +55,20 @@ class ReviewController(
     @PostMapping("/api/review/{itemId}/retry")
     fun retry(@PathVariable itemId: String): MemoraItem =
         reviewService.retry(itemId)
+
+    @PostMapping("/api/review/{itemId}/regenerate-cleaned-text")
+    fun regenerateCleanedText(@PathVariable itemId: String): MemoraItem =
+        reviewService.regenerateCleanedText(itemId)
+
+    @PostMapping("/api/review/{itemId}/regenerate-answer")
+    fun regenerateAnswer(@PathVariable itemId: String): MemoraItem =
+        reviewService.regenerateAnswer(itemId)
+
+    @PostMapping("/api/review/{itemId}/regenerate-category-proposal")
+    fun regenerateCategoryProposal(@PathVariable itemId: String): MemoraItem =
+        reviewService.regenerateCategoryProposal(itemId)
+
+    @PostMapping("/api/review/{itemId}/regenerate-all")
+    fun regenerateAll(@PathVariable itemId: String): MemoraItem =
+        reviewService.regenerateAll(itemId)
 }

@@ -40,7 +40,7 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
         type="search"
         value={filters.keyword}
         onChange={(e) => set({ keyword: e.target.value })}
-        placeholder="Search title, cleaned text, raw transcript, raw input..."
+        placeholder="Search title, cleaned text, raw transcript, raw input, answer..."
         className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-900"
       />
       <CategoryCascade

@@ -36,6 +36,8 @@ Current behavior:
 - returns backend item ID as `memoraId` on accept responses only
 - accepted items first stored as `RECEIVED`
 - text items processed asynchronously into Needs Review (`AI_PROCESSED_UNREVIEWED`)
+- QUESTION items may carry answer output plus answer status/failure metadata
+- category inference may produce a pending-review proposal path separate from the current category path
 - voice items persist traceability metadata and currently always end in `TRANSCRIPTION_FAILED`
 - bot-facing failure notifications exposed for polling and delivery acknowledgement
 - capture endpoints authenticated with `X-Memora-Bot-Token`
@@ -59,9 +61,15 @@ Current backend endpoints:
 - `GET /api/review/failures`
 - `POST /api/review/{itemId}/approve`
 - `POST /api/review/{itemId}/edit-and-approve`
+- `POST /api/review/{itemId}/category-proposal/approve`
+- `POST /api/review/{itemId}/category-proposal/reject`
 - `POST /api/review/{itemId}/reject`
 - `DELETE /api/review/{itemId}/trash`
 - `POST /api/review/{itemId}/retry`
+- `POST /api/review/{itemId}/regenerate-cleaned-text`
+- `POST /api/review/{itemId}/regenerate-answer`
+- `POST /api/review/{itemId}/regenerate-category-proposal`
+- `POST /api/review/{itemId}/regenerate-all`
 
 State guards:
 - `approve`, `reject`, `edit-and-approve` — only `AI_PROCESSED_UNREVIEWED` items
@@ -71,6 +79,8 @@ State guards:
 Current behavior:
 - `edit-and-approve` is the review-safe edit path for reviewable items
 - retry requeues failed items back through the same backend-owned processing path
+- regeneration actions update the current working values while preserving the original `ai*` snapshot fields
+- answer regeneration is explicit and separate from the core review/failure retry path
 
 ## Items
 
@@ -84,9 +94,10 @@ State guards:
 
 Current behavior:
 - approved item edits stay approved in V1 (result is always `HUMAN_EDITED_APPROVED`)
-- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority, answer
+- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority, answer, answerStatus
 - `MemoraItem` uses `id` as primary identifier; `memoraId` only appears in accept/notification payloads
 - approved list endpoint returns only `HUMAN_APPROVED` and `HUMAN_EDITED_APPROVED` items
+- answer status values include `NONE`, `GENERATED`, `EDITED`, `REJECTED`, `DELETED`, `FAILED`
 
 ## Search/filter/sort — query params
 
@@ -126,6 +137,7 @@ Current behavior:
 - category delete blocked for the default category path
 - category rename cascades `categoryPath` on all linked items
 - category rename does NOT update `aiCategoryPath` (preserves original AI output)
+- category proposal approval may create and reuse a new path, tracked through `proposedCategoryPath` and `proposedCategoryStatus`
 
 ## Health
 

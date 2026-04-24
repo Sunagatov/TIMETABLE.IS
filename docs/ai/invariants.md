@@ -24,6 +24,8 @@
   - `OTHER`
 - category tree is exactly 3 levels in V1
 - original AI output and latest human version both remain visible
+- answer lifecycle is explicit and may be `NONE`, `GENERATED`, `EDITED`, `REJECTED`, `DELETED`, or `FAILED`
+- category proposals are explicit and use `proposedCategoryPath` plus `proposedCategoryStatus`
 - item status groups must stay conceptually separate:
   - Needs Review (`AI_PROCESSED_UNREVIEWED`)
   - Failures (`TRANSCRIPTION_FAILED`, `AI_PROCESSING_FAILED`)
@@ -43,6 +45,7 @@
 - `retry`: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
 - direct `PATCH /api/items/{itemId}`: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
 - `DELETE /api/review/{itemId}/trash`: any status
+- regeneration actions update current working values while preserving the original AI snapshot fields
 
 ## Category invariants
 

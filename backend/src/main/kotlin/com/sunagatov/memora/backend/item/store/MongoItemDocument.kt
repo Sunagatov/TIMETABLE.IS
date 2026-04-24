@@ -1,12 +1,14 @@
 package com.sunagatov.memora.backend.item.store
 
 import com.sunagatov.memora.backend.category.model.CategoryPath
+import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.Priority
 import com.sunagatov.memora.backend.item.model.SourceType
+import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
 import com.sunagatov.memora.backend.item.model.TelegramVoiceTrace
 import java.time.Instant
 import org.springframework.data.annotation.Id
@@ -22,7 +24,8 @@ data class MongoItemDocument(
     val aiCleanedText: String,
     val aiType: ItemType,
     val aiCategoryPath: CategoryPathDocument,
-    val aiCategoryPathIsProposal: Boolean = false,
+    val proposedCategoryPath: CategoryPathDocument?,
+    val proposedCategoryStatus: ProposedCategoryStatus,
     val aiPriority: Priority,
     val aiAnswer: String?,
     val title: String,
@@ -31,6 +34,9 @@ data class MongoItemDocument(
     val categoryPath: CategoryPathDocument,
     val priority: Priority,
     val answer: String?,
+    val answerStatus: AnswerStatus,
+    val answerFailureStage: FailureStage?,
+    val answerFailureReason: String?,
     val status: ItemStatus,
     val retryCountTranscription: Int,
     val retryCountAi: Int,
@@ -66,7 +72,8 @@ internal fun MemoraItem.toDocument() = MongoItemDocument(
     aiCleanedText = aiCleanedText,
     aiType = aiType,
     aiCategoryPath = aiCategoryPath.toDocument(),
-    aiCategoryPathIsProposal = aiCategoryPathIsProposal,
+    proposedCategoryPath = proposedCategoryPath?.toDocument(),
+    proposedCategoryStatus = proposedCategoryStatus,
     aiPriority = aiPriority,
     aiAnswer = aiAnswer,
     title = title,
@@ -75,6 +82,9 @@ internal fun MemoraItem.toDocument() = MongoItemDocument(
     categoryPath = categoryPath.toDocument(),
     priority = priority,
     answer = answer,
+    answerStatus = answerStatus,
+    answerFailureStage = answerFailureStage,
+    answerFailureReason = answerFailureReason,
     status = status,
     retryCountTranscription = retryCountTranscription,
     retryCountAi = retryCountAi,
@@ -94,7 +104,8 @@ internal fun MongoItemDocument.toDomain() = MemoraItem(
     aiCleanedText = aiCleanedText,
     aiType = aiType,
     aiCategoryPath = aiCategoryPath.toDomain(),
-    aiCategoryPathIsProposal = aiCategoryPathIsProposal,
+    proposedCategoryPath = proposedCategoryPath?.toDomain(),
+    proposedCategoryStatus = proposedCategoryStatus,
     aiPriority = aiPriority,
     aiAnswer = aiAnswer,
     title = title,
@@ -103,6 +114,9 @@ internal fun MongoItemDocument.toDomain() = MemoraItem(
     categoryPath = categoryPath.toDomain(),
     priority = priority,
     answer = answer,
+    answerStatus = answerStatus,
+    answerFailureStage = answerFailureStage,
+    answerFailureReason = answerFailureReason,
     status = status,
     retryCountTranscription = retryCountTranscription,
     retryCountAi = retryCountAi,

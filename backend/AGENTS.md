@@ -146,7 +146,7 @@ All three list endpoints share the same query param model:
 - `directExecutor()` runs `ItemProcessingService` synchronously — enables state assertions immediately after `ingest()`
 - `testProperties()` helper provides valid bcrypt hash and sane defaults
 - `MemoraBackendApplicationTests` — Spring context load test only
-- Current test count: 19 in `FoundationServicesTests` + 1 context load = 20 total
+- Current test count: 23 in `FoundationServicesTests` + 1 context load = 24 total
 
 Tests that must remain green:
 - owner-only ingest (non-owner throws)
@@ -161,6 +161,10 @@ Tests that must remain green:
 - edit-and-approve rejected for already-approved item
 - retry rejected for reviewable item
 - category delete blocked when non-empty
+- QUESTION answer failure stays visible and can be regenerated
+- category proposal can be approved and reused
+- regenerate-all preserves original ai* snapshot fields
+- approved question answer can be cleared/rejected/deleted without removing the item
 
 ## Current validation
 

@@ -73,6 +73,7 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   const [view, setView] = useState<View>("needs-review");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [nrFilters, setNrFilters] = useState<NeedsReviewFilters>(DEFAULT_NR_FILTERS);
   const [failFilters, setFailFilters] = useState<FailuresFilters>(DEFAULT_FAIL_FILTERS);
   const [approvedFilters, setApprovedFilters] = useState<ApprovedFilters>(DEFAULT_APPROVED_FILTERS);
@@ -126,11 +127,14 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     enabled: Boolean(selectedItemId)
   });
 
-  const { handleApprove, handleEditAndApprove, handleSave, handleReject, handleDelete, handleRetry} =
-    useReviewActions({ setBusyAction, setSelectedItemId });
+  const { handleApprove, handleEditAndApprove, handleSave, handleReject, handleDelete, handleRetry,
+    handleApproveCategoryProposal, handleRejectCategoryProposal, handleRegenerateCleanedText,
+    handleRegenerateAnswer, handleRegenerateCategoryProposal, handleRegenerateAll } =
+    useReviewActions({ setBusyAction, setActionError, setSelectedItemId });
 
   async function runCategoryAction(action: string, handler: () => Promise<unknown>) {
     setBusyAction(action);
+    setActionError(null);
     try {
       await handler();
       await Promise.all([
@@ -138,6 +142,8 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
         queryClient.invalidateQueries({ queryKey: ["item"] }),
         queryClient.invalidateQueries({ queryKey: ["categories"] })
       ]);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Action failed");
     } finally {
       setBusyAction(null);
     }
@@ -185,7 +191,13 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
       ? "Unapproved items waiting for human review."
       : view === "failures"
         ? "Items that failed at a processing stage and remain retryable."
-        : "Human-approved items only.";
+      : "Human-approved items only.";
+
+  const counts = {
+    needsReview: needsReview.data?.length ?? 0,
+    failures: failures.data?.length ?? 0,
+    approved: approved.data?.length ?? 0
+  };
 
   const toolbar =
     view === "needs-review" ? (
@@ -219,9 +231,12 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
           onChange={setView}
           onLoggedOut={() => void onLoggedOut()}
           categories={categories.data ?? []}
+          categoriesLoading={categories.isPending}
+          categoriesError={categories.error instanceof Error ? categories.error.message : null}
           categoryFilter={categoryFilter}
           onCategoryFilterChange={handleCategoryFilterChange}
           busyAction={busyAction}
+          counts={counts}
           onCreateCategory={handleCreateCategory}
           onRenameCategory={handleRenameCategory}
           onDeleteCategory={handleDeleteCategory}
@@ -234,18 +249,41 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
           onSelect={setSelectedItemId}
           toolbar={toolbar}
           view={view}
+          isLoading={
+            view === "needs-review"
+              ? needsReview.isPending
+              : view === "failures"
+                ? failures.isPending
+                : approved.isPending
+          }
+          errorMessage={
+            (view === "needs-review" && needsReview.error instanceof Error
+              ? needsReview.error.message
+              : null) ??
+            (view === "failures" && failures.error instanceof Error ? failures.error.message : null) ??
+            (view === "approved" && approved.error instanceof Error ? approved.error.message : null)
+          }
         />
         <ItemDetailPanel
           view={view}
           item={selectedItem.data}
           categories={categories.data ?? []}
           busyAction={busyAction}
+          actionError={actionError}
+          isLoading={selectedItem.isPending}
+          errorMessage={selectedItem.error instanceof Error ? selectedItem.error.message : null}
           onApprove={handleApprove}
           onEditAndApprove={handleEditAndApprove}
           onSave={handleSave}
           onReject={handleReject}
           onDelete={handleDelete}
           onRetry={handleRetry}
+          onApproveCategoryProposal={handleApproveCategoryProposal}
+          onRejectCategoryProposal={handleRejectCategoryProposal}
+          onRegenerateCleanedText={handleRegenerateCleanedText}
+          onRegenerateAnswer={handleRegenerateAnswer}
+          onRegenerateCategoryProposal={handleRegenerateCategoryProposal}
+          onRegenerateAll={handleRegenerateAll}
         />
       </div>
     </main>

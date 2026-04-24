@@ -78,12 +78,17 @@ If answer generation fails, the item must still be created and the failure must 
 Answer source in V1: model knowledge only. Web-search-backed answers are future.
 
 ## FR-13 AI output regeneration
-Memora shall support regeneration of AI outputs, including at minimum:
-- cleaned text
+Memora shall support regeneration of AI outputs:
+- cleaned text (also regenerates AI title since both derive from the same input)
 - answer (for QUESTION items)
 - category path proposal
+- all AI outputs as one combined action: title, cleaned text, type, answer if QUESTION, category/category proposal, priority
 
-Regeneration should preserve previous AI output/candidate where practical.
+Regeneration must:
+- preserve the original AI output (ai* fields) — they represent the first AI run
+- update the current working values (title, cleanedText, answer, etc.)
+- keep the item in its current review/approval state
+- not silently overwrite the item into an inconsistent state
 
 AI output regeneration is a V1 feature, not future-only.
 

@@ -50,3 +50,19 @@ enum class Priority {
     NOT_URGENT_NOT_IMPORTANT,
     NOT_APPLICABLE
 }
+
+enum class ProposedCategoryStatus {
+    NONE,
+    PENDING_REVIEW,
+    APPROVED,
+    REJECTED
+}
+
+enum class AnswerStatus {
+    NONE,
+    GENERATED,
+    EDITED,
+    REJECTED,
+    DELETED,
+    FAILED
+}
