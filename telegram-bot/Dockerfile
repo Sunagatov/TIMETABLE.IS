@@ -1,13 +1,20 @@
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+FROM eclipse-temurin:25-jdk AS build
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+COPY gradlew gradlew.bat build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gradle ./gradle
+
+RUN chmod +x gradlew
+
 COPY src ./src
 
-RUN pip install --no-cache-dir .
+RUN ./gradlew --no-daemon installDist
 
-CMD ["memora-bot"]
+FROM eclipse-temurin:25-jre
+
+WORKDIR /app
+
+COPY --from=build /app/build/install/memora-telegram-bot /app/memora-telegram-bot
+
+ENTRYPOINT ["/app/memora-telegram-bot/bin/memora-telegram-bot"]
