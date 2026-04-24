@@ -1,51 +1,85 @@
-# API Surface (Requirement-Level, Not Final Code)
+# API Surface
 
-This file is intentionally high-level and requirement-driven.
+This file is intentionally compact.
 
-It exists to help agents reason about likely backend boundaries without inventing implementation details too early.
+It exists to help agents avoid rediscovering the current backend foundation from source every time.
 
 ## Authentication
-Expected V1 capabilities:
-- login
-- logout
-- session validation
+
+Current backend endpoints:
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/session`
+
+Behavior notes:
+- backend-managed session cookie
+- single password checked against configured password hash
+- session lifetime is configurable in days
 
 ## Capture ingestion
-Expected V1 capabilities:
-- accept Telegram text message payload
-- accept Telegram voice metadata payload
-- generate Memora item ID
-- persist accepted item
-- enqueue or trigger async processing
+
+Current backend endpoint:
+- `POST /api/capture/telegram/ingest`
+
+Current request shape:
+- exactly one of `text` or `voice`
+- `telegramUserId`
+- `telegramChatId`
+- `telegramMessageId`
+- `voice.fileId`
+- `voice.fileUniqueId`
+- optional voice media metadata
+
+Current behavior:
+- owner Telegram user ID is validated in backend
+- returns backend item ID as `memoraId`
+- text ingest lands in Needs Review
+- voice ingest persists traceability metadata and currently lands in visible transcription failure
 
 ## Review
-Expected V1 capabilities:
-- list Needs Review items
-- list Failures
-- list approved items
-- fetch item detail
-- approve item
-- edit then approve
-- reject item
-- delete item
-- retry processing
+
+Current backend endpoints:
+- `GET /api/review/needs-review`
+- `GET /api/review/failures`
+- `POST /api/review/{itemId}/approve`
+- `POST /api/review/{itemId}/edit-and-approve`
+- `POST /api/review/{itemId}/reject`
+- `DELETE /api/review/{itemId}/trash`
+- `POST /api/review/{itemId}/retry`
+
+## Items
+
+Current backend endpoints:
+- `GET /api/items/approved`
+- `GET /api/items/{itemId}`
+- `PATCH /api/items/{itemId}`
+
+Current behavior:
+- approved item edits stay approved in V1
+- current editable fields include title, cleaned text, raw transcript, type, 3-level category path, priority
 
 ## Category management
-Expected V1 capabilities:
-- list categories
-- create category
-- rename category
-- delete empty category
-- move item/category assignments where needed
+
+Current backend endpoints:
+- `GET /api/categories`
+- `POST /api/categories`
+- `PATCH /api/categories/{categoryId}`
+- `DELETE /api/categories/{categoryId}`
+
+Current behavior:
+- category paths are exact 3-level leaf paths only
+- default category path is bootstrapped automatically
+- category delete is blocked if the path is still used by items
+- category rename updates linked item category assignments
 
 ## Search/filter/sort
-Expected V1 capabilities:
+
+Still requirement-level only:
 - keyword search
 - filter by type/status/category/path/priority/date
 - sort by title/category/date
 
-## Important warning
+## Health
 
-This is not a final endpoint list.
-
-If implementation starts, source-of-truth behavior is still `docs/requirements/`.
+Current backend endpoint:
+- `GET /api/health`

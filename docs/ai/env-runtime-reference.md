@@ -12,6 +12,17 @@ For production/deployment/runtime truth, use Vault.
 - Kotlin/Spring Boot app
 - source of truth
 - session-based auth expected by requirements
+- current local validation:
+  - `cd backend && ./gradlew compileKotlin`
+  - `cd backend && ./gradlew test`
+- current relevant source-repo backend config keys:
+  - `BACKEND_ALLOWED_ORIGIN`
+  - `BACKEND_APP_PASSWORD_HASH`
+  - `BACKEND_SESSION_DAYS`
+  - `BACKEND_BOT_INGEST_TOKEN`
+  - `MEMORA_OWNER_TELEGRAM_USER_ID`
+  - `DEFAULT_CATEGORY_PATH`
+  - `MONGODB_URI`
 
 ### Frontend
 - React/Vite app

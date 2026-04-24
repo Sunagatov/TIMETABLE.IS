@@ -18,6 +18,7 @@ Read:
 Read:
 - `AGENTS.md`
 - `backend/AGENTS.md`
+- `docs/ai/current-bootstrap-state.md` if contract/bootstrap status matters
 - exact backend feature folder only
 
 ### Frontend work
@@ -25,21 +26,15 @@ Read:
 - `AGENTS.md`
 - `frontend/AGENTS.md`
 - exact frontend feature files only
-- `frontend/src/shared/http.ts` only if request behavior matters
-- `frontend/src/shared/routes.ts` only if route naming/navigation matters
+- `frontend/src/shared/api/httpClient.ts` only if request behavior matters
 
-### AI curation or topic enrichment
+### Documentation / agent-context enrichment
 Read:
 - `AGENTS.md`
-- `backend/AGENTS.md`
-- `docs/ai/ai-curation-workflow.md`
-- `docs/ai/example-style-guide.md`
-- exact curation backend files only
-
-### Prompt / context / cost work
-Read:
-- `docs/ai/context-budget-rules.md`
-- `docs/ai/ai-cost-reduction-backlog.md`
+- `docs/ai/README.md`
+- `docs/ai/current-bootstrap-state.md`
+- `docs/ai/repo-map.md`
+- exact stale doc files only
 
 ### API question
 Read:

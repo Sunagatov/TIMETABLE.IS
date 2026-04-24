@@ -10,25 +10,24 @@
 ## Backend
 - `backend/AGENTS.md`
 - `backend/README.md`
+- `backend/src/main/resources/application.yml`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/auth/`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/category/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/common/`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/config/`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/review/`
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/health/`
+- `backend/src/test/kotlin/com/sunagatov/memora/backend/`
 
 ## Frontend
 - `frontend/AGENTS.md`
 - `frontend/README.md`
 - `frontend/src/app/`
-- `frontend/src/features/auth/`
-- `frontend/src/features/review/`
 - `frontend/src/shared/`
 
 ## Telegram bot
 - `telegram-bot/AGENTS.md`
 - `telegram-bot/README.md`
-- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/`
-- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/command/`
-- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/backend/`
-- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/`
-- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/config/`
+- `telegram-bot/src/memora_bot/`

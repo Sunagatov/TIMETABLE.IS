@@ -7,10 +7,23 @@
 - enums
 - item model
 - status transitions
-- auth/session skeleton
+- auth/session baseline
 - in-memory store first
 - telegram ingest endpoint
-- review list endpoints
+- review list/action endpoints
+- item detail/update endpoints
+- category CRUD baseline
+
+### Phase 1 status
+
+Already present in backend:
+- explicit item lifecycle/status model
+- in-memory item/session/category stores
+- auth/session baseline
+- Telegram ingest baseline
+- review/failure/approved API baseline
+- item detail/update baseline
+- category CRUD baseline
 
 ### Phase 2 — frontend shell
 

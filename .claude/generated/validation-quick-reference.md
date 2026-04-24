@@ -6,8 +6,9 @@ Use the smallest relevant validation first.
 
 Prefer one of:
 
+- `cd backend && ./gradlew compileKotlin`
 - targeted backend test
-- narrow startup check
+- `cd backend && ./gradlew test`
 - feature-focused validation
 
 ## Frontend-only change

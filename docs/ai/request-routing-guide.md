@@ -4,7 +4,8 @@
 Read:
 1. `backend/AGENTS.md`
 2. exact relevant requirement file(s)
-3. exact backend files
+3. `docs/ai/current-bootstrap-state.md` if foundation/bootstrap shape matters
+4. exact backend files
 
 ## Frontend-only task
 Read:
@@ -27,6 +28,13 @@ Read:
 Read:
 1. `docs/ai/architecture.md`
 2. `docs/ai/invariants.md`
+
+## Backend foundation / contract question
+Read:
+1. `backend/AGENTS.md`
+2. `docs/ai/current-bootstrap-state.md`
+3. `docs/ai/api-surface.md`
+4. exact backend files only after that
 
 ## Deployment/runtime/prod question
 Read Vault docs first.

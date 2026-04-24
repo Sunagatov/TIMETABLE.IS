@@ -28,6 +28,14 @@ Owns production/deployment/runtime truth.
 - Spring Boot
 - source of truth
 - business logic owner
+- current foundation uses explicit application services and in-memory stores
+- current backend feature areas:
+  - `auth`
+  - `capture`
+  - `category`
+  - `item`
+  - `review`
+  - `health`
 
 ### Frontend
 - React
@@ -43,6 +51,8 @@ Owns production/deployment/runtime truth.
 - backend must stay client-agnostic
 - Telegram must stay thin
 - review-first trust model must remain visible everywhere
+- original AI output and latest human-approved values must remain separately visible
+- category model must stay exactly 3 levels in V1
 - simplicity > flexibility theater
 - requirements > stale comments
 - Vault runtime truth > source-repo guesses

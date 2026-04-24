@@ -8,9 +8,11 @@ Owns:
 
 - business logic
 - item lifecycle
+- category path model and CRUD baseline
 - review workflow
 - failures and retries
 - session/auth behavior
+- item edit/approval contracts
 - search/filter/sort contracts
 - AI orchestration
 - bot-facing ingestion endpoints
@@ -19,14 +21,8 @@ Owns:
 
 Owns:
 
-- login UI
-- Needs Review
-- Failures
-- approved items list
-- item detail/edit/review
-- category management UI
-- search/filter/sort UI
-- category tree sidebar
+- current app shell and shared API client
+- future Needs Review / Failures / approved item UI
 
 ## telegram-bot/
 

@@ -9,12 +9,21 @@ This file helps AI agents and humans avoid working in the wrong order.
 - review/failure state separation
 - auth/session baseline
 
+Current status:
+- done as a bootstrap backend foundation
+- current implementation is still in-memory and intentionally simple
+
 ## Phase 2 — Telegram ingestion path
 - owner validation
 - message acceptance
 - Memora ID generation
 - async handoff
 - acknowledgement/failure messaging
+
+Current status:
+- owner validation and message acceptance are present
+- text and voice ingest contracts exist
+- full async orchestration and bot acknowledgement flows are still later work
 
 ## Phase 3 — processing pipeline
 - raw input persistence

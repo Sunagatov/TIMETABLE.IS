@@ -9,12 +9,14 @@ Prefer:
 - one scoped file
 - one or two compact docs
 - exact feature files only
+- `docs/ai/current-bootstrap-state.md` before rediscovering current backend status from code
 
 Avoid:
 - whole-repo scans
 - reading all three modules for one task
 - repeating requirements that are already summarized
 - carrying stale Memora assumptions into Memora
+- trusting generated routing docs that point to nonexistent paths without checking `docs/ai/repo-map.md`
 
 ## Stop conditions
 
@@ -31,6 +33,7 @@ Before opening more code, prefer:
 - `docs/ai/repo-map.md`
 - `docs/ai/architecture.md`
 - `docs/ai/invariants.md`
+- `docs/ai/current-bootstrap-state.md`
 
 ## Editing strategy
 
