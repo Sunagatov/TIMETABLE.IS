@@ -3,55 +3,85 @@
 ## If you change backend API
 
 Also review:
-
-- frontend API client usage
-- telegram-bot backend forwarder
-- relevant requirements docs
 - `docs/ai/api-surface.md`
 - `docs/ai/current-bootstrap-state.md`
+- frontend API client usage (`frontend/src/features/review/api/reviewApi.ts`)
+- telegram-bot backend forwarder (`telegram-bot/src/main/kotlin/.../backend/BackendClient.kt`)
+- relevant requirements docs
 
 ## If you change item lifecycle or statuses
 
 Also review:
-
 - `docs/requirements/02_DOMAIN_MODEL_AND_STATES.md`
 - `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
 - `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
-- frontend status handling
-- bot failure messaging
+- `docs/ai/invariants.md` (state transition guards section)
+- `backend/src/main/kotlin/.../item/model/ItemEnums.kt`
+- `backend/src/main/kotlin/.../review/application/ReviewService.kt`
+- `backend/src/main/kotlin/.../item/application/ItemService.kt`
+- frontend status handling in `ItemDetailPanel.tsx` (action buttons per view)
+- bot failure messaging (which statuses trigger failure notifications)
 - `docs/ai/current-bootstrap-state.md`
-- `docs/ai/invariants.md`
-- direct item patch approval rules
+- `FoundationServicesTests.kt` — update state-guard tests
+
+## If you change filter/query params
+
+This is a high-risk area — param name mismatches are silently ignored by the backend.
+
+Also review:
+- `docs/ai/api-surface.md` (search/filter/sort table)
+- `backend/src/main/kotlin/.../item/api/ItemDtos.kt` (ItemListQueryRequest)
+- `frontend/src/features/review/types/reviewTypes.ts` (ListParams, filter types)
+- `frontend/src/features/review/api/reviewApi.ts` (buildQuery)
+- `frontend/src/features/review/pages/ReviewWorkspacePage.tsx` (toListParams, DEFAULT filters)
+- all three filter bar components (NeedsReviewFiltersBar, FailuresFiltersBar, ApprovedFiltersBar)
+
+Known past bug: frontend used `dateFrom`/`dateTo` while backend used `createdFrom`/`createdTo`. Fixed. Do not reintroduce.
 
 ## If you change category behavior
 
 Also review:
-
 - `docs/requirements/02_DOMAIN_MODEL_AND_STATES.md`
 - `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
-- `backend/src/main/kotlin/com/sunagatov/memora/backend/category/*`
-- `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
+- `docs/ai/invariants.md` (category invariants section)
+- `backend/src/main/kotlin/.../category/` (CategoryService especially)
+- `backend/src/main/kotlin/.../item/` (category field in MemoraItem)
 - `docs/ai/api-surface.md`
-- `docs/ai/current-bootstrap-state.md`
+- `frontend/src/features/review/components/CategoryTree.tsx`
+- `frontend/src/features/review/components/ReviewSidebar.tsx`
+- `frontend/src/features/review/components/FilterControls.tsx` (CategoryCascade)
 
 ## If you change auth/session or config keys
 
 Also review:
-
 - `docs/requirements/07_SECURITY_AND_ACCESS.md`
 - `backend/src/main/resources/application.yml`
 - `docs/ai/env-runtime-reference.md`
-- telegram-bot/frontend only if external contract changed
 - `docs/ai/api-surface.md` if a contract is renamed
+
+## If you change the Telegram bot
+
+Also review:
+- `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
+- `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
+- `telegram-bot/AGENTS.md`
+- `docs/ai/api-surface.md` (capture endpoints section)
+- Failure notification payload format — `notificationId` is re-derived each poll; ack is one-shot
 
 ## If you change stack/tooling versions
 
 Also review:
-
-- `docs/requirements/08_tech-stack-decision.md`
+- `docs/requirements/` tech stack files
 - root `README.md`
 - subproject READMEs
 
 ## If you think a change belongs in deployment/runtime
 
 Stop and check Vault first.
+
+## If you add or change tests
+
+- All backend service tests live in `FoundationServicesTests.kt`
+- Use `directExecutor()` to make `ItemProcessingService` synchronous
+- Use `testProperties()` for consistent config
+- Assert state guards throw `IllegalArgumentException` using `assertFailsWith`
