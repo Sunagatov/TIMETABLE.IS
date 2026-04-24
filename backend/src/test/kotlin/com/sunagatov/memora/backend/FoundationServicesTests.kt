@@ -25,7 +25,6 @@ import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
@@ -495,7 +494,83 @@ class FoundationServicesTests {
         assertEquals(inDefault.id, defaultOnly.single().id)
     }
 
-    // T10: query filters by type using the type inferred during processing
+    // T10: QUESTION type inferred and answer generated for question-like text
+    @Test
+    fun `question text infers QUESTION type and generates a placeholder answer`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = service.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-q1",
+                text = "What is the capital of France?"
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
+        assertEquals(ItemType.QUESTION, stored.type)
+        assertEquals(ItemType.QUESTION, stored.aiType)
+        assertNotNull(stored.answer)
+        assertNotNull(stored.aiAnswer)
+        assertEquals(stored.aiAnswer, stored.answer)
+    }
+
+    // T11: question detection via question mark suffix
+    @Test
+    fun `text ending with question mark infers QUESTION type`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = service.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-q2",
+                text = "Is Kotlin better than Java?"
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemType.QUESTION, stored.type)
+        assertNotNull(stored.answer)
+    }
+
+    // T12: answer is searchable via keyword filter
+    @Test
+    fun `keyword search matches answer field on QUESTION items`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val question = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-q3",
+                text = "What is photosynthesis?"
+            )
+        )
+        reviewService.editAndApprove(
+            question.id,
+            EditAndApproveRequest(answer = "Photosynthesis is the process by which plants convert light into energy.")
+        )
+
+        val results = itemService.listApproved(ItemListQueryRequest(keyword = "photosynthesis"))
+        assertEquals(1, results.size)
+        assertEquals(question.id, results.single().id)
+    }
+
     @Test
     fun `query filters approved items by type`() {
         val itemStore = InMemoryItemStore()
@@ -515,6 +590,11 @@ class FoundationServicesTests {
         )
         reviewService.approve(ideaItem.id)
 
+        val questionItem = captureService.ingest(
+            TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-typeflt-3", text = "How does gravity work?")
+        )
+        reviewService.approve(questionItem.id)
+
         val reminders = itemService.listApproved(ItemListQueryRequest(type = ItemType.REMINDER))
         assertEquals(1, reminders.size)
         assertEquals(reminderItem.id, reminders.single().id)
@@ -522,6 +602,10 @@ class FoundationServicesTests {
         val ideas = itemService.listApproved(ItemListQueryRequest(type = ItemType.IDEA))
         assertEquals(1, ideas.size)
         assertEquals(ideaItem.id, ideas.single().id)
+
+        val questions = itemService.listApproved(ItemListQueryRequest(type = ItemType.QUESTION))
+        assertEquals(1, questions.size)
+        assertEquals(questionItem.id, questions.single().id)
     }
 
     private fun createCategoryService(itemStore: InMemoryItemStore): CategoryService =

@@ -31,7 +31,7 @@ class ItemService(
             "Only approved items can be edited directly"
         }
 
-        return itemStore.save(buildUpdatedItem(item, request, ItemStatus.HUMAN_EDITED_APPROVED))
+        return itemStore.save(buildUpdatedItem(item, request))
     }
 
     fun editAndApprove(itemId: String, request: UpdateItemRequest): MemoraItem {
@@ -40,14 +40,10 @@ class ItemService(
             "Only reviewable items can be edited and approved"
         }
 
-        return itemStore.save(buildUpdatedItem(item, request, ItemStatus.HUMAN_EDITED_APPROVED))
+        return itemStore.save(buildUpdatedItem(item, request))
     }
 
-    private fun buildUpdatedItem(
-        item: MemoraItem,
-        request: UpdateItemRequest,
-        nextStatus: ItemStatus
-    ): MemoraItem {
+    private fun buildUpdatedItem(item: MemoraItem, request: UpdateItemRequest): MemoraItem {
         val nextCategoryPath = request.categoryPath
             ?.toCategoryPath()
             ?.let(categoryService::requireExistingPath)
@@ -60,7 +56,8 @@ class ItemService(
             type = request.type ?: item.type,
             categoryPath = nextCategoryPath,
             priority = request.priority ?: item.priority,
-            status = nextStatus,
+            answer = request.answer?.trim()?.takeIf { it.isNotBlank() } ?: item.answer,
+            status = ItemStatus.HUMAN_EDITED_APPROVED,
             failureStage = null,
             failureReason = null,
             updatedAt = Instant.now()

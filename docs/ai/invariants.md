@@ -19,6 +19,7 @@
 - type enum is exactly:
   - `IDEA`
   - `THOUGHT`
+  - `QUESTION`
   - `REMINDER`
   - `OTHER`
 - category tree is exactly 3 levels in V1
@@ -59,14 +60,13 @@
 
 ## V1 non-features / limitations
 
-- no QUESTION workflow in V1
 - no labels in V1
-- no AI-created category proposals in V1
-- no regeneration workflows in V1
 - no Memora-managed audio storage in V1
 - no audio playback/download in web app
 - no semantic search in V1
 - no view-count sorting in V1
+- no web-search-backed question answers in V1 (model knowledge only)
+- no real AI integration yet in current bootstrap backend (stubs only)
 - no Memora-owned transcription implementation yet in current bootstrap backend
 - no Mongo persistence yet in current bootstrap backend
 

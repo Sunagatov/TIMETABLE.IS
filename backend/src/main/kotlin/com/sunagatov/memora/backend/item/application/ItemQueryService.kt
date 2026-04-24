@@ -41,6 +41,8 @@ class ItemQueryService {
             append(item.rawTranscript.orEmpty())
             append(' ')
             append(item.rawInputText.orEmpty())
+            append(' ')
+            append(item.answer.orEmpty())
         }.lowercase()
 
         return haystack.contains(term)

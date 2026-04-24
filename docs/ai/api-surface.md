@@ -84,7 +84,7 @@ State guards:
 
 Current behavior:
 - approved item edits stay approved in V1 (result is always `HUMAN_EDITED_APPROVED`)
-- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority
+- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority, answer
 - `MemoraItem` uses `id` as primary identifier; `memoraId` only appears in accept/notification payloads
 - approved list endpoint returns only `HUMAN_APPROVED` and `HUMAN_EDITED_APPROVED` items
 
@@ -94,8 +94,8 @@ All three list endpoints accept these query params via `ItemListQueryRequest`:
 
 | Param | Type | Notes |
 |-------|------|-------|
-| `keyword` | string | searches title, cleanedText, rawTranscript, rawInputText |
-| `type` | enum | IDEA, THOUGHT, REMINDER, OTHER |
+| `keyword` | string | searches title, cleanedText, rawTranscript, rawInputText, answer |
+| `type` | enum | IDEA, THOUGHT, QUESTION, REMINDER, OTHER |
 | `status` | enum | exact ItemStatus value |
 | `priority` | enum | URGENT_IMPORTANT, URGENT_NOT_IMPORTANT, NOT_URGENT_IMPORTANT, NOT_URGENT_NOT_IMPORTANT, NOT_APPLICABLE |
 | `category` | string | exact level-1 match |

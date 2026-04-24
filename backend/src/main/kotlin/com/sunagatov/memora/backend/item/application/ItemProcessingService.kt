@@ -51,6 +51,7 @@ class ItemProcessingService(
             val itemType = inferType(normalizedText)
             val title = buildTitle(normalizedText)
             val defaultCategoryPath = categoryService.defaultPath()
+            val generatedAnswer = if (itemType == ItemType.QUESTION) generateAnswer(normalizedText) else null
             val now = Instant.now()
 
             itemStore.save(
@@ -61,12 +62,15 @@ class ItemProcessingService(
                     aiCleanedText = normalizedText,
                     aiType = itemType,
                     aiCategoryPath = defaultCategoryPath,
+                    aiCategoryPathIsProposal = false,
                     aiPriority = Priority.NOT_APPLICABLE,
+                    aiAnswer = generatedAnswer,
                     title = title,
                     cleanedText = normalizedText,
                     type = itemType,
                     categoryPath = defaultCategoryPath,
                     priority = Priority.NOT_APPLICABLE,
+                    answer = generatedAnswer,
                     status = ItemStatus.AI_PROCESSED_UNREVIEWED,
                     failureStage = null,
                     failureReason = null,
@@ -155,14 +159,24 @@ class ItemProcessingService(
             }
 
     private fun inferType(raw: String): ItemType {
-        val text = raw.lowercase()
+        val text = raw.lowercase().trim()
+        val questionStarters = listOf(
+            "what ", "why ", "how ", "who ", "when ", "where ", "which ",
+            "is ", "are ", "do ", "does ", "did ", "can ", "could ",
+            "should ", "would ", "will ", "was ", "were ", "have ", "has "
+        )
         return when {
+            text.endsWith("?") || questionStarters.any { text.startsWith(it) } -> ItemType.QUESTION
             text.startsWith("remember ") || text.contains(" remind ") -> ItemType.REMINDER
             text.contains(" idea ") || text.startsWith("idea") -> ItemType.IDEA
             text.isNotBlank() -> ItemType.THOUGHT
             else -> ItemType.OTHER
         }
     }
+
+    private fun generateAnswer(question: String): String =
+        "Answer generation is not yet connected to an AI model. " +
+            "Question received: \"$question\""
 
     private fun buildTitle(text: String): String =
         text.split(" ")

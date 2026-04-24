@@ -8,6 +8,7 @@ enum class SourceType {
 enum class ItemType {
     IDEA,
     THOUGHT,
+    QUESTION,
     REMINDER,
     OTHER
 }
@@ -15,7 +16,7 @@ enum class ItemType {
 enum class ItemStatus {
     RECEIVED,
     TRANSCRIPTION_FAILED,
-    TRANSCRIBED,
+    @Suppress("unused") TRANSCRIBED, // defined; populated when transcription is implemented
     AI_PROCESSING_FAILED,
     AI_PROCESSED_UNREVIEWED,
     HUMAN_APPROVED,
@@ -33,13 +34,15 @@ enum class ItemStatus {
 }
 
 enum class FailureStage {
-    RECEPTION,
-    TELEGRAM_FILE_FETCH,
+    @Suppress("unused") RECEPTION,           // defined; used when initial acceptance itself fails
+    @Suppress("unused") TELEGRAM_FILE_FETCH, // defined; used when voice file download from Telegram fails
     TRANSCRIPTION,
     AI_PROCESSING,
-    PERSISTENCE
+    @Suppress("unused") PERSISTENCE          // defined; used when durable storage fails
 }
 
+// All values are part of the V1 spec and deserialized from API requests by Jackson.
+@Suppress("unused")
 enum class Priority {
     URGENT_IMPORTANT,
     URGENT_NOT_IMPORTANT,

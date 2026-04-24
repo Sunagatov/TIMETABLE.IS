@@ -1,7 +1,7 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton } from "./FilterControls";
 import type { ListSort, MemoraCategory, NeedsReviewFilters } from "../types/reviewTypes";
 
-const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "REMINDER", "OTHER"];
+const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
 const PRIORITY_OPTIONS = [
   "ALL",
   "URGENT_IMPORTANT",

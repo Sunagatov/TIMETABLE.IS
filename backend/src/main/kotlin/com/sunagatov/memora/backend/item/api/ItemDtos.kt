@@ -15,7 +15,8 @@ data class UpdateItemRequest(
     val type: ItemType? = null,
     @field:Valid
     val categoryPath: CategoryPathRequest? = null,
-    val priority: Priority? = null
+    val priority: Priority? = null,
+    val answer: String? = null
 )
 
 data class EditAndApproveRequest(
@@ -25,7 +26,8 @@ data class EditAndApproveRequest(
     val type: ItemType? = null,
     @field:Valid
     val categoryPath: CategoryPathRequest? = null,
-    val priority: Priority? = null
+    val priority: Priority? = null,
+    val answer: String? = null
 ) {
     fun toUpdateItemRequest(): UpdateItemRequest =
         UpdateItemRequest(
@@ -34,7 +36,8 @@ data class EditAndApproveRequest(
             rawTranscript = rawTranscript,
             type = type,
             categoryPath = categoryPath,
-            priority = priority
+            priority = priority,
+            answer = answer
         )
 }
 

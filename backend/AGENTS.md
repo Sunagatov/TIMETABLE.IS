@@ -76,8 +76,8 @@ Any status
 ## Filter params — ItemListQueryRequest
 
 All three list endpoints share the same query param model:
-- `keyword` — searches title, cleanedText, rawTranscript, rawInputText
-- `type` — IDEA | THOUGHT | REMINDER | OTHER
+- `keyword` — searches title, cleanedText, rawTranscript, rawInputText, answer
+- `type` — IDEA | THOUGHT | QUESTION | REMINDER | OTHER
 - `status` — exact ItemStatus enum value
 - `priority` — URGENT_IMPORTANT | URGENT_NOT_IMPORTANT | NOT_URGENT_IMPORTANT | NOT_URGENT_NOT_IMPORTANT | NOT_APPLICABLE
 - `category`, `subcategory`, `subsubcategory` — partial or full 3-level path (each level optional)
@@ -146,7 +146,7 @@ All three list endpoints share the same query param model:
 - `directExecutor()` runs `ItemProcessingService` synchronously — enables state assertions immediately after `ingest()`
 - `testProperties()` helper provides valid bcrypt hash and sane defaults
 - `MemoraBackendApplicationTests` — Spring context load test only
-- Current test count: 12 in `FoundationServicesTests` + 1 context load = 13 total
+- Current test count: 19 in `FoundationServicesTests` + 1 context load = 20 total
 
 Tests that must remain green:
 - owner-only ingest (non-owner throws)

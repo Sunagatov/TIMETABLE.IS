@@ -23,12 +23,15 @@ export type MemoraItem = {
   aiCleanedText: string;
   aiType: string;
   aiCategoryPath: CategoryPath;
+  aiCategoryPathIsProposal: boolean;
   aiPriority: string;
+  aiAnswer: string | null;
   title: string;
   cleanedText: string;
   type: string;
   categoryPath: CategoryPath;
   priority: string;
+  answer: string | null;
   status: string;
   retryCountTranscription: number;
   retryCountAi: number;
@@ -73,6 +76,7 @@ export type UpdateItemRequest = {
   type?: string;
   categoryPath?: CategoryPathRequest;
   priority?: string;
+  answer?: string;
 };
 
 export type ListSort =

@@ -28,6 +28,7 @@ type FormState = {
   type: string;
   priority: string;
   categoryId: string;
+  answer: string;
 };
 
 export function ItemDetailPanel({
@@ -48,7 +49,8 @@ export function ItemDetailPanel({
     rawTranscript: "",
     type: "OTHER",
     priority: "NOT_APPLICABLE",
-    categoryId: ""
+    categoryId: "",
+    answer: ""
   });
 
   useEffect(() => {
@@ -69,7 +71,8 @@ export function ItemDetailPanel({
       rawTranscript: item.rawTranscript ?? "",
       type: item.type,
       priority: item.priority,
-      categoryId: matchingCategory?.id ?? ""
+      categoryId: matchingCategory?.id ?? "",
+      answer: item.answer ?? ""
     });
   }, [categories, item]);
 
@@ -82,7 +85,8 @@ export function ItemDetailPanel({
       rawTranscript: formState.rawTranscript || undefined,
       type: formState.type,
       priority: formState.priority,
-      categoryPath: category?.path
+      categoryPath: category?.path,
+      answer: formState.answer || undefined
     };
   }, [categories, formState]);
 
@@ -123,9 +127,12 @@ export function ItemDetailPanel({
               <Field label="AI Type" value={item.aiType} />
               <Field
                 label="AI Category"
-                value={formatCategoryPath(item.aiCategoryPath)}
+                value={`${formatCategoryPath(item.aiCategoryPath)}${item.aiCategoryPathIsProposal ? " (proposed — pending approval)" : ""}`}
               />
               <Field label="AI Priority" value={item.aiPriority} />
+              {item.aiType === "QUESTION" ? (
+                <Field label="AI Answer" value={item.aiAnswer} multiline />
+              ) : null}
             </InfoCard>
 
             <InfoCard title="Original Capture">
@@ -205,7 +212,7 @@ export function ItemDetailPanel({
                     }
                     className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
                   >
-                    {["IDEA", "THOUGHT", "REMINDER", "OTHER"].map((option) => (
+                    {["IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"].map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -252,6 +259,20 @@ export function ItemDetailPanel({
                   </select>
                 </FormField>
               </div>
+
+              {formState.type === "QUESTION" ? (
+                <FormField label="Answer">
+                  <textarea
+                    rows={6}
+                    value={formState.answer}
+                    onChange={(event) =>
+                      setFormState((current) => ({ ...current, answer: event.target.value }))
+                    }
+                    placeholder="Edit or verify the AI-generated answer…"
+                    className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-stone-900"
+                  />
+                </FormField>
+              ) : null}
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
