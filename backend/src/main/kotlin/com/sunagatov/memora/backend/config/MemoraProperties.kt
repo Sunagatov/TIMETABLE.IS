@@ -9,5 +9,7 @@ data class MemoraProperties(
     val sessionDays: Long,
     val botIngestToken: String,
     val defaultCategoryPath: String,
-    val ownerTelegramUserId: String
+    val ownerTelegramUserId: String,
+    val transcriptionAutoRetryAttempts: Int,
+    val aiAutoRetryAttempts: Int
 )

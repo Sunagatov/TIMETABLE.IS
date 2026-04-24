@@ -33,8 +33,9 @@ Current request shape:
 Current behavior:
 - owner Telegram user ID is validated in backend
 - returns backend item ID as `memoraId` on accept responses only
-- text ingest lands in Needs Review
-- voice ingest persists traceability metadata and currently lands in visible transcription failure
+- accepted items are first stored as `RECEIVED`
+- text items are then processed asynchronously into Needs Review
+- voice items persist traceability metadata and currently end in visible transcription failure after bounded retries
 - bot-facing failure notifications are exposed for polling and delivery acknowledgement
 
 Current bot-facing failure notification endpoints:
@@ -63,6 +64,7 @@ Current backend endpoints:
 Current behavior:
 - `edit-and-approve` is the review-safe edit path
 - direct item edits are not a replacement for review workflow
+- retry requeues failed items back through the same backend-owned processing path
 
 ## Items
 

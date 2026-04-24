@@ -43,9 +43,9 @@ It is not yet the full target V1 implementation.
   - `health`
   - `item`
   - `review`
-- voice ingest persists Telegram traceability metadata and currently lands in visible retryable transcription failure state
+- voice ingest persists Telegram traceability metadata, is durably accepted first, and then reaches visible retryable transcription failure after bounded retries
 - backend exposes bot-facing failure notification polling + delivery acknowledgement endpoints for failed Telegram items
-- text ingest currently lands in Needs Review with normalized text and default category path
+- text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text and default category path
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`

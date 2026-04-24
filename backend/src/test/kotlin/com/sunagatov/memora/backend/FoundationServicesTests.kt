@@ -12,6 +12,7 @@ import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.item.application.ItemService
+import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
@@ -19,6 +20,9 @@ import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import java.util.concurrent.AbstractExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.ExecutorService
 
 class FoundationServicesTests {
 
@@ -26,7 +30,8 @@ class FoundationServicesTests {
     fun `text ingest lands in needs review with default category`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
-        val service = TelegramCaptureService(itemStore, categoryService, testProperties())
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
 
         val item = service.ingest(
             TelegramIngestRequest(
@@ -37,18 +42,22 @@ class FoundationServicesTests {
             )
         )
 
-        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, item.status)
-        assertEquals("Default", item.categoryPath.category)
-        assertEquals("General", item.categoryPath.subcategory)
-        assertEquals("Inbox", item.categoryPath.subsubcategory)
-        assertEquals("Remember to review kotlin contracts", item.cleanedText)
+        val stored = itemStore.findById(item.id)!!
+
+        assertEquals(ItemStatus.RECEIVED, item.status)
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
+        assertEquals("Default", stored.categoryPath.category)
+        assertEquals("General", stored.categoryPath.subcategory)
+        assertEquals("Inbox", stored.categoryPath.subsubcategory)
+        assertEquals("Remember to review kotlin contracts", stored.cleanedText)
     }
 
     @Test
     fun `voice ingest is kept visible as retryable transcription failure`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
-        val service = TelegramCaptureService(itemStore, categoryService, testProperties())
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
 
         val item = service.ingest(
             TelegramIngestRequest(
@@ -64,19 +73,23 @@ class FoundationServicesTests {
             )
         )
 
-        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, item.status)
-        assertEquals(FailureStage.TRANSCRIPTION, item.failureStage)
-        assertEquals("file-1", item.telegramTrace?.telegramFileId)
-        assertEquals("audio/ogg", item.telegramTrace?.mimeType)
+        val stored = itemStore.findById(item.id)!!
+
+        assertEquals(ItemStatus.RECEIVED, item.status)
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, stored.status)
+        assertEquals(FailureStage.TRANSCRIPTION, stored.failureStage)
+        assertEquals("file-1", stored.telegramTrace?.telegramFileId)
+        assertEquals("audio/ogg", stored.telegramTrace?.mimeType)
     }
 
     @Test
     fun `renaming a category updates linked items and approved edits stay approved`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
-        val captureService = TelegramCaptureService(itemStore, categoryService, testProperties())
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val itemService = ItemService(itemStore, categoryService)
-        val reviewService = ReviewService(itemStore, itemService)
+        val reviewService = ReviewService(itemStore, itemService, processingService)
 
         val customCategory = categoryService.create(
             CreateCategoryRequest(
@@ -129,7 +142,8 @@ class FoundationServicesTests {
     fun `failed telegram items are exposed once through failure notifications until acknowledged`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
-        val captureService = TelegramCaptureService(itemStore, categoryService, testProperties())
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
         val notificationService = TelegramFailureNotificationService(
             itemStore = itemStore,
             notificationStore = InMemoryFailureNotificationStore()
@@ -163,6 +177,41 @@ class FoundationServicesTests {
             properties = testProperties()
         )
 
+    private fun createProcessingService(
+        itemStore: InMemoryItemStore,
+        categoryService: CategoryService
+    ): ItemProcessingService =
+        ItemProcessingService(
+            itemStore = itemStore,
+            categoryService = categoryService,
+            properties = testProperties(),
+            executor = directExecutor()
+        )
+
+    private fun directExecutor(): ExecutorService =
+        object : AbstractExecutorService() {
+            private var shutdown = false
+
+            override fun shutdown() {
+                shutdown = true
+            }
+
+            override fun shutdownNow(): MutableList<Runnable> {
+                shutdown = true
+                return mutableListOf()
+            }
+
+            override fun isShutdown(): Boolean = shutdown
+
+            override fun isTerminated(): Boolean = shutdown
+
+            override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean = true
+
+            override fun execute(command: Runnable) {
+                command.run()
+            }
+        }
+
     private fun testProperties(): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
@@ -170,6 +219,8 @@ class FoundationServicesTests {
             sessionDays = 30,
             botIngestToken = "bot-token",
             defaultCategoryPath = "Default/General/Inbox",
-            ownerTelegramUserId = "owner-1"
+            ownerTelegramUserId = "owner-1",
+            transcriptionAutoRetryAttempts = 3,
+            aiAutoRetryAttempts = 2
         )
 }

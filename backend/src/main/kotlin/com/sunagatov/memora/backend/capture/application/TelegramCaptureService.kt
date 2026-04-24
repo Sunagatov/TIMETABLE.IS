@@ -3,9 +3,9 @@ package com.sunagatov.memora.backend.capture.application
 import com.sunagatov.memora.backend.capture.api.TelegramIngestRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.config.MemoraProperties
-import com.sunagatov.memora.backend.item.model.FailureStage
-import com.sunagatov.memora.backend.item.model.ItemStatus
+import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.model.ItemType
+import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.Priority
 import com.sunagatov.memora.backend.item.model.SourceType
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
 class TelegramCaptureService(
     private val itemStore: ItemStore,
     private val categoryService: CategoryService,
+    private val itemProcessingService: ItemProcessingService,
     private val properties: MemoraProperties
 ) {
 
@@ -29,14 +30,7 @@ class TelegramCaptureService(
 
         val now = Instant.now()
         val itemId = UUID.randomUUID().toString()
-        val isVoice = request.voice != null
         val rawInputText = request.text?.takeIf { it.isNotBlank() }
-        val defaultCategoryPath = categoryService.defaultPath()
-
-        val normalizedText = rawInputText?.let(::normalizeText)
-        val itemType = normalizedText?.let(::inferType) ?: ItemType.OTHER
-        val title = normalizedText?.let(::buildTitle) ?: "Voice note pending transcription"
-        val priority = Priority.NOT_APPLICABLE
 
         val telegramTrace = TelegramVoiceTrace(
             telegramUserId = request.telegramUserId,
@@ -50,50 +44,29 @@ class TelegramCaptureService(
 
         val item = MemoraItem(
             id = itemId,
-            sourceType = if (isVoice) SourceType.TELEGRAM_VOICE else SourceType.TELEGRAM_TEXT,
+            sourceType = if (request.voice != null) SourceType.TELEGRAM_VOICE else SourceType.TELEGRAM_TEXT,
             rawInputText = rawInputText,
             rawTranscript = null,
-            aiTitle = title,
-            aiCleanedText = normalizedText ?: "",
-            aiType = itemType,
-            aiCategoryPath = defaultCategoryPath,
-            aiPriority = priority,
-            title = title,
-            cleanedText = normalizedText ?: "",
-            type = itemType,
-            categoryPath = defaultCategoryPath,
-            priority = priority,
-            status = if (isVoice) ItemStatus.TRANSCRIPTION_FAILED else ItemStatus.AI_PROCESSED_UNREVIEWED,
-            failureStage = if (isVoice) FailureStage.TRANSCRIPTION else null,
-            failureReason = if (isVoice) "Voice transcription is not implemented in the backend foundation yet" else null,
+            aiTitle = "",
+            aiCleanedText = "",
+            aiType = ItemType.OTHER,
+            aiCategoryPath = categoryService.defaultPath(),
+            aiPriority = Priority.NOT_APPLICABLE,
+            title = "",
+            cleanedText = "",
+            type = ItemType.OTHER,
+            categoryPath = categoryService.defaultPath(),
+            priority = Priority.NOT_APPLICABLE,
+            status = ItemStatus.RECEIVED,
+            failureStage = null,
+            failureReason = null,
             telegramTrace = telegramTrace,
             createdAt = now,
             updatedAt = now
         )
 
-        return itemStore.save(item)
+        val saved = itemStore.save(item)
+        itemProcessingService.enqueue(saved.id)
+        return saved
     }
-
-    private fun normalizeText(raw: String): String =
-        raw.trim()
-            .replace(Regex("\\s+"), " ")
-            .replaceFirstChar { char ->
-                if (char.isLowerCase()) char.titlecase() else char.toString()
-            }
-
-    private fun inferType(raw: String): ItemType {
-        val text = raw.lowercase()
-        return when {
-            text.startsWith("remember ") || text.contains(" remind ") -> ItemType.REMINDER
-            text.contains(" idea ") || text.startsWith("idea") -> ItemType.IDEA
-            text.isNotBlank() -> ItemType.THOUGHT
-            else -> ItemType.OTHER
-        }
-    }
-
-    private fun buildTitle(text: String): String =
-        text.split(" ")
-            .take(6)
-            .joinToString(" ")
-            .ifBlank { "Untitled item" }
 }

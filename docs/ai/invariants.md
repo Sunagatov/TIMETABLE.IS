@@ -5,6 +5,7 @@
 - single-user system in V1
 - capture via Telegram
 - processing asynchronous
+- accepted items are durably stored before background processing
 - backend source of truth
 - Telegram thin adapter only
 - review-first trust model
@@ -29,6 +30,7 @@
   - Rejected/deleted terminal states
 - approved items remain approved after later human edits in V1
 - voice items must preserve Telegram traceability metadata sufficient for operator recovery attempts
+- voice retry in V1 is intentionally bounded by the lack of Memora-owned audio storage
 - Telegram ingest uses a unified text-or-voice request shape with nested voice payload
 - bot-facing failure notifications are acknowledged after delivery instead of being re-delivered forever
 

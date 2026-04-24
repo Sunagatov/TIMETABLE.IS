@@ -2,6 +2,7 @@ package com.sunagatov.memora.backend.review.application
 
 import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.application.ItemService
+import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service
 @Service
 class ReviewService(
     private val itemStore: ItemStore,
-    private val itemService: ItemService
+    private val itemService: ItemService,
+    private val itemProcessingService: ItemProcessingService
 ) {
 
     fun getNeedsReview(): List<MemoraItem> =
@@ -62,13 +64,15 @@ class ReviewService(
         val next = when (item.failureStage) {
             FailureStage.TRANSCRIPTION -> item.copy(
                 retryCountTranscription = item.retryCountTranscription + 1,
-                failureReason = "Retry requested, but transcription is not implemented in the backend foundation yet",
+                status = ItemStatus.RECEIVED,
+                failureStage = null,
+                failureReason = null,
                 updatedAt = Instant.now()
             )
 
             FailureStage.AI_PROCESSING -> item.copy(
                 retryCountAi = item.retryCountAi + 1,
-                status = ItemStatus.AI_PROCESSED_UNREVIEWED,
+                status = ItemStatus.RECEIVED,
                 failureStage = null,
                 failureReason = null,
                 updatedAt = Instant.now()
@@ -79,7 +83,9 @@ class ReviewService(
             )
         }
 
-        return itemStore.save(next)
+        val saved = itemStore.save(next)
+        itemProcessingService.retry(saved.id)
+        return saved
     }
 
     private fun requireItem(itemId: String): MemoraItem =
