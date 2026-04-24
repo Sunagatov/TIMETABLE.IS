@@ -25,6 +25,9 @@ For voice items, Memora shall:
 - run AI cleanup/classification
 - place result into review or failure path
 
+Current bootstrap limitation:
+- voice acceptance may stop at durable metadata persistence and route to visible retryable transcription failure until the transcription slice is implemented.
+
 ## FR-06 Text processing
 For text items, Memora shall:
 - persist raw input text

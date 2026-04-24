@@ -48,7 +48,7 @@ Avoid:
 - backend item model separates original AI output from latest human-facing values
 - category path is exactly 3 levels in V1
 - Telegram ingest is unified at `POST /api/capture/telegram/ingest` with exactly one of text or nested voice payload
-- bot-facing failure notifications are polled from the backend and acknowledged after delivery
+- Telegram bot currently uses long polling, and bot-facing failure notifications are polled from the backend and acknowledged after delivery
 - voice ingest persists Telegram traceability metadata and lands in visible retryable failure state until transcription exists
 - approved items stay approved after direct human edits; reviewable edits go through `edit-and-approve`
 - single-user auth uses backend-managed session cookies and password-hash config

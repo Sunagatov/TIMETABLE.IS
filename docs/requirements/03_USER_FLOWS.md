@@ -10,10 +10,9 @@
    - accepted
    - processing asynchronously
    - Memora ID
-6. Backend retrieves audio through Telegram references.
-7. Backend transcribes audio.
-8. Backend runs AI cleanup/classification.
-9. Item enters Needs Review or Failures depending on outcome.
+6. Backend persists voice traceability metadata and processes asynchronously.
+7. Current bootstrap routes voice items to visible retryable transcription failure after bounded retries because the transcription slice is not implemented yet.
+8. Item enters Needs Review or Failures depending on outcome once the full voice pipeline exists.
 
 ## Flow 2 — capture text message
 
@@ -22,7 +21,7 @@
 3. Bot validates owner Telegram user ID.
 4. Backend accepts item and generates Memora ID.
 5. Bot replies with async acknowledgement + Memora ID.
-6. Backend runs AI cleanup/classification.
+6. Backend runs AI cleanup/classification asynchronously.
 7. Item enters Needs Review or Failures depending on outcome.
 
 ## Flow 3 — review and approve

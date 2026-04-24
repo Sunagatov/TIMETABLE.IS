@@ -43,7 +43,7 @@ Owns production/deployment/runtime truth.
 - review/search/edit UI
 
 ### Telegram bot
-- Kotlin-based thin adapter
+- Kotlin-based thin adapter using Telegram long polling
 - forwards accepted messages to backend
 - polls backend failure notifications for operator-facing follow-up
 

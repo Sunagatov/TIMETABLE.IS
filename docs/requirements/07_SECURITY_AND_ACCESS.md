@@ -12,9 +12,13 @@
 
 - HTTPS required
 - backend-managed session cookies
-- webhook secret verification for Telegram
+- Telegram bot transport is long polling in the current V1 bootstrap
+- backend capture and failure-notification endpoints are protected with a bot ingest token
+- webhook secret verification is not part of the current source-repo contract
 - no signup/user management
 - no public access model in V1
+
+If a webhook transport is introduced later, its secret verification belongs in Vault/runtime docs, not as a current Memora source assumption.
 
 ## Sensitive-content stance in V1
 

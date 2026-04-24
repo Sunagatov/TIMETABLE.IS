@@ -37,6 +37,7 @@ Current behavior:
 - text items are then processed asynchronously into Needs Review
 - voice items persist traceability metadata and currently end in visible transcription failure after bounded retries
 - bot-facing failure notifications are exposed for polling and delivery acknowledgement
+- current Telegram bot transport is long polling, and the backend capture/failure endpoints are authenticated with `X-Memora-Bot-Token`
 
 Current bot-facing failure notification endpoints:
 - `GET /api/capture/telegram/failure-notifications`

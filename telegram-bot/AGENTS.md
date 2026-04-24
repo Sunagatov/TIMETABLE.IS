@@ -9,6 +9,7 @@ Telegram bot is a thin Memora transport adapter.
 - keep it thin
 - keep it boring
 - keep it transport-focused
+- current implementation is Telegram long polling, not webhook delivery
 - do not move core domain logic here
 - follow feature/area structure similar to Festiva-style bot organization
 - current implementation is Kotlin

@@ -17,7 +17,9 @@ The current runnable starter implements:
 - accepted text ingest
 - accepted voice metadata ingest
 - stable item id generation
-- simple normalization/inference starter logic
+- backend-owned in-process async processing for accepted text items
+- lightweight normalization/inference starter logic
+- voice items that cannot be transcribed yet end in visible retryable failure after bounded retries
 - review/failure/approved query endpoints
 
 The full transcription and AI integration slices are intentionally still future implementation tasks.

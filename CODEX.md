@@ -38,6 +38,6 @@ Compact guidance for Codex CLI.
 - category paths are exact 3-level leaf paths, not arbitrary-depth trees
 - approved items stay approved after human edits in V1
 - unified Telegram ingest uses `POST /api/capture/telegram/ingest` with text or nested voice payload
-- bot failure notifications are an explicit backend contract, not an implied polling convention
+- Telegram bot currently uses long polling; bot failure notifications are an explicit backend contract delivered by backend polling and delivery acknowledgement
 - direct item patch is approved-only; reviewable edits use `edit-and-approve`
 - voice ingest is accepted and persisted, but full transcription remains future work
