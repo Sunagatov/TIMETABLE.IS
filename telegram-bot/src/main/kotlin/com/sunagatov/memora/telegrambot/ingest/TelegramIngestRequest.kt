@@ -1,21 +1,18 @@
 package com.sunagatov.memora.telegrambot.ingest
 
-data class TelegramTextIngestRequest(
-    val telegramUserId: Long,
-    val telegramChatId: Long,
-    val telegramMessageId: Int,
-    val text: String
+data class TelegramVoicePayload(
+    val fileId: String,
+    val fileUniqueId: String,
+    val durationSeconds: Int? = null,
+    val mimeType: String? = null
 )
 
-data class TelegramVoiceIngestRequest(
-    val telegramUserId: Long,
-    val telegramChatId: Long,
-    val telegramMessageId: Int,
-    val telegramFileId: String,
-    val telegramFileUniqueId: String,
-    val durationSeconds: Int? = null,
-    val mimeType: String? = null,
-    val fileSizeBytes: Long? = null
+data class TelegramIngestRequest(
+    val telegramUserId: String,
+    val telegramChatId: String,
+    val telegramMessageId: String,
+    val text: String? = null,
+    val voice: TelegramVoicePayload? = null
 )
 
 data class TelegramAcceptedResponse(
@@ -24,7 +21,7 @@ data class TelegramAcceptedResponse(
 
 data class TelegramFailureNotification(
     val notificationId: String,
-    val telegramChatId: Long,
+    val telegramChatId: String,
     val memoraId: String,
     val failedStage: String,
     val summary: String,

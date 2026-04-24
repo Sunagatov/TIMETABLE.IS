@@ -3,6 +3,7 @@ package com.sunagatov.memora.telegrambot.bot
 import com.sunagatov.memora.telegrambot.backend.BackendClient
 import com.sunagatov.memora.telegrambot.config.BotSettings
 import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
+import com.sunagatov.memora.telegrambot.ingest.TelegramIngestRequest
 import com.sunagatov.memora.telegrambot.ingest.TelegramUpdateMapper
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
@@ -47,7 +48,7 @@ class MemoraLongPollingBot(
 
     private fun acceptText(
         chatId: String,
-        request: com.sunagatov.memora.telegrambot.ingest.TelegramTextIngestRequest
+        request: TelegramIngestRequest
     ) {
         try {
             val accepted = backendClient.ingestText(request)
@@ -60,7 +61,7 @@ class MemoraLongPollingBot(
 
     private fun acceptVoice(
         chatId: String,
-        request: com.sunagatov.memora.telegrambot.ingest.TelegramVoiceIngestRequest
+        request: TelegramIngestRequest
     ) {
         try {
             val accepted = backendClient.ingestVoice(request)
@@ -93,7 +94,7 @@ class MemoraLongPollingBot(
             ?.takeIf { it.isNotBlank() }
             ?.let { lines += "Retry context: $it" }
 
-        sendMessage(notification.telegramChatId.toString(), lines.joinToString("\n"))
+        sendMessage(notification.telegramChatId, lines.joinToString("\n"))
     }
 
     private fun sendMessage(chatId: String, text: String) {

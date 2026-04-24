@@ -36,6 +36,10 @@ Current behavior:
 - text ingest lands in Needs Review
 - voice ingest persists traceability metadata and currently lands in visible transcription failure
 
+Current bot-facing failure notification endpoints:
+- `GET /api/capture/telegram/failure-notifications`
+- `POST /api/capture/telegram/failure-notifications/{notificationId}/delivered`
+
 ## Review
 
 Current backend endpoints:
@@ -74,10 +78,13 @@ Current behavior:
 
 ## Search/filter/sort
 
-Still requirement-level only:
+Current frontend shell:
 - keyword search
-- filter by type/status/category/path/priority/date
+- filter by type/category/path/priority
 - sort by title/category/date
+
+Current backend limitation:
+- approved search/filter/sort is still client-side because backend does not expose query endpoints yet
 
 ## Health
 

@@ -34,7 +34,7 @@ class ReviewService(
     }
 
     fun editAndApprove(itemId: String, request: EditAndApproveRequest): MemoraItem =
-        itemService.updateItem(itemId, request.toUpdateItemRequest())
+        itemService.editAndApprove(itemId, request.toUpdateItemRequest())
 
     fun reject(itemId: String): MemoraItem {
         val item = requireItem(itemId)

@@ -1,19 +1,21 @@
 package com.sunagatov.memora.backend
 
-import com.sunagatov.memora.backend.category.api.CreateCategoryRequest
-import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
-import com.sunagatov.memora.backend.category.api.CategoryPathRequest
-import com.sunagatov.memora.backend.category.application.CategoryService
-import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.capture.api.TelegramIngestRequest
 import com.sunagatov.memora.backend.capture.api.TelegramVoicePayload
 import com.sunagatov.memora.backend.capture.application.TelegramCaptureService
+import com.sunagatov.memora.backend.capture.application.TelegramFailureNotificationService
+import com.sunagatov.memora.backend.capture.store.InMemoryFailureNotificationStore
+import com.sunagatov.memora.backend.category.api.CategoryPathRequest
+import com.sunagatov.memora.backend.category.api.CreateCategoryRequest
+import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
+import com.sunagatov.memora.backend.category.application.CategoryService
+import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.config.MemoraProperties
-import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
+import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -74,6 +76,7 @@ class FoundationServicesTests {
         val categoryService = createCategoryService(itemStore)
         val captureService = TelegramCaptureService(itemStore, categoryService, testProperties())
         val itemService = ItemService(itemStore, categoryService)
+        val reviewService = ReviewService(itemStore, itemService)
 
         val customCategory = categoryService.create(
             CreateCategoryRequest(
@@ -94,9 +97,9 @@ class FoundationServicesTests {
             )
         )
 
-        val approved = itemService.updateItem(
+        val approved = reviewService.editAndApprove(
             ingested.id,
-            UpdateItemRequest(
+            com.sunagatov.memora.backend.item.api.EditAndApproveRequest(
                 categoryPath = CategoryPathRequest("Work", "Backend", "Memora")
             )
         )
@@ -120,6 +123,37 @@ class FoundationServicesTests {
         assertEquals("Foundation", updated.categoryPath.subsubcategory)
         assertEquals(ItemStatus.HUMAN_EDITED_APPROVED, updated.status)
         assertNotNull(updated.updatedAt)
+    }
+
+    @Test
+    fun `failed telegram items are exposed once through failure notifications until acknowledged`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val captureService = TelegramCaptureService(itemStore, categoryService, testProperties())
+        val notificationService = TelegramFailureNotificationService(
+            itemStore = itemStore,
+            notificationStore = InMemoryFailureNotificationStore()
+        )
+
+        val failed = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "123456",
+                telegramMessageId = "msg-4",
+                voice = TelegramVoicePayload(
+                    fileId = "file-2",
+                    fileUniqueId = "unique-2"
+                )
+            )
+        )
+
+        val notifications = notificationService.listPending()
+        assertEquals(1, notifications.size)
+        assertEquals(failed.id, notifications.single().memoraId)
+
+        notificationService.markDelivered(notifications.single().notificationId)
+
+        assertEquals(0, notificationService.listPending().size)
     }
 
     private fun createCategoryService(itemStore: InMemoryItemStore): CategoryService =

@@ -90,7 +90,7 @@ export function ReviewQueueList({
                       (selected ? "text-stone-200" : "text-stone-500")
                     }
                   >
-                    <span>{item.memoraId}</span>
+                    <span>{item.id}</span>
                     <span>•</span>
                     <span>{item.type}</span>
                     <span>•</span>

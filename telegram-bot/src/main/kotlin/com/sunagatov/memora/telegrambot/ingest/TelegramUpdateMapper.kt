@@ -4,7 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 class TelegramUpdateMapper {
 
-    fun toTextIngestRequest(update: Update): TelegramTextIngestRequest? {
+    fun toTextIngestRequest(update: Update): TelegramIngestRequest? {
         val message = update.message ?: return null
         val from = message.from ?: return null
         val chat = message.chat ?: return null
@@ -13,29 +13,30 @@ class TelegramUpdateMapper {
             return null
         }
 
-        return TelegramTextIngestRequest(
-            telegramUserId = from.id,
-            telegramChatId = chat.id,
-            telegramMessageId = message.messageId,
+        return TelegramIngestRequest(
+            telegramUserId = from.id.toString(),
+            telegramChatId = chat.id.toString(),
+            telegramMessageId = message.messageId.toString(),
             text = text
         )
     }
 
-    fun toVoiceIngestRequest(update: Update): TelegramVoiceIngestRequest? {
+    fun toVoiceIngestRequest(update: Update): TelegramIngestRequest? {
         val message = update.message ?: return null
         val from = message.from ?: return null
         val chat = message.chat ?: return null
         val voice = message.voice ?: return null
 
-        return TelegramVoiceIngestRequest(
-            telegramUserId = from.id,
-            telegramChatId = chat.id,
-            telegramMessageId = message.messageId,
-            telegramFileId = voice.fileId,
-            telegramFileUniqueId = voice.fileUniqueId,
-            durationSeconds = voice.duration,
-            mimeType = voice.mimeType,
-            fileSizeBytes = voice.fileSize
+        return TelegramIngestRequest(
+            telegramUserId = from.id.toString(),
+            telegramChatId = chat.id.toString(),
+            telegramMessageId = message.messageId.toString(),
+            voice = TelegramVoicePayload(
+                fileId = voice.fileId,
+                fileUniqueId = voice.fileUniqueId,
+                durationSeconds = voice.duration,
+                mimeType = voice.mimeType
+            )
         )
     }
 }

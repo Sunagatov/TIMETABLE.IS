@@ -16,7 +16,6 @@ export type TelegramVoiceTrace = {
 
 export type MemoraItem = {
   id: string;
-  memoraId: string;
   sourceType: string;
   rawInputText: string | null;
   rawTranscript: string | null;

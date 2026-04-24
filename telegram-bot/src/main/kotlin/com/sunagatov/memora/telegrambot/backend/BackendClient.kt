@@ -5,8 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.sunagatov.memora.telegrambot.config.BotSettings
 import com.sunagatov.memora.telegrambot.ingest.TelegramAcceptedResponse
 import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
-import com.sunagatov.memora.telegrambot.ingest.TelegramTextIngestRequest
-import com.sunagatov.memora.telegrambot.ingest.TelegramVoiceIngestRequest
+import com.sunagatov.memora.telegrambot.ingest.TelegramIngestRequest
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -18,15 +17,15 @@ class BackendClient(
     private val httpClient = HttpClient.newHttpClient()
     private val mapper = jacksonObjectMapper()
 
-    fun ingestText(request: TelegramTextIngestRequest): TelegramAcceptedResponse =
+    fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse =
         post(
-            path = settings.textCapturePath,
+            path = settings.ingestPath,
             requestBody = request
         )
 
-    fun ingestVoice(request: TelegramVoiceIngestRequest): TelegramAcceptedResponse =
+    fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse =
         post(
-            path = settings.voiceCapturePath,
+            path = settings.ingestPath,
             requestBody = request
         )
 
