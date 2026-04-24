@@ -1,22 +1,31 @@
 import { httpClient } from "../../../shared/api/httpClient";
 import type {
   CreateCategoryRequest,
+  ListParams,
   MemoraCategory,
   MemoraItem,
   RenameCategoryRequest,
   UpdateItemRequest
 } from "../types/reviewTypes";
 
-export async function fetchNeedsReview(): Promise<MemoraItem[]> {
-  return httpClient.get("/api/review/needs-review");
+function buildQuery(params: ListParams): string {
+  const entries = (Object.entries(params) as [string, string | undefined][]).filter(
+    ([, v]) => Boolean(v) && v !== "ALL"
+  ) as [string, string][];
+  if (!entries.length) return "";
+  return "?" + new URLSearchParams(entries).toString();
 }
 
-export async function fetchFailures(): Promise<MemoraItem[]> {
-  return httpClient.get("/api/review/failures");
+export async function fetchNeedsReview(params: ListParams = {}): Promise<MemoraItem[]> {
+  return httpClient.get(`/api/review/needs-review${buildQuery(params)}`);
 }
 
-export async function fetchApproved(): Promise<MemoraItem[]> {
-  return httpClient.get("/api/items/approved");
+export async function fetchFailures(params: ListParams = {}): Promise<MemoraItem[]> {
+  return httpClient.get(`/api/review/failures${buildQuery(params)}`);
+}
+
+export async function fetchApproved(params: ListParams = {}): Promise<MemoraItem[]> {
+  return httpClient.get(`/api/items/approved${buildQuery(params)}`);
 }
 
 export async function fetchItem(itemId: string): Promise<MemoraItem> {
@@ -54,9 +63,7 @@ export async function fetchCategories(): Promise<MemoraCategory[]> {
   return httpClient.get<MemoraCategory[]>("/api/categories");
 }
 
-export async function createCategory(
-  request: CreateCategoryRequest
-): Promise<MemoraCategory> {
+export async function createCategory(request: CreateCategoryRequest): Promise<MemoraCategory> {
   return httpClient.post<MemoraCategory>("/api/categories", request);
 }
 

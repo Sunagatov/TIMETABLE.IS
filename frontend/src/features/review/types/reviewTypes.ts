@@ -75,10 +75,59 @@ export type UpdateItemRequest = {
   priority?: string;
 };
 
-export type ApprovedSort =
+export type ListSort =
   | "createdAt-desc"
   | "createdAt-asc"
   | "title-asc"
   | "title-desc"
   | "category-asc"
   | "category-desc";
+
+export type ApprovedSort = ListSort;
+
+export type ListParams = {
+  keyword?: string;
+  type?: string;
+  priority?: string;
+  status?: string;
+  category?: string;
+  subcategory?: string;
+  subsubcategory?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sort?: string;
+};
+
+export type NeedsReviewFilters = {
+  keyword: string;
+  type: string;
+  priority: string;
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+  dateFrom: string;
+  dateTo: string;
+  sort: ListSort;
+};
+
+export type FailuresFilters = {
+  keyword: string;
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+  dateFrom: string;
+  dateTo: string;
+};
+
+export type ApprovedFilters = {
+  keyword: string;
+  type: string;
+  priority: string;
+  status: string;
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+  dateFrom: string;
+  dateTo: string;
+  sort: ListSort;
+};

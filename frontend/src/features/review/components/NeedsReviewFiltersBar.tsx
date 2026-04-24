@@ -1,5 +1,5 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton } from "./FilterControls";
-import type { ApprovedFilters, ListSort, MemoraCategory } from "../types/reviewTypes";
+import type { ListSort, MemoraCategory, NeedsReviewFilters } from "../types/reviewTypes";
 
 const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "REMINDER", "OTHER"];
 const PRIORITY_OPTIONS = [
@@ -9,11 +9,6 @@ const PRIORITY_OPTIONS = [
   "NOT_URGENT_IMPORTANT",
   "NOT_URGENT_NOT_IMPORTANT",
   "NOT_APPLICABLE"
-];
-const STATUS_OPTIONS = [
-  "ALL",
-  "HUMAN_APPROVED",
-  "HUMAN_EDITED_APPROVED"
 ];
 const SORT_OPTIONS: ListSort[] = [
   "createdAt-desc",
@@ -25,14 +20,14 @@ const SORT_OPTIONS: ListSort[] = [
 ];
 
 type Props = {
-  filters: ApprovedFilters;
+  filters: NeedsReviewFilters;
   categories: MemoraCategory[];
-  onChange: (next: ApprovedFilters) => void;
+  onChange: (next: NeedsReviewFilters) => void;
   onReset: () => void;
 };
 
-export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: Props) {
-  const set = (partial: Partial<ApprovedFilters>) => onChange({ ...filters, ...partial });
+export function NeedsReviewFiltersBar({ filters, categories, onChange, onReset }: Props) {
+  const set = (partial: Partial<NeedsReviewFilters>) => onChange({ ...filters, ...partial });
 
   return (
     <div className="space-y-4">
@@ -40,7 +35,7 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
         type="search"
         value={filters.keyword}
         onChange={(e) => set({ keyword: e.target.value })}
-        placeholder="Search title, cleaned text, raw transcript, raw input..."
+        placeholder="Search title, cleaned text, raw input..."
         className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-900"
       />
       <CategoryCascade
@@ -52,7 +47,7 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
         onSubcategoryChange={(v) => set({ subcategory: v, subsubcategory: "" })}
         onSubsubcategoryChange={(v) => set({ subsubcategory: v })}
       />
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-3">
         <FilterSelect
           label="Type"
           value={filters.type}
@@ -64,12 +59,6 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
           value={filters.priority}
           options={PRIORITY_OPTIONS}
           onChange={(v) => set({ priority: v })}
-        />
-        <FilterSelect
-          label="Status"
-          value={filters.status}
-          options={STATUS_OPTIONS}
-          onChange={(v) => set({ status: v })}
         />
         <FilterSelect
           label="Sort"

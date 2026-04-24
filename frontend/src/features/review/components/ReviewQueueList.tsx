@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import type { MemoraItem } from "../types/reviewTypes";
 
+type View = "needs-review" | "failures" | "approved";
+
 type Props = {
   title: string;
   description: string;
@@ -8,6 +10,7 @@ type Props = {
   selectedItemId: string | null;
   onSelect: (itemId: string) => void;
   toolbar?: ReactNode;
+  view?: View;
 };
 
 export function ReviewQueueList({
@@ -16,7 +19,8 @@ export function ReviewQueueList({
   items,
   selectedItemId,
   onSelect,
-  toolbar
+  toolbar,
+  view
 }: Props) {
   return (
     <section className="flex h-screen flex-col border-r border-stone-200 bg-[#fbf8f2]">
@@ -32,7 +36,7 @@ export function ReviewQueueList({
       <div className="flex-1 overflow-y-auto p-4">
         {items.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-stone-300 bg-white/80 p-8 text-center text-sm leading-6 text-stone-500">
-            No items match the current backend state and filters.
+            No items match the current filters.
           </div>
         ) : (
           <div className="space-y-3">
@@ -52,7 +56,7 @@ export function ReviewQueueList({
                   }
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <p
                         className={
                           "text-xs font-semibold uppercase tracking-[0.2em] " +
@@ -61,18 +65,30 @@ export function ReviewQueueList({
                       >
                         {item.sourceType.replace(/_/g, " ")}
                       </p>
-                      <h2 className="mt-2 text-lg font-semibold">{item.title}</h2>
+                      <h2 className="mt-2 truncate text-lg font-semibold">{item.title}</h2>
                     </div>
-                    <span
-                      className={
-                        "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] " +
-                        (selected
-                          ? "bg-white/15 text-white"
-                          : "bg-stone-100 text-stone-700")
-                      }
-                    >
-                      {item.status.replace(/_/g, " ")}
-                    </span>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <span
+                        className={
+                          "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] " +
+                          (selected ? "bg-white/15 text-white" : "bg-stone-100 text-stone-700")
+                        }
+                      >
+                        {item.status.replace(/_/g, " ")}
+                      </span>
+                      {view === "failures" && item.failureStage ? (
+                        <span
+                          className={
+                            "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] " +
+                            (selected
+                              ? "bg-red-400/30 text-red-100"
+                              : "bg-red-50 text-red-700")
+                          }
+                        >
+                          {item.failureStage.replace(/_/g, " ")}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
                   <p
@@ -90,11 +106,13 @@ export function ReviewQueueList({
                       (selected ? "text-stone-200" : "text-stone-500")
                     }
                   >
-                    <span>{item.id}</span>
-                    <span>•</span>
+                    <span className="truncate max-w-[160px]">{item.id}</span>
+                    <span>·</span>
                     <span>{item.type}</span>
-                    <span>•</span>
+                    <span>·</span>
                     <span>{item.priority}</span>
+                    <span>·</span>
+                    <span>{item.categoryPath.category}</span>
                   </div>
                 </button>
               );
