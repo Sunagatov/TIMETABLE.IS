@@ -73,8 +73,8 @@ Backend `ItemListQueryRequest` uses `createdFrom` and `createdTo`.
 They must match exactly — mismatching silently drops date filters.
 
 All filter params sent to backend:
-- `keyword` — free text, searches title + cleanedText + rawTranscript + rawInputText
-- `type` — IDEA | THOUGHT | REMINDER | OTHER
+- `keyword` — free text, searches title + cleanedText + rawTranscript + rawInputText + answer
+- `type` — IDEA | THOUGHT | QUESTION | REMINDER | OTHER
 - `priority` — URGENT_IMPORTANT | URGENT_NOT_IMPORTANT | NOT_URGENT_IMPORTANT | NOT_URGENT_NOT_IMPORTANT | NOT_APPLICABLE
 - `status` — ItemStatus enum value
 - `category`, `subcategory`, `subsubcategory` — exact 3-level path filter
