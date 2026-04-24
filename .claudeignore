@@ -1,1 +1,29 @@
- placeholder
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Secrets — never read these
+apps/**/.env
+apps/**/.env.*
+*.enc
+*.age
+
+# Logs and temp files
+*.log
+*.log.*
+*.tmp
+*.bak
+*.tar.gz
+*.dump
+/tmp/
+
+# Ansible inventory and generated outputs (large, rarely relevant)
+ansible/inventory/
+ansible/*.retry
+
+# Goss test output
+goss/*.json
+infra/**/.env
+infra/**/.env.*
