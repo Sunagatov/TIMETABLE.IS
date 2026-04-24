@@ -50,12 +50,16 @@ export function ReviewQueueList({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className={`h-2 w-2 shrink-0 rounded-full ${accentBg}`} />
-            <h1 className="truncate text-base font-semibold text-stone-900">{title}</h1>
-            {items.length > 0 && (
-              <span className="shrink-0 rounded-full bg-stone-200 px-2 py-0.5 text-[11px] font-semibold text-stone-600">
-                {items.length}
-              </span>
-            )}
+            <h1 className="truncate text-sm font-semibold text-stone-900">{title}</h1>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+              items.length > 0
+                ? view === "needs-review" ? "bg-amber-100 text-amber-700"
+                  : view === "failures" ? "bg-red-100 text-red-700"
+                  : "bg-emerald-100 text-emerald-700"
+                : "bg-stone-100 text-stone-500"
+            }`}>
+              {items.length}
+            </span>
           </div>
           {toolbar ? (
             <button
@@ -72,7 +76,7 @@ export function ReviewQueueList({
             </button>
           ) : null}
         </div>
-        <p className="mt-1 text-xs leading-5 text-stone-500">{description}</p>
+        <p className="mt-1 text-xs leading-5 text-stone-400">{description}</p>
       </header>
 
       {/* Collapsible filters */}

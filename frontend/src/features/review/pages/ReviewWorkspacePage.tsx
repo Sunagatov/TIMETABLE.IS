@@ -242,7 +242,7 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] text-stone-900">
-      <div className="lg:grid lg:h-screen lg:overflow-hidden lg:grid-cols-[280px_400px_minmax(0,1fr)]">
+      <div className="lg:grid lg:h-screen lg:overflow-hidden lg:grid-cols-[220px_340px_minmax(0,1fr)]">
         <div className={`${mobilePanel === "sidebar" ? "flex" : "hidden"} lg:flex flex-col h-[calc(100dvh-4rem)] lg:h-screen`}>
           <ReviewSidebar
             view={view}

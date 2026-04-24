@@ -62,6 +62,11 @@ export function ItemDetailPanel({
   onRegenerateAll,
   onMobileBack
 }: Props) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [showAiDetails, setShowAiDetails] = useState(false);
+  const [showTrace, setShowTrace] = useState(false);
+
   const [formState, setFormState] = useState<FormState>({
     title: "",
     cleanedText: "",
@@ -74,15 +79,20 @@ export function ItemDetailPanel({
   });
 
   useEffect(() => {
+    setEditOpen(false);
+    setShowOriginal(false);
+    setShowAiDetails(false);
+    setShowTrace(false);
+  }, [item?.id]);
+
+  useEffect(() => {
     if (!item) return;
-
     const matchingCategory = categories.find(
-      (category) =>
-        category.path.category === item.categoryPath.category &&
-        category.path.subcategory === item.categoryPath.subcategory &&
-        category.path.subsubcategory === item.categoryPath.subsubcategory
+      (c) =>
+        c.path.category === item.categoryPath.category &&
+        c.path.subcategory === item.categoryPath.subcategory &&
+        c.path.subsubcategory === item.categoryPath.subsubcategory
     );
-
     setFormState({
       title: item.title,
       cleanedText: item.cleanedText,
@@ -96,9 +106,8 @@ export function ItemDetailPanel({
   }, [categories, item]);
 
   const request = useMemo<UpdateItemRequest>(() => {
-    const category = categories.find((entry) => entry.id === formState.categoryId);
+    const category = categories.find((e) => e.id === formState.categoryId);
     const normalizedAnswerStatus = normalizeAnswerStatus(formState.answerStatus, formState.answer);
-
     return {
       title: formState.title,
       cleanedText: formState.cleanedText,
@@ -114,27 +123,16 @@ export function ItemDetailPanel({
     };
   }, [categories, formState]);
 
-  const mobileHeader = onMobileBack ? (
-    <div className="flex items-center gap-3 border-b border-stone-100 px-5 py-3 lg:hidden">
-      <button
-        type="button"
-        onClick={onMobileBack}
-        className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-100 transition"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="10 3 5 8 10 13" />
-        </svg>
-        <span>Back</span>
-      </button>
-    </div>
-  ) : null;
+  const busy = busyAction !== null;
+
+  // ── Empty / loading states ────────────────────────────────
 
   if (isLoading) {
     return (
       <section className="flex h-full flex-col bg-white">
-        {mobileHeader}
-        <div className="flex flex-1 items-center justify-center p-10">
-          <StateCard icon="⟳" title="Loading item" body="Fetching the selected item from the backend." />
+        {onMobileBack && <MobileBack onClick={onMobileBack} />}
+        <div className="flex flex-1 items-center justify-center">
+          <CenterState icon="·  ·  ·" title="Loading" body="Fetching item…" />
         </div>
       </section>
     );
@@ -143,11 +141,11 @@ export function ItemDetailPanel({
   if (errorMessage) {
     return (
       <section className="flex h-full flex-col bg-white">
-        {mobileHeader}
-        <div className="flex flex-1 items-center justify-center p-10">
-          <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-            <p className="text-lg font-semibold text-red-900">Failed to load item</p>
-            <p className="mt-2 text-sm leading-6 text-red-700">{errorMessage}</p>
+        {onMobileBack && <MobileBack onClick={onMobileBack} />}
+        <div className="flex flex-1 items-center justify-center p-8">
+          <div className="max-w-sm rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+            <p className="font-semibold text-red-900">Failed to load</p>
+            <p className="mt-2 text-sm text-red-700">{errorMessage}</p>
           </div>
         </div>
       </section>
@@ -157,332 +155,472 @@ export function ItemDetailPanel({
   if (!item) {
     return (
       <section className="flex h-full flex-col bg-white">
-        {mobileHeader}
-        <div className="flex flex-1 items-center justify-center p-10">
-          <StateCard
-            icon="◱"
-            title="No item selected"
-            body="Select an item from the list to inspect, compare AI output, and take review actions."
-          />
+        {onMobileBack && <MobileBack onClick={onMobileBack} />}
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 p-8">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#a8a29e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="4" width="20" height="20" rx="3" />
+              <line x1="9" y1="11" x2="19" y2="11" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="font-semibold text-stone-700">Select an item to review</p>
+            <p className="mt-1 text-sm text-stone-400">Pick from the list to read, decide, and act.</p>
+          </div>
         </div>
       </section>
     );
   }
 
+  // ── Derived values ────────────────────────────────────────
+
   const isQuestion = item.type === "QUESTION" || item.aiType === "QUESTION";
-  const hasPendingProposal =
-    item.proposedCategoryPath != null && item.proposedCategoryStatus === "PENDING_REVIEW";
-  const showProposalControls = Boolean(item.proposedCategoryPath);
-  const answerFailureMessage =
-    item.answerStatus === "FAILED"
-      ? item.answerFailureReason || "Answer generation failed"
-      : null;
+  const hasPendingProposal = item.proposedCategoryPath != null && item.proposedCategoryStatus === "PENDING_REVIEW";
+  const hasOriginal = Boolean(item.rawInputText || item.rawTranscript);
+  const hasAiDiff =
+    (item.aiCleanedText && item.aiCleanedText !== item.cleanedText) ||
+    (item.aiTitle && item.aiTitle !== item.title);
   const answerStatusOptions =
     formState.answerStatus === "FAILED" ? ["FAILED", ...ANSWER_STATUS_OPTIONS] : ANSWER_STATUS_OPTIONS;
+  const answerFailureMessage =
+    item.answerStatus === "FAILED" ? (item.answerFailureReason || "Answer generation failed") : null;
+  const displayAnswer = item.answer || item.aiAnswer;
+  const categoryLabel = [
+    item.categoryPath.category,
+    item.categoryPath.subcategory,
+    item.categoryPath.subsubcategory
+  ].filter(Boolean).join(" › ");
+
+  // ── Full render ───────────────────────────────────────────
 
   return (
     <section className="flex h-full flex-col bg-white">
-      {mobileHeader}
+      {onMobileBack && <MobileBack onClick={onMobileBack} />}
 
-      {/* Item header */}
-      <div className="border-b border-stone-100 px-6 py-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge status={item.status} />
-              <span className="text-xs text-stone-400">{item.sourceType.replace(/_/g, " ")}</span>
-            </div>
-            <h2 className="mt-2 text-xl font-semibold leading-snug text-stone-950">
-              {item.title || "Untitled"}
-            </h2>
-          </div>
-          <div className="shrink-0 rounded-xl border border-stone-100 bg-stone-50 px-3 py-2 text-xs text-stone-500">
-            <p>{formatDate(item.createdAt)}</p>
-            <p className="mt-0.5 text-stone-400">Updated {formatDate(item.updatedAt)}</p>
-          </div>
-        </div>
-
-        {actionError ? (
-          <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+      {/* ── Sticky action toolbar ───────────────────────────── */}
+      <div className="sticky top-0 z-10 shrink-0 border-b border-stone-100 bg-white/97 backdrop-blur-sm">
+        {actionError && (
+          <div className="border-b border-red-100 bg-red-50 px-5 py-2 text-xs text-red-700">
             {actionError}
           </div>
-        ) : null}
+        )}
+        <div className="flex flex-wrap items-center gap-2 px-5 py-3">
+
+          {view === "needs-review" && (
+            <>
+              <ToolbarBtn
+                tone="approve"
+                busy={busyAction === "approve"}
+                disabled={busy}
+                onClick={() => void onApprove(item.id)}
+              >
+                <CheckIcon /> Approve
+              </ToolbarBtn>
+              <ToolbarBtn
+                tone="edit"
+                busy={busyAction === "edit-approve" && editOpen}
+                disabled={busy && !editOpen}
+                onClick={() => setEditOpen((o) => !o)}
+              >
+                <PencilIcon /> {editOpen ? "Cancel edit" : "Edit & Approve"}
+              </ToolbarBtn>
+              <ToolbarBtn
+                tone="neutral"
+                busy={busyAction === "reject"}
+                disabled={busy}
+                onClick={() => void onReject(item.id)}
+              >
+                Reject
+              </ToolbarBtn>
+              <ToolbarBtn
+                tone="danger"
+                busy={busyAction === "delete"}
+                disabled={busy}
+                onClick={() => void onDelete(item.id)}
+              >
+                Delete
+              </ToolbarBtn>
+
+              <div className="ml-auto flex items-center gap-1">
+                <GhostBtn busy={busyAction === "regen-all"} disabled={busy} onClick={() => void onRegenerateAll(item.id)}>Regen All</GhostBtn>
+                <GhostBtn busy={busyAction === "regen-cleaned"} disabled={busy} onClick={() => void onRegenerateCleanedText(item.id)}>Regen Text</GhostBtn>
+                <GhostBtn busy={busyAction === "regen-category"} disabled={busy} onClick={() => void onRegenerateCategoryProposal(item.id)}>Regen Category</GhostBtn>
+              </div>
+            </>
+          )}
+
+          {view === "failures" && (
+            <>
+              <ToolbarBtn
+                tone="approve"
+                busy={busyAction === "retry"}
+                disabled={busy}
+                onClick={() => void onRetry(item.id)}
+              >
+                <RetryIcon /> Retry Processing
+              </ToolbarBtn>
+              <ToolbarBtn
+                tone="danger"
+                busy={busyAction === "delete"}
+                disabled={busy}
+                onClick={() => void onDelete(item.id)}
+              >
+                Delete
+              </ToolbarBtn>
+            </>
+          )}
+
+          {view === "approved" && (
+            <>
+              <ToolbarBtn
+                tone={editOpen ? "neutral" : "edit"}
+                busy={false}
+                disabled={false}
+                onClick={() => setEditOpen((o) => !o)}
+              >
+                <PencilIcon /> {editOpen ? "Cancel edit" : "Edit item"}
+              </ToolbarBtn>
+              {editOpen && (
+                <ToolbarBtn
+                  tone="approve"
+                  busy={busyAction === "save"}
+                  disabled={busy}
+                  onClick={() => void onSave(item.id, request)}
+                >
+                  Save Changes
+                </ToolbarBtn>
+              )}
+              <div className="ml-auto flex items-center gap-1">
+                <GhostBtn busy={busyAction === "regen-all"} disabled={busy} onClick={() => void onRegenerateAll(item.id)}>Regen All</GhostBtn>
+                <GhostBtn busy={busyAction === "regen-cleaned"} disabled={busy} onClick={() => void onRegenerateCleanedText(item.id)}>Regen Text</GhostBtn>
+              </div>
+            </>
+          )}
+
+        </div>
       </div>
 
-      {/* Scrollable content */}
+      {/* ── Scrollable document ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl p-6">
-          <div className="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
+        <div className="px-8 py-7">
 
-            {/* Left: read-only info */}
-            <div className="space-y-4">
-              <InfoSection title="AI Output">
-                <Field label="Title" value={item.aiTitle} />
-                <Field label="Cleaned Text" value={item.aiCleanedText} multiline />
-                <Field label="Type" value={item.aiType} />
-                <Field label="Category" value={formatCategoryPath(item.aiCategoryPath)} />
-                <Field label="Priority" value={item.aiPriority} />
-                <Field
-                  label="Proposed Category"
-                  value={
-                    item.proposedCategoryPath
-                      ? `${formatCategoryPath(item.proposedCategoryPath)} · ${proposalLabel(item.proposedCategoryStatus)}`
-                      : null
-                  }
-                />
-                {isQuestion ? <Field label="Answer" value={item.aiAnswer} multiline /> : null}
-              </InfoSection>
+          {/* Meta row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded border border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+              {item.sourceType.replace(/_/g, " ")}
+            </span>
+            <StatusPill status={item.status} />
+            {isQuestion && (
+              <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">Question</span>
+            )}
+            {item.proposedCategoryStatus === "PENDING_REVIEW" && (
+              <span className="rounded bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">Category proposal pending</span>
+            )}
+            <span className="ml-auto text-xs text-stone-400">{formatDate(item.createdAt)}</span>
+          </div>
 
-              <InfoSection title="Current Values">
-                <Field label="Title" value={formState.title} />
-                <Field label="Cleaned Text" value={formState.cleanedText} multiline />
-                <Field label="Type" value={formState.type} />
-                <Field label="Priority" value={formState.priority} />
-                <Field
-                  label="Category"
-                  value={displaySelectedCategory(categories, formState.categoryId, item.categoryPath)}
-                />
-                {formState.answer ? <Field label="Answer" value={formState.answer} multiline /> : null}
-                <Field label="Answer Status" value={formState.answerStatus} />
-                {answerFailureMessage ? (
-                  <Field label="Answer Failure" value={answerFailureMessage} multiline />
-                ) : null}
-              </InfoSection>
+          {/* Title */}
+          <h1 className="mt-4 text-2xl font-semibold leading-snug text-stone-950">
+            {item.title || <span className="text-stone-300">Untitled</span>}
+          </h1>
 
-              <InfoSection title="Raw Capture">
-                <Field label="Raw Input Text" value={item.rawInputText} multiline />
-                <Field label="Raw Transcript" value={item.rawTranscript} multiline />
-                {item.failureStage || item.failureReason ? (
-                  <>
-                    <Field label="Failure Stage" value={item.failureStage} />
-                    <Field label="Failure Reason" value={item.failureReason} multiline />
-                  </>
-                ) : null}
-              </InfoSection>
+          {/* Main content */}
+          {item.cleanedText && (
+            <p className="mt-4 text-base leading-8 text-stone-700 whitespace-pre-wrap">
+              {item.cleanedText}
+            </p>
+          )}
 
-              {item.telegramTrace ? (
-                <InfoSection title="Telegram Trace">
-                  <Field label="User ID" value={item.telegramTrace.telegramUserId} />
-                  <Field label="Chat ID" value={item.telegramTrace.telegramChatId} />
-                  <Field label="Message ID" value={item.telegramTrace.telegramMessageId} />
-                  <Field label="File ID" value={item.telegramTrace.telegramFileId} />
-                  <Field
-                    label="Media"
-                    value={
-                      item.telegramTrace.durationSeconds || item.telegramTrace.mimeType
-                        ? `${item.telegramTrace.durationSeconds ?? "?"}s · ${item.telegramTrace.mimeType ?? "unknown"}`
-                        : null
-                    }
-                  />
-                </InfoSection>
-              ) : null}
+          {/* Answer block for questions */}
+          {isQuestion && displayAnswer && (
+            <div className="mt-5 rounded-xl border border-amber-100 bg-amber-50/60 p-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-600">Answer</p>
+              <p className="text-base leading-7 text-stone-700">{displayAnswer}</p>
+              {item.answerStatus && (
+                <p className="mt-2 text-xs text-stone-400">{item.answerStatus.toLowerCase()}</p>
+              )}
+            </div>
+          )}
 
-              <div className="rounded-xl border border-stone-100 bg-stone-50 px-4 py-3 text-xs text-stone-500">
-                <p className="font-medium text-stone-600">Retry counts</p>
-                <p className="mt-1">Transcription: {item.retryCountTranscription} · AI: {item.retryCountAi}</p>
-                <p className="mt-1 font-mono text-[10px] text-stone-400 truncate">{item.id}</p>
+          {/* Metadata chips */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip label="Type" value={item.type} />
+            {item.priority !== "NOT_APPLICABLE" && (
+              <Chip label="Priority" value={priorityLabel(item.priority)} />
+            )}
+            {categoryLabel && <Chip label="Category" value={categoryLabel} />}
+          </div>
+
+          {/* Failure notice */}
+          {(item.failureStage || item.failureReason) && (
+            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+              <p className="text-sm font-semibold text-red-800">
+                {item.failureStage ? `Failed at: ${item.failureStage.replace(/_/g, " ")}` : "Processing failure"}
+              </p>
+              {item.failureReason && (
+                <p className="mt-1 text-sm text-red-700">{item.failureReason}</p>
+              )}
+            </div>
+          )}
+
+          {/* Disclosure row */}
+          {(hasOriginal || hasAiDiff || item.telegramTrace) && (
+            <div className="mt-5 flex flex-wrap gap-4 border-t border-stone-100 pt-4">
+              {hasOriginal && (
+                <Disclosure open={showOriginal} onToggle={() => setShowOriginal((o) => !o)}>
+                  Original capture
+                </Disclosure>
+              )}
+              {hasAiDiff && (
+                <Disclosure open={showAiDetails} onToggle={() => setShowAiDetails((o) => !o)}>
+                  AI changes
+                </Disclosure>
+              )}
+              {item.telegramTrace && (
+                <Disclosure open={showTrace} onToggle={() => setShowTrace((o) => !o)}>
+                  Telegram trace
+                </Disclosure>
+              )}
+            </div>
+          )}
+
+          {/* Expanded: original capture */}
+          {showOriginal && (
+            <div className="mt-3 rounded-xl bg-stone-50 p-5">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Original capture</p>
+              {item.rawInputText && (
+                <p className="text-sm leading-6 text-stone-600 whitespace-pre-wrap">{item.rawInputText}</p>
+              )}
+              {item.rawTranscript && (
+                <>
+                  <p className="mt-3 text-[11px] font-medium text-stone-400">Transcript</p>
+                  <p className="mt-1 text-sm leading-6 text-stone-600 whitespace-pre-wrap">{item.rawTranscript}</p>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Expanded: AI diff */}
+          {showAiDetails && (
+            <div className="mt-3 rounded-xl bg-stone-50 p-5 space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">AI original output</p>
+              {item.aiTitle && item.aiTitle !== item.title && (
+                <KV label="AI Title" value={item.aiTitle} />
+              )}
+              {item.aiCleanedText && item.aiCleanedText !== item.cleanedText && (
+                <KV label="AI Cleaned Text" value={item.aiCleanedText} multiline />
+              )}
+              {item.aiType && <KV label="AI Type" value={item.aiType} />}
+              {item.aiPriority && <KV label="AI Priority" value={item.aiPriority} />}
+              {item.aiCategoryPath && (
+                <KV label="AI Category" value={formatCategoryPath(item.aiCategoryPath)} />
+              )}
+              {isQuestion && item.aiAnswer && (
+                <KV label="AI Answer" value={item.aiAnswer} multiline />
+              )}
+            </div>
+          )}
+
+          {/* Expanded: telegram trace */}
+          {showTrace && item.telegramTrace && (
+            <div className="mt-3 rounded-xl bg-stone-50 p-5">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Telegram trace</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                <KVPair label="User ID" value={item.telegramTrace.telegramUserId} />
+                <KVPair label="Chat ID" value={item.telegramTrace.telegramChatId} />
+                <KVPair label="Message ID" value={item.telegramTrace.telegramMessageId} />
+                {item.telegramTrace.durationSeconds && (
+                  <KVPair label="Duration" value={`${item.telegramTrace.durationSeconds}s`} />
+                )}
+                {item.telegramTrace.mimeType && (
+                  <KVPair label="MIME" value={item.telegramTrace.mimeType} />
+                )}
               </div>
             </div>
+          )}
 
-            {/* Right: editable form + actions */}
-            <div>
-              <div className="rounded-2xl border border-stone-200 bg-[#fdfcfa] p-5">
-                <h3 className="text-sm font-semibold text-stone-900">Edit &amp; Actions</h3>
-                <p className="mt-1 text-xs leading-5 text-stone-500">
-                  Human-facing values. Submit backend-supported fields only.
-                </p>
-
-                {/* Primary actions — top of form for quick access */}
-                <div className="mt-4">
-                  <ActionBar
-                    view={view}
-                    item={item}
-                    busyAction={busyAction}
-                    request={request}
-                    onApprove={onApprove}
-                    onEditAndApprove={onEditAndApprove}
-                    onSave={onSave}
-                    onReject={onReject}
-                    onDelete={onDelete}
-                    onRetry={onRetry}
-                    onRegenerateCleanedText={onRegenerateCleanedText}
-                    onRegenerateAnswer={onRegenerateAnswer}
-                    onRegenerateCategoryProposal={onRegenerateCategoryProposal}
-                    onRegenerateAll={onRegenerateAll}
-                  />
+          {/* Category proposal */}
+          {item.proposedCategoryPath && (
+            <div className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/60 p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-500">AI Category Proposal</p>
+                  <p className="mt-1 text-sm text-stone-700">
+                    {formatCategoryPath(item.proposedCategoryPath)}
+                    <span className="ml-2 text-xs text-stone-400">{proposalLabel(item.proposedCategoryStatus)}</span>
+                  </p>
                 </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={!hasPendingProposal || busy}
+                    onClick={() => void onApproveCategoryProposal(item.id)}
+                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-50"
+                  >
+                    {busyAction === "category-approve" ? "…" : "Accept"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!item.proposedCategoryPath || busy}
+                    onClick={() => void onRejectCategoryProposal(item.id)}
+                    className="rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition disabled:opacity-50"
+                  >
+                    {busyAction === "category-reject" ? "…" : "Dismiss"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
-                <div className="mt-5 space-y-4">
-                  <FormField label="Title">
-                    <input
-                      value={formState.title}
-                      onChange={(e) => setFormState((s) => ({ ...s, title: e.target.value }))}
-                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
-                    />
-                  </FormField>
+          {/* Edit form */}
+          {editOpen && (
+            <div className="mt-5 rounded-xl border border-stone-200 bg-stone-50/60 p-5">
+              <p className="mb-4 text-sm font-semibold text-stone-700">Edit fields</p>
+              <div className="space-y-4">
+                <FormField label="Title">
+                  <input
+                    value={formState.title}
+                    onChange={(e) => setFormState((s) => ({ ...s, title: e.target.value }))}
+                    className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+                  />
+                </FormField>
 
-                  <FormField label="Cleaned Text">
-                    <textarea
-                      rows={7}
-                      value={formState.cleanedText}
-                      onChange={(e) => setFormState((s) => ({ ...s, cleanedText: e.target.value }))}
-                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
-                    />
-                  </FormField>
+                <FormField label="Cleaned Text">
+                  <textarea
+                    rows={7}
+                    value={formState.cleanedText}
+                    onChange={(e) => setFormState((s) => ({ ...s, cleanedText: e.target.value }))}
+                    className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+                  />
+                </FormField>
 
+                {formState.rawTranscript && (
                   <FormField label="Raw Transcript">
                     <textarea
-                      rows={4}
+                      rows={3}
                       value={formState.rawTranscript}
                       onChange={(e) => setFormState((s) => ({ ...s, rawTranscript: e.target.value }))}
-                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
                     />
                   </FormField>
+                )}
 
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <FormField label="Type">
-                      <select
-                        value={formState.type}
-                        onChange={(e) => setFormState((s) => ({ ...s, type: e.target.value }))}
-                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                      >
-                        {["IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"].map((o) => (
-                          <option key={o} value={o}>{o}</option>
-                        ))}
-                      </select>
-                    </FormField>
-
-                    <FormField label="Priority">
-                      <select
-                        value={formState.priority}
-                        onChange={(e) => setFormState((s) => ({ ...s, priority: e.target.value }))}
-                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                      >
-                        {[
-                          "URGENT_IMPORTANT",
-                          "URGENT_NOT_IMPORTANT",
-                          "NOT_URGENT_IMPORTANT",
-                          "NOT_URGENT_NOT_IMPORTANT",
-                          "NOT_APPLICABLE"
-                        ].map((o) => (
-                          <option key={o} value={o}>{o}</option>
-                        ))}
-                      </select>
-                    </FormField>
-
-                    <FormField label="Category">
-                      <select
-                        value={formState.categoryId}
-                        onChange={(e) => setFormState((s) => ({ ...s, categoryId: e.target.value }))}
-                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                      >
-                        <option value="">Select…</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {formatCategoryPath(cat.path)}
-                          </option>
-                        ))}
-                      </select>
-                    </FormField>
-                  </div>
-
-                  {showProposalControls ? (
-                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
-                        AI Category Proposal
-                      </p>
-                      <p className="mt-2 text-sm text-stone-700">
-                        {item.proposedCategoryPath
-                          ? `${formatCategoryPath(item.proposedCategoryPath)} · ${proposalLabel(item.proposedCategoryStatus)}`
-                          : "No proposal"}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <ActionButton
-                          label="Approve Proposal"
-                          busy={busyAction === "category-approve"}
-                          disabled={!hasPendingProposal || busyAction !== null}
-                          onClick={() => onApproveCategoryProposal(item.id)}
-                          tone="primary"
-                          size="sm"
-                        />
-                        <ActionButton
-                          label="Reject Proposal"
-                          busy={busyAction === "category-reject"}
-                          disabled={!item.proposedCategoryPath || busyAction !== null}
-                          onClick={() => onRejectCategoryProposal(item.id)}
-                          tone="secondary"
-                          size="sm"
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {isQuestion ? (
-                    <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
-                          Answer
-                        </p>
-                        <ActionButton
-                          label="Regenerate"
-                          busy={busyAction === "regen-answer"}
-                          disabled={busyAction !== null}
-                          onClick={() => onRegenerateAnswer(item.id)}
-                          tone="accent"
-                          size="xs"
-                        />
-                      </div>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <FormField label="Status">
-                          <select
-                            value={formState.answerStatus}
-                            onChange={(e) => setFormState((s) => ({ ...s, answerStatus: e.target.value }))}
-                            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                          >
-                            {answerStatusOptions.map((o) => (
-                              <option key={o} value={o} disabled={o === "FAILED"}>{o}</option>
-                            ))}
-                          </select>
-                        </FormField>
-                        <FormField label="Answer text">
-                          <textarea
-                            rows={4}
-                            value={formState.answer}
-                            onChange={(e) => setFormState((s) => ({ ...s, answer: e.target.value }))}
-                            placeholder="Edit or verify…"
-                            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                          />
-                        </FormField>
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {[
-                          { label: "Use AI Answer", action: () => setFormState((s) => ({ ...s, answerStatus: "GENERATED", answer: item.aiAnswer ?? s.answer })) },
-                          { label: "Mark Edited", action: () => setFormState((s) => ({ ...s, answerStatus: "EDITED" })) },
-                          { label: "Clear", action: () => setFormState((s) => ({ ...s, answerStatus: "NONE", answer: "" })) },
-                          { label: "Reject", action: () => setFormState((s) => ({ ...s, answerStatus: "REJECTED", answer: "" })) },
-                          { label: "Delete", action: () => setFormState((s) => ({ ...s, answerStatus: "DELETED", answer: "" })) },
-                        ].map(({ label, action }) => (
-                          <button
-                            key={label}
-                            type="button"
-                            disabled={busyAction !== null}
-                            onClick={action}
-                            className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-stone-600 hover:border-stone-400 hover:text-stone-900 transition disabled:opacity-50"
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                      {answerFailureMessage ? (
-                        <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                          {answerFailureMessage}
-                        </p>
-                      ) : null}
-                    </div>
-                  ) : null}
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <FormField label="Type">
+                    <select
+                      value={formState.type}
+                      onChange={(e) => setFormState((s) => ({ ...s, type: e.target.value }))}
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                    >
+                      {["IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"].map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField label="Priority">
+                    <select
+                      value={formState.priority}
+                      onChange={(e) => setFormState((s) => ({ ...s, priority: e.target.value }))}
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                    >
+                      {["URGENT_IMPORTANT","URGENT_NOT_IMPORTANT","NOT_URGENT_IMPORTANT","NOT_URGENT_NOT_IMPORTANT","NOT_APPLICABLE"].map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField label="Category">
+                    <select
+                      value={formState.categoryId}
+                      onChange={(e) => setFormState((s) => ({ ...s, categoryId: e.target.value }))}
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                    >
+                      <option value="">Select…</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{formatCategoryPath(c.path)}</option>
+                      ))}
+                    </select>
+                  </FormField>
                 </div>
+
+                {isQuestion && (
+                  <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Answer</p>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void onRegenerateAnswer(item.id)}
+                        className="rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 hover:bg-amber-200 transition disabled:opacity-50"
+                      >
+                        {busyAction === "regen-answer" ? "…" : "Regenerate"}
+                      </button>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <FormField label="Status">
+                        <select
+                          value={formState.answerStatus}
+                          onChange={(e) => setFormState((s) => ({ ...s, answerStatus: e.target.value }))}
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                        >
+                          {answerStatusOptions.map((o) => (
+                            <option key={o} value={o} disabled={o === "FAILED"}>{o}</option>
+                          ))}
+                        </select>
+                      </FormField>
+                      <FormField label="Answer text">
+                        <textarea
+                          rows={4}
+                          value={formState.answer}
+                          onChange={(e) => setFormState((s) => ({ ...s, answer: e.target.value }))}
+                          placeholder="Edit or verify…"
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                        />
+                      </FormField>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        { l: "Use AI", a: () => setFormState((s) => ({ ...s, answerStatus: "GENERATED", answer: item.aiAnswer ?? s.answer })) },
+                        { l: "Mark edited", a: () => setFormState((s) => ({ ...s, answerStatus: "EDITED" })) },
+                        { l: "Clear", a: () => setFormState((s) => ({ ...s, answerStatus: "NONE", answer: "" })) },
+                        { l: "Reject", a: () => setFormState((s) => ({ ...s, answerStatus: "REJECTED", answer: "" })) },
+                        { l: "Delete", a: () => setFormState((s) => ({ ...s, answerStatus: "DELETED", answer: "" })) },
+                      ].map(({ l, a }) => (
+                        <button key={l} type="button" disabled={busy} onClick={a}
+                          className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-stone-600 hover:border-stone-400 transition disabled:opacity-50">
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                    {answerFailureMessage && (
+                      <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{answerFailureMessage}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Confirm inside edit form */}
+                {view === "needs-review" && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void onEditAndApprove(item.id, request)}
+                    className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-55"
+                  >
+                    <CheckIcon />
+                    {busyAction === "edit-approve" ? "Approving…" : "Confirm Edit & Approve"}
+                  </button>
+                )}
               </div>
             </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 border-t border-stone-100 pt-4 text-[11px] text-stone-300">
+            <span>Updated {formatDate(item.updatedAt)}</span>
+            <span className="mx-2">·</span>
+            <span>Retries: {item.retryCountTranscription} / {item.retryCountAi}</span>
+            <span className="mx-2">·</span>
+            <span className="font-mono">{item.id}</span>
           </div>
         </div>
       </div>
@@ -490,194 +628,194 @@ export function ItemDetailPanel({
   );
 }
 
-function ActionBar({
-  view,
-  item,
-  busyAction,
-  request,
-  onApprove,
-  onEditAndApprove,
-  onSave,
-  onReject,
-  onDelete,
-  onRetry,
-  onRegenerateCleanedText,
-  onRegenerateAnswer: _onRegenerateAnswer,
-  onRegenerateCategoryProposal,
-  onRegenerateAll
-}: {
-  view: View;
-  item: MemoraItem;
-  busyAction: string | null;
-  request: UpdateItemRequest;
-  onApprove: (id: string) => Promise<void>;
-  onEditAndApprove: (id: string, r: UpdateItemRequest) => Promise<void>;
-  onSave: (id: string, r: UpdateItemRequest) => Promise<void>;
-  onReject: (id: string) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
-  onRetry: (id: string) => Promise<void>;
-  onRegenerateCleanedText: (id: string) => Promise<void>;
-  onRegenerateAnswer: (id: string) => Promise<void>;
-  onRegenerateCategoryProposal: (id: string) => Promise<void>;
-  onRegenerateAll: (id: string) => Promise<void>;
-}) {
-  const busy = busyAction !== null;
+// ── UI primitives ─────────────────────────────────────────────
 
-  if (view === "needs-review") {
-    return (
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          <ActionButton label="Approve As Is" busy={busyAction === "approve"} disabled={busy} onClick={() => onApprove(item.id)} tone="primary" />
-          <ActionButton label="Edit Then Approve" busy={busyAction === "edit-approve"} disabled={busy} onClick={() => onEditAndApprove(item.id, request)} tone="accent" />
-          <ActionButton label="Reject" busy={busyAction === "reject"} disabled={busy} onClick={() => onReject(item.id)} tone="secondary" />
-          <ActionButton label="Delete" busy={busyAction === "delete"} disabled={busy} onClick={() => onDelete(item.id)} tone="danger" />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ActionButton label="Regen All" busy={busyAction === "regen-all"} disabled={busy} onClick={() => onRegenerateAll(item.id)} tone="secondary" size="sm" />
-          <ActionButton label="Regen Text" busy={busyAction === "regen-cleaned"} disabled={busy} onClick={() => onRegenerateCleanedText(item.id)} tone="secondary" size="sm" />
-          <ActionButton label="Regen Category" busy={busyAction === "regen-category"} disabled={busy} onClick={() => onRegenerateCategoryProposal(item.id)} tone="secondary" size="sm" />
-        </div>
-      </div>
-    );
-  }
-
-  if (view === "failures") {
-    return (
-      <div className="flex flex-wrap gap-2">
-        <ActionButton label="Retry" busy={busyAction === "retry"} disabled={busy} onClick={() => onRetry(item.id)} tone="primary" />
-        <ActionButton label="Delete" busy={busyAction === "delete"} disabled={busy} onClick={() => onDelete(item.id)} tone="danger" />
-      </div>
-    );
-  }
-
+function MobileBack({ onClick }: { onClick: () => void }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      <ActionButton label="Save Changes" busy={busyAction === "save"} disabled={busy} onClick={() => onSave(item.id, request)} tone="primary" />
-      <ActionButton label="Regen All" busy={busyAction === "regen-all"} disabled={busy} onClick={() => onRegenerateAll(item.id)} tone="secondary" size="sm" />
-      <ActionButton label="Regen Text" busy={busyAction === "regen-cleaned"} disabled={busy} onClick={() => onRegenerateCleanedText(item.id)} tone="secondary" size="sm" />
+    <div className="flex items-center border-b border-stone-100 px-5 py-3 lg:hidden">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-stone-500 hover:bg-stone-100 transition"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="10 3 5 8 10 13" />
+        </svg>
+        Back
+      </button>
     </div>
   );
 }
 
-function ActionButton(props: {
-  label: string;
+function ToolbarBtn({
+  tone,
+  busy,
+  disabled,
+  onClick,
+  children
+}: {
+  tone: "approve" | "edit" | "neutral" | "danger";
   busy: boolean;
-  disabled?: boolean;
-  onClick: () => Promise<void> | void;
-  tone: "primary" | "accent" | "secondary" | "danger";
-  size?: "sm" | "xs";
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
 }) {
-  const toneClass =
-    props.tone === "primary"
-      ? "bg-stone-900 text-white hover:bg-stone-700"
-      : props.tone === "accent"
+  const cls =
+    tone === "approve"
+      ? "bg-emerald-600 text-white hover:bg-emerald-500"
+      : tone === "edit"
         ? "bg-amber-500 text-stone-950 hover:bg-amber-400"
-        : props.tone === "danger"
-          ? "bg-red-600 text-white hover:bg-red-500"
-          : "border border-stone-200 bg-white text-stone-800 hover:border-stone-300 hover:bg-stone-50";
-
-  const sizeClass =
-    props.size === "xs"
-      ? "rounded-lg px-2.5 py-1 text-xs"
-      : props.size === "sm"
-        ? "rounded-xl px-3 py-1.5 text-xs"
-        : "rounded-xl px-4 py-2.5 text-sm";
+        : tone === "danger"
+          ? "text-red-500 hover:bg-red-50"
+          : "border border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50";
 
   return (
     <button
       type="button"
-      disabled={props.busy || props.disabled}
-      onClick={() => void props.onClick()}
-      className={`font-medium transition disabled:cursor-not-allowed disabled:opacity-55 ${toneClass} ${sizeClass}`}
+      disabled={busy || disabled}
+      onClick={onClick}
+      className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${cls}`}
     >
-      {props.busy ? "Working…" : props.label}
+      {busy ? "…" : children}
     </button>
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const colorClass = status.includes("APPROVED")
+function GhostBtn({
+  busy,
+  disabled,
+  onClick,
+  children
+}: {
+  busy: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={busy || disabled}
+      onClick={onClick}
+      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition disabled:opacity-50"
+    >
+      {busy ? "…" : children}
+    </button>
+  );
+}
+
+function StatusPill({ status }: { status: string }) {
+  const cls = status.includes("APPROVED")
     ? "bg-emerald-100 text-emerald-700"
     : status.includes("FAILED")
       ? "bg-red-100 text-red-700"
       : status.includes("PENDING")
         ? "bg-amber-100 text-amber-700"
         : "bg-stone-100 text-stone-600";
-
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${colorClass}`}>
+    <span className={`rounded px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
       {status.replace(/_/g, " ")}
     </span>
   );
 }
 
-function InfoSection(props: { title: string; children: ReactNode }) {
+function Chip({ label, value }: { label: string; value: string }) {
   return (
-    <section className="rounded-2xl border border-stone-100 bg-white p-5">
-      <h3 className="mb-4 text-sm font-semibold text-stone-800">{props.title}</h3>
-      <div className="space-y-3.5">{props.children}</div>
-    </section>
-  );
-}
-
-function Field(props: { label: string; value: string | null | undefined; multiline?: boolean }) {
-  if (!props.value) return null;
-  return (
-    <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">
-        {props.label}
-      </p>
-      <p className={`mt-1 text-sm leading-6 text-stone-700 ${props.multiline ? "whitespace-pre-wrap" : "truncate"}`}>
-        {props.value}
-      </p>
+    <div className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{label}</span>
+      <span className="text-xs font-medium text-stone-700">{value}</span>
     </div>
   );
 }
 
-function FormField(props: { label: string; children: ReactNode }) {
+function Disclosure({ open, onToggle, children }: { open: boolean; onToggle: () => void; children: ReactNode }) {
   return (
-    <label className="block text-sm">
-      <span className="mb-1.5 block text-xs font-semibold text-stone-500">{props.label}</span>
-      {props.children}
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex items-center gap-1.5 text-xs font-medium text-stone-400 transition hover:text-stone-700"
+    >
+      <span className="text-[9px]">{open ? "▲" : "▼"}</span>
+      {children}
+    </button>
+  );
+}
+
+function KV({ label, value, multiline }: { label: string; value: string; multiline?: boolean }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{label}</p>
+      <p className={`mt-0.5 text-sm text-stone-600 ${multiline ? "whitespace-pre-wrap leading-6" : ""}`}>{value}</p>
+    </div>
+  );
+}
+
+function KVPair({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <>
+      <p className="text-stone-400">{label}</p>
+      <p className="font-mono text-stone-600 truncate">{value}</p>
+    </>
+  );
+}
+
+function FormField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold text-stone-500">{label}</span>
+      {children}
     </label>
   );
 }
 
-function StateCard(props: { icon: string; title: string; body: string }) {
+function CenterState({ icon, title, body }: { icon: string; title: string; body: string }) {
   return (
-    <div className="max-w-xs rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-8 text-center">
-      <p className="text-3xl text-stone-300">{props.icon}</p>
-      <p className="mt-3 text-base font-semibold text-stone-800">{props.title}</p>
-      <p className="mt-2 text-sm leading-6 text-stone-500">{props.body}</p>
+    <div className="max-w-xs rounded-2xl border border-dashed border-stone-200 p-10 text-center">
+      <p className="text-3xl text-stone-200">{icon}</p>
+      <p className="mt-3 font-semibold text-stone-700">{title}</p>
+      <p className="mt-2 text-sm text-stone-400">{body}</p>
     </div>
   );
 }
 
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="2 7.5 5.5 11 12 4.5" />
+    </svg>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8.5 1.5L11.5 4.5L4.5 11.5H1.5V8.5L8.5 1.5Z" />
+    </svg>
+  );
+}
+
+function RetryIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1.5 7A5.5 5.5 0 1 0 3 3L1.5 1.5V5H5" />
+    </svg>
+  );
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+
 function normalizeAnswerStatus(status: string, answer: string): string | undefined {
-  if (status === "FAILED") {
-    return answer.trim() ? "EDITED" : undefined;
-  }
+  if (status === "FAILED") return answer.trim() ? "EDITED" : undefined;
   return ANSWER_STATUS_OPTIONS.includes(status) ? status : answer.trim() ? "EDITED" : "NONE";
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short"
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 function formatCategoryPath(path: { category: string; subcategory: string; subsubcategory: string }) {
   return `${path.category} / ${path.subcategory} / ${path.subsubcategory}`;
-}
-
-function displaySelectedCategory(
-  categories: MemoraCategory[],
-  categoryId: string,
-  fallbackPath: { category: string; subcategory: string; subsubcategory: string }
-) {
-  const category = categories.find((entry) => entry.id === categoryId);
-  return category ? formatCategoryPath(category.path) : formatCategoryPath(fallbackPath);
 }
 
 function proposalLabel(status: string) {
@@ -685,4 +823,12 @@ function proposalLabel(status: string) {
   if (status === "APPROVED") return "approved";
   if (status === "REJECTED") return "rejected";
   return "none";
+}
+
+function priorityLabel(priority: string): string {
+  if (priority === "URGENT_IMPORTANT") return "Urgent & important";
+  if (priority === "URGENT_NOT_IMPORTANT") return "Urgent, not important";
+  if (priority === "NOT_URGENT_IMPORTANT") return "Important";
+  if (priority === "NOT_URGENT_NOT_IMPORTANT") return "Low priority";
+  return priority;
 }

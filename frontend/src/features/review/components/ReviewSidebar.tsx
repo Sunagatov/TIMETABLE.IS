@@ -134,6 +134,13 @@ export function ReviewSidebar({
         </div>
       </div>
 
+      {/* Context hint */}
+      <div className="mx-3 mb-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5">
+        <p className="text-[11px] leading-4 text-stone-400">
+          Review AI-processed knowledge before it becomes trusted. Approve, edit, or reject each item.
+        </p>
+      </div>
+
       {/* Navigation */}
       <nav className="px-3 space-y-0.5">
         <NavItem
