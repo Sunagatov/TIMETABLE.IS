@@ -14,6 +14,7 @@ This folder is the product and engineering source of truth for Memora V1.
 8. `08_FAILURE_HANDLING_AND_RETRY.md`
 9. `09_CLIENT_AND_API_BOUNDARIES.md`
 10. `10_VAULT_AND_PRODUCTION_BOUNDARIES.md`
+11. `11_FUTURE_PHASES.md`
 
 Legacy lowercase mirrors still exist in this folder for historical reasons. Prefer the uppercase files above unless a task explicitly says otherwise.
 
