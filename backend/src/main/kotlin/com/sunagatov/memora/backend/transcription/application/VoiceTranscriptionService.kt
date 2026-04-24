@@ -2,7 +2,7 @@ package com.sunagatov.memora.backend.transcription.application
 
 import com.sunagatov.memora.backend.item.model.MemoraItem
 
-interface VoiceTranscriptionService {
+fun interface VoiceTranscriptionService {
     fun transcribe(item: MemoraItem): String
 }
 

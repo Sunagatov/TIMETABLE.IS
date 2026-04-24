@@ -69,12 +69,9 @@ class TelegramCaptureService(
     }
 
     private fun validateOwner(request: TelegramIngestRequest) {
-        val configuredOwnerId = properties.ownerTelegramUserId.toLongOrNull()
-        if (configuredOwnerId == null || configuredOwnerId <= 0) {
-            return
-        }
-
-        require(request.telegramUserId == properties.ownerTelegramUserId) {
+        val ownerId = properties.ownerTelegramUserId.trim()
+        if (ownerId.isBlank()) return
+        require(request.telegramUserId == ownerId) {
             "Telegram user is not allowed to ingest items"
         }
     }

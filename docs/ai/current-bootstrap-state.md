@@ -19,7 +19,8 @@ It is not yet the full target V1 implementation.
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
 - backend deterministic placeholder AI port for cleaned text, type, category proposal, answer generation, and regeneration actions
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
-- backend in-memory stores for items, sessions, and categories
+- backend in-memory stores for items, sessions, categories, and failure notifications
+- backend voice transcription pipeline: Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`), configured via `MEMORA_TRANSCRIPTION_API_KEY`, `MEMORA_TRANSCRIPTION_API_BASE_URL`, `MEMORA_TRANSCRIPTION_MODEL`, `MEMORA_TELEGRAM_BOT_TOKEN`
 - frontend session-aware login + review workspace
 - frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
 - frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
@@ -31,8 +32,7 @@ It is not yet the full target V1 implementation.
 ## What is still intentionally starter-level
 
 - Mongo persistence is not implemented yet
-- transcription is not implemented yet
-- AI integration is not implemented yet
+- AI integration is not implemented yet (deterministic placeholder AI port is used)
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter

@@ -33,10 +33,14 @@ import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.item.store.InMemoryItemStore
 import com.sunagatov.memora.backend.review.application.ReviewService
+import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTranscriptionService
+import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ExecutorService
@@ -97,6 +101,92 @@ class FoundationServicesTests {
         assertEquals(FailureStage.TRANSCRIPTION, stored.failureStage)
         assertEquals("file-1", stored.telegramTrace?.telegramFileId)
         assertEquals("audio/ogg", stored.telegramTrace?.mimeType)
+    }
+
+    // V1: successful transcription persists rawTranscript and advances to Needs Review
+    @Test
+    fun `voice item with successful transcription lands in needs review with raw transcript persisted`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(
+            itemStore, categoryService,
+            voiceTranscriptionService = VoiceTranscriptionService { _ -> "discuss the reactor pattern in spring" }
+        )
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-voice-ok",
+                voice = TelegramVoicePayload(fileId = "f-ok", fileUniqueId = "u-ok", mimeType = "audio/ogg")
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
+        assertEquals("discuss the reactor pattern in spring", stored.rawTranscript)
+        assertNotNull(stored.cleanedText)
+        assertNull(stored.failureStage)
+        assertNull(stored.failureReason)
+    }
+
+    // V2: rawTranscript is included in keyword search (FR-19)
+    @Test
+    fun `keyword search matches raw transcript of approved voice items`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(
+            itemStore, categoryService,
+            voiceTranscriptionService = VoiceTranscriptionService { _ -> "discuss the reactor pattern in spring" }
+        )
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-voice-search",
+                voice = TelegramVoicePayload(fileId = "f-s", fileUniqueId = "u-s")
+            )
+        )
+        reviewService.approve(item.id)
+
+        val results = itemService.listApproved(ItemListQueryRequest(keyword = "reactor"))
+        assertEquals(1, results.size)
+        assertEquals(item.id, results.single().id)
+    }
+
+    // V3: Telegram download failure produces correct failure stage and preserves traceability
+    @Test
+    fun `telegram download failure produces transcription failed state and preserves trace metadata`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(
+            itemStore, categoryService,
+            voiceTranscriptionService = VoiceTranscriptionService { _ ->
+                throw IllegalStateException("Telegram file download failed with status 403")
+            }
+        )
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-voice-dl-fail",
+                voice = TelegramVoicePayload(fileId = "f-dl-fail", fileUniqueId = "u-dl-fail")
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, stored.status)
+        assertEquals(FailureStage.TRANSCRIPTION, stored.failureStage)
+        assertTrue(stored.failureReason!!.contains("403"))
+        assertEquals("f-dl-fail", stored.telegramTrace?.telegramFileId)
+        assertNull(stored.rawTranscript)
     }
 
     @Test
@@ -859,12 +949,14 @@ class FoundationServicesTests {
     private fun createProcessingService(
         itemStore: InMemoryItemStore,
         categoryService: CategoryService,
-        aiPort: MemoraAiPort = DeterministicMemoraAiPort()
+        aiPort: MemoraAiPort = DeterministicMemoraAiPort(),
+        voiceTranscriptionService: VoiceTranscriptionService = DisabledVoiceTranscriptionService()
     ): ItemProcessingService =
         ItemProcessingService(
             itemStore = itemStore,
             categoryService = categoryService,
             aiPort = aiPort,
+            voiceTranscriptionService = voiceTranscriptionService,
             properties = testProperties(),
             executor = directExecutor()
         )
@@ -910,6 +1002,7 @@ class FoundationServicesTests {
     private fun testProperties(): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
+            appPassword = null,
             appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
             sessionDays = 30,
             botIngestToken = "bot-token",

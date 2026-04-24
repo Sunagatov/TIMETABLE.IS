@@ -15,10 +15,11 @@ import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTrans
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import java.time.Instant
 import java.util.concurrent.ExecutorService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ItemProcessingService(
+class ItemProcessingService @Autowired constructor(
     private val itemStore: ItemStore,
     private val categoryService: CategoryService,
     private val aiPort: MemoraAiPort,
