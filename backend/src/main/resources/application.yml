@@ -16,7 +16,8 @@ management:
 
 memora:
   allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}
-  app-password: ${BACKEND_APP_PASSWORD:change-me}
+  app-password-hash: ${BACKEND_APP_PASSWORD_HASH:$2y$10$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza}
   session-days: ${BACKEND_SESSION_DAYS:30}
   bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}
+  owner-telegram-user-id: ${MEMORA_OWNER_TELEGRAM_USER_ID:owner-telegram-user-id}
   default-category-path: ${DEFAULT_CATEGORY_PATH:Default/General/Inbox}

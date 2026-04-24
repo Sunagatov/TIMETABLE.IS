@@ -21,7 +21,23 @@ enum class ItemStatus {
     HUMAN_APPROVED,
     HUMAN_EDITED_APPROVED,
     REJECTED,
-    DELETED
+    DELETED;
+
+    companion object {
+        fun reviewableStatuses(): Set<ItemStatus> = setOf(AI_PROCESSED_UNREVIEWED)
+
+        fun failureStatuses(): Set<ItemStatus> = setOf(TRANSCRIPTION_FAILED, AI_PROCESSING_FAILED)
+
+        fun approvedStatuses(): Set<ItemStatus> = setOf(HUMAN_APPROVED, HUMAN_EDITED_APPROVED)
+    }
+}
+
+enum class FailureStage {
+    RECEPTION,
+    TELEGRAM_FILE_FETCH,
+    TRANSCRIPTION,
+    AI_PROCESSING,
+    PERSISTENCE
 }
 
 enum class Priority {

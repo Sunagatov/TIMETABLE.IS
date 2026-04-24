@@ -18,6 +18,6 @@ class TelegramIngestController(
         @Valid @RequestBody request: TelegramIngestRequest
     ): TelegramIngestAcceptedResponse {
         val item = telegramCaptureService.ingest(request)
-        return TelegramIngestAcceptedResponse(mindraftId = item.mindraftId)
+        return TelegramIngestAcceptedResponse(memoraId = item.id)
     }
 }

@@ -10,7 +10,7 @@ export function ReviewItemCard({ item }: Props) {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {item.mindraftId}
+            {item.memoraId}
           </p>
           <h2 className="mt-1 text-lg font-semibold">{item.title}</h2>
         </div>

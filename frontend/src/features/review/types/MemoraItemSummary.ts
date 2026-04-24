@@ -1,6 +1,6 @@
 export type MemoraItemSummary = {
   id: string;
-  mindraftId: string;
+  memoraId: string;
   title: string;
   cleanedText: string;
   type: string;

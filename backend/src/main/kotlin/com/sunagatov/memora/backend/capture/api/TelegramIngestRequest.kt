@@ -20,8 +20,17 @@ data class TelegramIngestRequest(
     val telegramMessageId: String,
     val text: String? = null,
     val voice: TelegramVoicePayload? = null
-)
+) {
+    init {
+        val hasText = !text.isNullOrBlank()
+        val hasVoice = voice != null
+
+        require(hasText.xor(hasVoice)) {
+            "Exactly one of text or voice must be provided"
+        }
+    }
+}
 
 data class TelegramIngestAcceptedResponse(
-    val mindraftId: String
+    val memoraId: String
 )

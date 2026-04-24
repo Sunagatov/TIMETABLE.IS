@@ -1,5 +1,8 @@
 package com.sunagatov.memora.backend.review.application
 
+import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
+import com.sunagatov.memora.backend.item.application.ItemService
+import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.store.ItemStore
@@ -8,29 +11,34 @@ import org.springframework.stereotype.Service
 
 @Service
 class ReviewService(
-    private val itemStore: ItemStore
+    private val itemStore: ItemStore,
+    private val itemService: ItemService
 ) {
 
     fun getNeedsReview(): List<MemoraItem> =
-        itemStore.findByStatuses(setOf(ItemStatus.AI_PROCESSED_UNREVIEWED))
+        itemStore.findByStatuses(ItemStatus.reviewableStatuses())
 
     fun getFailures(): List<MemoraItem> =
-        itemStore.findByStatuses(setOf(ItemStatus.TRANSCRIPTION_FAILED, ItemStatus.AI_PROCESSING_FAILED))
-
-    fun getApproved(): List<MemoraItem> =
-        itemStore.findByStatuses(setOf(ItemStatus.HUMAN_APPROVED, ItemStatus.HUMAN_EDITED_APPROVED))
+        itemStore.findByStatuses(ItemStatus.failureStatuses())
 
     fun approve(itemId: String): MemoraItem {
         val item = requireItem(itemId)
+        require(item.status in ItemStatus.reviewableStatuses()) { "Only reviewable items can be approved" }
         val next = item.copy(
             status = ItemStatus.HUMAN_APPROVED,
+            failureStage = null,
+            failureReason = null,
             updatedAt = Instant.now()
         )
         return itemStore.save(next)
     }
 
+    fun editAndApprove(itemId: String, request: EditAndApproveRequest): MemoraItem =
+        itemService.updateItem(itemId, request.toUpdateItemRequest())
+
     fun reject(itemId: String): MemoraItem {
         val item = requireItem(itemId)
+        require(item.status in ItemStatus.reviewableStatuses()) { "Only reviewable items can be rejected" }
         val next = item.copy(
             status = ItemStatus.REJECTED,
             updatedAt = Instant.now()
@@ -38,12 +46,39 @@ class ReviewService(
         return itemStore.save(next)
     }
 
-    fun delete(itemId: String): MemoraItem {
+    fun deleteToTrash(itemId: String): MemoraItem {
         val item = requireItem(itemId)
         val next = item.copy(
             status = ItemStatus.DELETED,
             updatedAt = Instant.now()
         )
+        return itemStore.save(next)
+    }
+
+    fun retry(itemId: String): MemoraItem {
+        val item = requireItem(itemId)
+        require(item.status in ItemStatus.failureStatuses()) { "Only failed items can be retried" }
+
+        val next = when (item.failureStage) {
+            FailureStage.TRANSCRIPTION -> item.copy(
+                retryCountTranscription = item.retryCountTranscription + 1,
+                failureReason = "Retry requested, but transcription is not implemented in the backend foundation yet",
+                updatedAt = Instant.now()
+            )
+
+            FailureStage.AI_PROCESSING -> item.copy(
+                retryCountAi = item.retryCountAi + 1,
+                status = ItemStatus.AI_PROCESSED_UNREVIEWED,
+                failureStage = null,
+                failureReason = null,
+                updatedAt = Instant.now()
+            )
+
+            else -> item.copy(
+                updatedAt = Instant.now()
+            )
+        }
+
         return itemStore.save(next)
     }
 

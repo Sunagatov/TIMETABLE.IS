@@ -33,7 +33,7 @@ class BackendClient(
         }
 
         val parsed = mapper.readTree(response.body())
-        return parsed["mindraftId"]?.asText()
-            ?: throw IllegalStateException("Backend response did not contain mindraftId")
+        return parsed["memoraId"]?.asText()
+            ?: throw IllegalStateException("Backend response did not contain memoraId")
     }
 }

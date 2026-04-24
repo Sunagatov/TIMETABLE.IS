@@ -3,16 +3,18 @@ package com.sunagatov.memora.backend.auth.session
 import com.sunagatov.memora.backend.config.MemoraProperties
 import java.time.Instant
 import java.util.UUID
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
 class SessionService(
     private val store: SessionStore,
-    private val properties: MemoraProperties
+    private val properties: MemoraProperties,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     fun login(password: String): String {
-        if (password != properties.appPassword) {
+        if (!passwordEncoder.matches(password, properties.appPasswordHash)) {
             throw IllegalArgumentException("Invalid password")
         }
 
