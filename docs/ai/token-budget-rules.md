@@ -10,6 +10,8 @@ Prefer:
 - one or two compact docs
 - exact feature files only
 - `docs/ai/current-bootstrap-state.md` before rediscovering current backend status from code
+- `docs/ai/api-surface.md` before reading controller source for endpoint/DTO shapes
+- `backend/AGENTS.md` for filter param names, state guards, sort format, config keys
 
 Avoid:
 - whole-repo scans
@@ -34,8 +36,36 @@ Before opening more code, prefer:
 - `docs/ai/architecture.md`
 - `docs/ai/invariants.md`
 - `docs/ai/current-bootstrap-state.md`
-- `docs/ai/api-surface.md` when working on endpoints or DTOs
-- `docs/ai/implementation-sequence.md` over `implementation-order.md` unless you only need the shorthand summary
+- `docs/ai/api-surface.md` when working on endpoints, DTOs, or filter params
+- `backend/AGENTS.md` when touching state guards, category behavior, or test patterns
+- `frontend/AGENTS.md` when touching filters, query keys, or component structure
+- `docs/ai/implementation-sequence.md` for current completion status
+
+## Known high-risk areas (read carefully before touching)
+
+### Filter param names
+Frontend sends `createdFrom`/`createdTo`. Backend reads `createdFrom`/`createdTo`.
+**Do not change to `dateFrom`/`dateTo`.** This was a past bug that silently broke all date range filtering.
+
+### Sort format
+Backend parses sort as `field-direction` strings. Valid: `createdAt-asc`, `createdAt-desc`, `title-asc`, `title-desc`, `category-asc`, `category-desc`.
+Do not invent new sort field names — `ItemQueryService.parseSort()` will throw `IllegalArgumentException`.
+
+### Category path assignment
+Before assigning a category path to an item, `CategoryService.requireExistingPath()` must be called.
+It throws `IllegalArgumentException` if the path doesn't exist as a registered category.
+
+### `aiCategoryPath` vs `categoryPath`
+`CategoryService.rename()` updates `categoryPath` on linked items but intentionally does NOT update `aiCategoryPath`.
+Do not change this behavior — it preserves original AI output history.
+
+### `notificationId` format
+Failure notification IDs are `"${item.id}:${item.updatedAt.epochSecond}"`.
+They are re-derived each poll, not persisted. If an item is retried and fails again with a new `updatedAt`, a new `notificationId` is generated — allowing re-delivery.
+
+### Frontend "ALL" sentinel
+Filter state uses `"ALL"` as the "no filter selected" sentinel for select dropdowns.
+`buildQuery()` in `reviewApi.ts` strips it before building the URL. Never send `"ALL"` to backend.
 
 ## Editing strategy
 
@@ -43,3 +73,4 @@ Before opening more code, prefer:
 - avoid stylistic churn during requirement-driven work
 - avoid speculative abstractions
 - avoid deployment assumptions that belong in Vault
+- when changing filter params in any layer, update all three layers: backend DTO, frontend types, frontend filter bar components
