@@ -40,8 +40,8 @@ const DEFAULT_NR_FILTERS: NeedsReviewFilters = {
   category: "",
   subcategory: "",
   subsubcategory: "",
-  dateFrom: "",
-  dateTo: "",
+  createdFrom: "",
+  createdTo: "",
   sort: "createdAt-desc"
 };
 
@@ -50,8 +50,8 @@ const DEFAULT_FAIL_FILTERS: FailuresFilters = {
   category: "",
   subcategory: "",
   subsubcategory: "",
-  dateFrom: "",
-  dateTo: ""
+  createdFrom: "",
+  createdTo: ""
 };
 
 const DEFAULT_APPROVED_FILTERS: ApprovedFilters = {
@@ -62,8 +62,8 @@ const DEFAULT_APPROVED_FILTERS: ApprovedFilters = {
   category: "",
   subcategory: "",
   subsubcategory: "",
-  dateFrom: "",
-  dateTo: "",
+  createdFrom: "",
+  createdTo: "",
   sort: "createdAt-desc"
 };
 
@@ -77,7 +77,8 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   const [failFilters, setFailFilters] = useState<FailuresFilters>(DEFAULT_FAIL_FILTERS);
   const [approvedFilters, setApprovedFilters] = useState<ApprovedFilters>(DEFAULT_APPROVED_FILTERS);
   const [categoryFilter, setCategoryFilter] = useState<CategoryPathFilter>(EMPTY_CATEGORY_FILTER);
-  useQueryClient();
+  const queryClient = useQueryClient();
+
   const nrParams = toListParams(nrFilters);
   const failParams = toListParams(failFilters);
   const approvedParams = toListParams(approvedFilters);
@@ -125,14 +126,18 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     enabled: Boolean(selectedItemId)
   });
 
-  const { handleApprove, handleEditAndApprove, handleSave, handleReject, handleDelete, handleRetry, refreshAll } =
+  const { handleApprove, handleEditAndApprove, handleSave, handleReject, handleDelete, handleRetry} =
     useReviewActions({ setBusyAction, setSelectedItemId });
 
   async function runCategoryAction(action: string, handler: () => Promise<unknown>) {
     setBusyAction(action);
     try {
       await handler();
-      await refreshAll();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["review"] }),
+        queryClient.invalidateQueries({ queryKey: ["item"] }),
+        queryClient.invalidateQueries({ queryKey: ["categories"] })
+      ]);
     } finally {
       setBusyAction(null);
     }

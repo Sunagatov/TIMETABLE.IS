@@ -43,11 +43,11 @@ Current status:
 - category sidebar
 
 Current status:
-- present as a review-first starter
+- complete as a backend-backed review-first workspace
 - default landing is Needs Review
-- approved list is approved-only by default
-- category sidebar is present
-- approved/review/failure lists now accept backend query params for keyword, type, status, category path, priority, date range, and sort
+- all three views (Needs Review, Failures, Approved) use backend-backed query params
+- query params: keyword, type, priority, status, category path (category/subcategory/subsubcategory), createdFrom, createdTo, sort
+- item detail shows AI output vs human-facing comparison with all review actions
 
 ## Phase 5 — category management
 - create
@@ -57,7 +57,9 @@ Current status:
 
 Current status:
 - backend category CRUD baseline exists
-- category management UI is still future work
+- category rename cascades to linked items
+- category delete is blocked when non-empty
+- frontend category management UI is present (collapsible sidebar section with create/rename/delete)
 
 ## Rule
 

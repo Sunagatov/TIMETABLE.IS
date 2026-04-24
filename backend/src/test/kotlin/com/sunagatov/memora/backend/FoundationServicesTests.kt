@@ -11,7 +11,9 @@ import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
 import com.sunagatov.memora.backend.config.MemoraProperties
+import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
+import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.application.ItemQueryService
@@ -21,6 +23,7 @@ import com.sunagatov.memora.backend.item.store.InMemoryItemStore
 import com.sunagatov.memora.backend.review.application.ReviewService
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
@@ -114,7 +117,7 @@ class FoundationServicesTests {
 
         val approved = reviewService.editAndApprove(
             ingested.id,
-            com.sunagatov.memora.backend.item.api.EditAndApproveRequest(
+            EditAndApproveRequest(
                 categoryPath = CategoryPathRequest("Work", "Backend", "Memora")
             )
         )
@@ -217,6 +220,166 @@ class FoundationServicesTests {
         notificationService.markDelivered(notifications.single().notificationId)
 
         assertEquals(0, notificationService.listPending().size)
+    }
+
+    // T1: owner-only Telegram acceptance (FR-01)
+    @Test
+    fun `ingest rejects messages from non-owner telegram user`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        assertFailsWith<IllegalArgumentException> {
+            service.ingest(
+                TelegramIngestRequest(
+                    telegramUserId = "not-the-owner",
+                    telegramChatId = "chat-1",
+                    telegramMessageId = "msg-10",
+                    text = "this should be rejected"
+                )
+            )
+        }
+
+        assertEquals(0, itemStore.findAll().size)
+    }
+
+    // T2: exactly one of text or voice required (FR-02)
+    @Test
+    fun `ingest request rejects both text and voice present`() {
+        assertFailsWith<IllegalArgumentException> {
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-11",
+                text = "some text",
+                voice = TelegramVoicePayload(fileId = "f", fileUniqueId = "u")
+            )
+        }
+    }
+
+    @Test
+    fun `ingest request rejects neither text nor voice present`() {
+        assertFailsWith<IllegalArgumentException> {
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-12"
+            )
+        }
+    }
+
+    // T3: direct PATCH is approved-only
+    @Test
+    fun `direct item patch rejected for non-approved item`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-13",
+                text = "needs review item"
+            )
+        )
+
+        // Item is in AI_PROCESSED_UNREVIEWED — direct patch must be rejected
+        assertFailsWith<IllegalArgumentException> {
+            itemService.updateItem(ingested.id, UpdateItemRequest(title = "Changed"))
+        }
+    }
+
+    // T4: edit-and-approve only works on reviewable items
+    @Test
+    fun `edit-and-approve rejected for already approved item`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-14",
+                text = "already approved item"
+            )
+        )
+        reviewService.approve(ingested.id)
+
+        // Already approved — edit-and-approve must be rejected
+        assertFailsWith<IllegalArgumentException> {
+            reviewService.editAndApprove(ingested.id, EditAndApproveRequest(title = "Cannot re-approve"))
+        }
+    }
+
+    // T5: retry is only allowed on failed items
+    @Test
+    fun `retry rejected for reviewable item`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-15",
+                text = "reviewable item"
+            )
+        )
+
+        // Item is in AI_PROCESSED_UNREVIEWED — retry must be rejected
+        assertFailsWith<IllegalArgumentException> {
+            reviewService.retry(ingested.id)
+        }
+    }
+
+    // T6: category delete blocked when non-empty
+    @Test
+    fun `category delete blocked when category path is still used by an item`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = ReviewService(itemStore, itemService, processingService, ItemQueryService())
+
+        val customCategory = categoryService.create(
+            CreateCategoryRequest(
+                path = CategoryPathRequest(
+                    category = "Work",
+                    subcategory = "Ops",
+                    subsubcategory = "Infra"
+                )
+            )
+        )
+
+        val ingested = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-16",
+                text = "idea about infra"
+            )
+        )
+        reviewService.editAndApprove(
+            ingested.id,
+            EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Ops", "Infra"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            categoryService.delete(customCategory.id)
+        }
     }
 
     private fun createCategoryService(itemStore: InMemoryItemStore): CategoryService =

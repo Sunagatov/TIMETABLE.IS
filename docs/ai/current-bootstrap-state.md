@@ -19,8 +19,11 @@ It is not yet the full target V1 implementation.
 - backend separation of original AI output vs latest human-facing item values
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend in-memory stores for items, sessions, and categories
-- frontend session-aware login + review workspace starter
-- frontend review workspace now includes default Needs Review landing, Failures, approved list, category sidebar, category CRUD shell, edit panel, and client-side approved search/filter/sort shell
+- frontend session-aware login + review workspace
+- frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
+- frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
+- frontend category sidebar with collapsible 3-level tree and category management UI (create, rename, delete)
+- frontend item detail panel with AI output vs human-facing value comparison and all review actions
 - Kotlin telegram bot starter
 - stable stack versions
 
@@ -29,7 +32,6 @@ It is not yet the full target V1 implementation.
 - Mongo persistence is not implemented yet
 - transcription is not implemented yet
 - AI integration is not implemented yet
-- category CRUD management UI is present as a shell
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter
@@ -51,7 +53,7 @@ It is not yet the full target V1 implementation.
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID
 - Telegram bot currently uses Telegram long polling, not webhook delivery
-- current frontend behavior stays review-first: default landing is Needs Review, approved list is approved-only, and the approved shell exposes status/date/category filters while backend lists now accept matching query params
+- all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `subsubcategory`, `createdFrom`, `createdTo`, `sort`
 
 ## Default backend validation
 
