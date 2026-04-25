@@ -46,6 +46,7 @@ Useful recent stability facts:
 - deterministic AI is local/dev/test fallback only; real V1 polishing requires `MEMORA_AI_MODE=openai`
 - production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
 - the canonical AI-doc drift checker lives at `.project/scripts/ai/check-ai-docs.sh`
+- there is no root `scripts/ai/check-ai-docs.sh` wrapper
 
 ## Updating Docs
 

@@ -117,6 +117,7 @@ check_absent_path "old_docs"
 check_absent_path "copied_docs"
 check_absent_path ".patch-backup"
 check_absent_path "patch-backup"
+check_absent_path "scripts/ai/check-ai-docs.sh"
 
 check_no_root_patch_artifacts
 

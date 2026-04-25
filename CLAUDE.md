@@ -19,5 +19,6 @@ Claude-specific habits:
 - avoid loading denied secret/env paths
 - prefer exact file reads over whole-repo summaries
 - keep adapters thin; put durable project facts in `.project/docs/ai/*`
+- there is no root `scripts/ai/check-ai-docs.sh` wrapper; use `bash .project/scripts/ai/check-ai-docs.sh`
 - report changed files and validation commands when finishing implementation work
 - run `bash .project/scripts/ai/check-ai-docs.sh` after canonical doc or adapter changes

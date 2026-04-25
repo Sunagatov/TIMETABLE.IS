@@ -24,4 +24,5 @@ When finishing work, report:
 - commands not run and why
 
 Do not duplicate long current-state facts here. Update `.project/docs/ai/*` instead when behavior, contracts, routing, or repo structure changes.
+There is no root `scripts/ai/check-ai-docs.sh` wrapper. Use `bash .project/scripts/ai/check-ai-docs.sh`.
 Run `bash .project/scripts/ai/check-ai-docs.sh` after canonical doc or adapter changes.
