@@ -47,6 +47,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 
 - real V1 text polishing requires `MEMORA_AI_MODE=openai`; deterministic AI is a local/dev/test fallback only
 - production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false` so missing or broken real AI becomes a visible startup/configuration failure instead of fake success
+- backend production validation is real code now: when enabled, startup rejects deterministic AI mode, blank AI key/base URL/model, and enabled deterministic fallback
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter

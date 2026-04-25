@@ -44,6 +44,7 @@ Production-like AI safety:
 - production-like runtime should set `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
 - when production validation is enabled, startup fails unless AI mode is `openai`, `MEMORA_AI_API_KEY` is non-blank, `MEMORA_AI_API_BASE_URL` is non-blank, `MEMORA_AI_MODEL` is non-blank, and deterministic AI fallback is disabled
 - missing or broken real AI must become visible startup/configuration failure, not fake success
+- the same validator also activates for Spring `prod` / `production` profiles
 
 ## Backend validation commands
 

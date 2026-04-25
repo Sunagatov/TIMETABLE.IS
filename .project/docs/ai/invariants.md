@@ -93,6 +93,7 @@
 - real V1 text polishing requires `MEMORA_AI_MODE=openai`
 - production-like runtime must enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
 - production-like runtime must fail fast on unsafe AI config instead of silently falling back to deterministic output
+- production validation must reject deterministic AI mode, blank AI key/base URL/model, and enabled deterministic fallback
 - voice transcription is **live** via self-hosted Whisper (`whisper-worker`) — Memora backend calls `http://whisper-worker:8000/v1/audio/transcriptions`; deployment owned by Vault (`apps/whisper/`)
 - MongoDB persistence is **active** in production
 

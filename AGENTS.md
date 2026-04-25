@@ -18,6 +18,8 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 
 - Backend is the source of truth.
 - Telegram is a thin adapter, not the center of the architecture.
+- Deterministic AI is local/dev/test fallback only; real V1 text polishing requires `MEMORA_AI_MODE=openai`.
+- Production-like runtime should prefer visible AI failure by enabling `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keeping `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`.
 - Do not add out-of-scope V1 features.
 - Do not move Vault runtime/deployment truth into this repo.
 - Do not include secrets, tokens, or private credentials in docs, examples, commits, or output.

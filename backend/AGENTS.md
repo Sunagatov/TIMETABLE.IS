@@ -150,6 +150,10 @@ All three list endpoints share the same query param model:
 - `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` (default: true; local/dev-only escape hatch)
 - `MEMORA_VALIDATE_PRODUCTION_CONFIG` (default: false; also active for `prod`/`production` Spring profiles and rejects unsafe AI fallback/config)
 
+Production-AI safety anchor points:
+- `config/ProductionConfigValidator.kt` enforces production-like fail-fast validation
+- `BackendHardeningTests.kt` covers deterministic mode rejection, blank AI config rejection, fallback rejection, and local deterministic allowance when production validation is off
+
 ## Rules
 
 - do not let Telegram-specific concepts define domain logic

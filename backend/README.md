@@ -83,3 +83,7 @@ Production safety:
   password override, missing owner Telegram user ID, non-`openai` AI mode,
   blank `MEMORA_AI_API_KEY`, blank `MEMORA_AI_API_BASE_URL`, blank
   `MEMORA_AI_MODEL`, or enabled deterministic AI fallback.
+- Deterministic AI remains acceptable only for local/dev/test when production validation is off.
+- Real V1 product behavior requires `MEMORA_AI_MODE=openai`.
+- Production-like runtime should keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+  so broken or missing real AI becomes visible failure instead of fake success.

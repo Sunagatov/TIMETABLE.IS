@@ -45,6 +45,7 @@ Detailed current implementation state lives in:
 - `.project/docs/ai/current-state.md`
 - `.project/docs/ai/api-surface.md`
 - `.project/docs/ai/invariants.md`
+- `.project/docs/ai/env-runtime-reference.md`
 - `.project/docs/ai/repo-map.md`
 - `.project/docs/ai/frontend-v1-mvp.md` for detailed frontend agent guidance
 
@@ -75,6 +76,14 @@ For implementation work:
    - `telegram-bot/AGENTS.md`
 
 Do not start by scanning the whole repository.
+
+## High-Signal Safety Facts
+
+- backend remains the source of truth; telegram bot stays thin
+- deterministic AI is local/dev/test fallback only
+- real V1 text AI behavior requires `MEMORA_AI_MODE=openai`
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true`
+- production-like runtime should keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false` so broken or missing real AI is visible instead of silently downgraded
 
 ## Stack At A Glance
 
