@@ -1,5 +1,7 @@
 package com.sunagatov.memora.backend
 
+import com.sunagatov.memora.backend.capture.api.TELEGRAM_BOT_TOKEN_HEADER
+import com.sunagatov.memora.backend.capture.api.TELEGRAM_CAPTURE_INGEST_PATH
 import com.sunagatov.memora.backend.capture.security.BotIngestTokenFilter
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.config.ProductionConfigValidator
@@ -18,11 +20,11 @@ class BackendHardeningTests {
     @Test
     fun `bot ingest filter does not accept blank configured token`() {
         val filter = BotIngestTokenFilter(testProperties(botIngestToken = ""))
-        val request = MockHttpServletRequest("POST", "/api/capture/telegram/ingest")
+        val request = MockHttpServletRequest("POST", TELEGRAM_CAPTURE_INGEST_PATH)
         val response = MockHttpServletResponse()
         var reachedController = false
 
-        request.addHeader("X-Memora-Bot-Token", "")
+        request.addHeader(TELEGRAM_BOT_TOKEN_HEADER, "")
         filter.doFilter(request, response) { _, _ -> reachedController = true }
 
         assertEquals(500, response.status)

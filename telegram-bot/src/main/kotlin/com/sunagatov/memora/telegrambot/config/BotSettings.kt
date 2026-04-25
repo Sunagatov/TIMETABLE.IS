@@ -1,5 +1,9 @@
 package com.sunagatov.memora.telegrambot.config
 
+import com.sunagatov.memora.telegrambot.backend.DEFAULT_BACKEND_BASE_URL
+import com.sunagatov.memora.telegrambot.backend.DEFAULT_BACKEND_FAILURE_NOTIFICATIONS_PATH
+import com.sunagatov.memora.telegrambot.backend.DEFAULT_BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE
+import com.sunagatov.memora.telegrambot.backend.DEFAULT_BACKEND_INGEST_PATH
 import java.net.URI
 
 data class BotSettings(
@@ -27,17 +31,17 @@ data class BotSettings(
                 ingestPath = envOrDefault(
                     env,
                     "BACKEND_TELEGRAM_INGEST_PATH",
-                    "/api/capture/telegram/ingest"
+                    DEFAULT_BACKEND_INGEST_PATH
                 ),
                 failureNotificationsPath = envOrDefault(
                     env,
                     "BACKEND_FAILURE_NOTIFICATIONS_PATH",
-                    "/api/capture/telegram/failure-notifications"
+                    DEFAULT_BACKEND_FAILURE_NOTIFICATIONS_PATH
                 ),
                 failureNotificationAckPathTemplate = envOrDefault(
                     env,
                     "BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE",
-                    "/api/capture/telegram/failure-notifications/%s/delivered"
+                    DEFAULT_BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE
                 ),
                 failurePollIntervalSeconds = atLeastOne(
                     env,
@@ -52,9 +56,9 @@ data class BotSettings(
             )
 
         private fun backendBaseUrl(env: Map<String, String>): String {
-            val value = envOrDefault(env, "BACKEND_BASE_URL", "http://localhost:8080")
+            val value = envOrDefault(env, "BACKEND_BASE_URL", DEFAULT_BACKEND_BASE_URL)
                 .trim()
-                .ifBlank { "http://localhost:8080" }
+                .ifBlank { DEFAULT_BACKEND_BASE_URL }
                 .removeSuffix("/")
 
             val uri = runCatching { URI(value) }.getOrElse {

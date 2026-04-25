@@ -3,6 +3,7 @@ package com.sunagatov.memora.backend.auth.security
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.sunagatov.memora.backend.auth.session.SessionCookieFactory
 import com.sunagatov.memora.backend.auth.session.SessionService
+import com.sunagatov.memora.backend.capture.api.TELEGRAM_CAPTURE_BASE_PATH
 import com.sunagatov.memora.backend.common.api.ApiErrorResponse
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -23,7 +24,7 @@ class SessionAuthFilter(
         return !path.startsWith("/api/")
             || path.startsWith("/api/health")
             || path.startsWith("/api/auth/")
-            || path.startsWith("/api/capture/telegram/")
+            || path.startsWith("$TELEGRAM_CAPTURE_BASE_PATH/")
     }
 
     override fun doFilterInternal(

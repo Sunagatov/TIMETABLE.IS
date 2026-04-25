@@ -38,9 +38,8 @@ class BackendClient(
 
     override fun fetchFailureNotifications(): List<TelegramFailureNotification> {
         val response = send(
-            requestBuilder(settings.failureNotificationsPath)
+            authorizedRequestBuilder(settings.failureNotificationsPath)
                 .header("Accept", "application/json")
-                .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .GET()
                 .build()
         )
@@ -58,8 +57,7 @@ class BackendClient(
     override fun acknowledgeFailureNotification(notificationId: String) {
         val encodedNotificationId = encodePathSegment(notificationId)
         send(
-            requestBuilder(settings.failureNotificationAckPathTemplate.format(encodedNotificationId))
-                .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
+            authorizedRequestBuilder(settings.failureNotificationAckPathTemplate.format(encodedNotificationId))
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build()
         )
@@ -68,10 +66,9 @@ class BackendClient(
     private inline fun <reified T> post(path: String, requestBody: Any): T {
         val payload = mapper.writeValueAsString(requestBody)
         val response = send(
-            requestBuilder(path)
+            authorizedRequestBuilder(path)
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build()
         )
@@ -101,6 +98,10 @@ class BackendClient(
         HttpRequest.newBuilder()
             .uri(uri(path))
             .timeout(timeout)
+
+    private fun authorizedRequestBuilder(path: String): HttpRequest.Builder =
+        requestBuilder(path)
+            .header(BOT_TOKEN_HEADER, settings.backendBotIngestToken)
 
     private fun normalizePath(path: String): String =
         if (path.startsWith("/")) path else "/$path"

@@ -27,7 +27,7 @@ class BackendClientTest {
         var seenBody = ""
         startServer { exchange ->
             seenPath = exchange.requestURI.path
-            seenToken = exchange.requestHeaders.getFirst("X-Memora-Bot-Token")
+            seenToken = exchange.requestHeaders.getFirst(BOT_TOKEN_HEADER)
             seenBody = exchange.requestBody.readBytes().toString(Charsets.UTF_8)
             exchange.respond("""{"memoraId":"item-123"}""")
         }
@@ -120,7 +120,7 @@ class BackendClientTest {
 
         client().acknowledgeFailureNotification("item 1:456")
 
-        assertEquals("/api/capture/telegram/failure-notifications/item%201%3A456/delivered", seenPath)
+        assertEquals(DEFAULT_BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE.format("item%201%3A456"), seenPath)
     }
 
     @Test
@@ -145,7 +145,7 @@ class BackendClientTest {
         }
     }
 
-    private fun client(ingestPath: String = "/api/capture/telegram/ingest"): BackendClient =
+    private fun client(ingestPath: String = DEFAULT_BACKEND_INGEST_PATH): BackendClient =
         BackendClient(
             BotSettings.fromMap(
                 mapOf(

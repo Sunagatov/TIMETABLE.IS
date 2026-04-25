@@ -43,7 +43,7 @@ class MemoraLongPollingBotTest {
 
         assertEquals(emptyList(), backend.textRequests)
         assertEquals(emptyList(), backend.voiceRequests)
-        assertEquals(listOf(SentMessage("456", supportedInputMessage)), sender.messages)
+        assertEquals(listOf(SentMessage("456", BotMessages.supportedInput)), sender.messages)
     }
 
     @Test
@@ -53,7 +53,7 @@ class MemoraLongPollingBotTest {
 
         bot.consume(mutableListOf(updateWithEmptyMessage()))
 
-        assertEquals(listOf(SentMessage("456", supportedInputMessage)), sender.messages)
+        assertEquals(listOf(SentMessage("456", BotMessages.supportedInput)), sender.messages)
     }
 
     @Test
@@ -81,7 +81,7 @@ class MemoraLongPollingBotTest {
         assertEquals("remember this", backend.textRequests.single().text)
         assertEquals(emptyList(), backend.voiceRequests)
         assertEquals(
-            listOf(SentMessage("456", "Accepted. Processing asynchronously. Memora ID: item-text")),
+            listOf(SentMessage("456", BotMessages.accepted("item-text"))),
             sender.messages
         )
     }
@@ -99,7 +99,7 @@ class MemoraLongPollingBotTest {
         assertEquals(12345L, backend.voiceRequests.single().voice?.fileSizeBytes)
         assertEquals(emptyList(), backend.textRequests)
         assertEquals(
-            listOf(SentMessage("456", "Accepted. Processing asynchronously. Memora ID: item-voice")),
+            listOf(SentMessage("456", BotMessages.accepted("item-voice"))),
             sender.messages
         )
     }
@@ -159,7 +159,7 @@ class MemoraLongPollingBotTest {
             listOf(
                 SentMessage(
                     "456",
-                    "Processing failed.\nMemora ID: item-1\nFailed stage: transcription\nSummary: failed"
+                    BotMessages.failureNotification(failureNotification("n-1"))
                 )
             ),
             sender.messages
@@ -317,8 +317,4 @@ class MemoraLongPollingBotTest {
     }
 
     private data class SentMessage(val chatId: String, val text: String)
-
-    private companion object {
-        const val supportedInputMessage = "Supported inputs: text messages and voice notes. Commands: /start, /help."
-    }
 }

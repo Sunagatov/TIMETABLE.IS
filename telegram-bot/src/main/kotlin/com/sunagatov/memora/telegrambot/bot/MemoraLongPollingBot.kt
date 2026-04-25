@@ -40,7 +40,7 @@ class MemoraLongPollingBot(
             return
         }
         if (isCommand(message.text)) {
-            sendMessage(chatId, supportedInputMessage())
+            sendMessage(chatId, BotMessages.supportedInput)
             return
         }
 
@@ -54,7 +54,7 @@ class MemoraLongPollingBot(
             return
         }
 
-        sendMessage(chatId, supportedInputMessage())
+        sendMessage(chatId, BotMessages.supportedInput)
     }
 
     private fun acceptIngest(
@@ -64,22 +64,10 @@ class MemoraLongPollingBot(
     ) {
         try {
             val accepted = action()
-            sendMessage(
-                chatId,
-                "Accepted. Processing asynchronously. Memora ID: ${accepted.memoraId}"
-            )
+            sendMessage(chatId, BotMessages.accepted(accepted.memoraId))
         } catch (exception: Exception) {
             logger.error("Failed to process Telegram update at stage={}", stage, exception)
-            sendMessage(
-                chatId,
-                buildString {
-                    append("Failed to process message.")
-                    append("\nStage: ")
-                    append(stage)
-                    append("\nReason: ")
-                    append(exception.message ?: "unknown")
-                }
-            )
+            sendMessage(chatId, BotMessages.processingFailure(stage, exception.message ?: "unknown"))
         }
     }
 
@@ -147,17 +135,7 @@ class MemoraLongPollingBot(
     }
 
     private fun sendFailureNotification(notification: TelegramFailureNotification) {
-        val lines = mutableListOf(
-            "Processing failed.",
-            "Memora ID: ${notification.memoraId}",
-            "Failed stage: ${notification.failedStage}",
-            "Summary: ${notification.summary}"
-        )
-        notification.retryContext
-            ?.takeIf { it.isNotBlank() }
-            ?.let { lines += "Retry context: $it" }
-
-        sendMessage(notification.telegramChatId, lines.joinToString("\n"))
+        sendMessage(notification.telegramChatId, BotMessages.failureNotification(notification))
     }
 
     private fun sendMessage(chatId: String, text: String) {
@@ -179,6 +157,4 @@ class MemoraLongPollingBot(
             ?.substringBefore("@")
             ?.lowercase()
 
-    private fun supportedInputMessage(): String =
-        "Supported inputs: text messages and voice notes. Commands: /start, /help."
 }

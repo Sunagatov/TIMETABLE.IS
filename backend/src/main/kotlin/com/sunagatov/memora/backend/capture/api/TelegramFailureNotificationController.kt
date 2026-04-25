@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/capture/telegram/failure-notifications")
+@RequestMapping(TELEGRAM_FAILURE_NOTIFICATIONS_PATH)
 class TelegramFailureNotificationController(
     private val telegramFailureNotificationService: TelegramFailureNotificationService
 ) {

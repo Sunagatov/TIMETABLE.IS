@@ -1,4 +1,9 @@
 import { useMemo, useState } from "react";
+import {
+  DEFAULT_APPROVED_FILTERS as DEFAULT_APPROVED_FILTERS_STATE,
+  DEFAULT_FAILURE_FILTERS,
+  DEFAULT_NEEDS_REVIEW_FILTERS
+} from "../reviewConstants";
 import type {
   ApprovedFilters,
   CategoryPathFilter,
@@ -10,40 +15,9 @@ import type {
 export type ReviewView = "needs-review" | "failures" | "approved";
 export type MobilePanel = "sidebar" | "list" | "detail";
 
-export const DEFAULT_NR_FILTERS: NeedsReviewFilters = {
-  keyword: "",
-  type: "ALL",
-  priority: "ALL",
-  category: "",
-  subcategory: "",
-  createdFrom: "",
-  createdTo: "",
-  sort: "createdAt-desc"
-};
-
-export const DEFAULT_FAIL_FILTERS: FailuresFilters = {
-  keyword: "",
-  type: "ALL",
-  priority: "ALL",
-  status: "ALL",
-  category: "",
-  subcategory: "",
-  createdFrom: "",
-  createdTo: "",
-  sort: "createdAt-desc"
-};
-
-export const DEFAULT_APPROVED_FILTERS: ApprovedFilters = {
-  keyword: "",
-  type: "ALL",
-  priority: "ALL",
-  status: "ALL",
-  category: "",
-  subcategory: "",
-  createdFrom: "",
-  createdTo: "",
-  sort: "createdAt-desc"
-};
+export const DEFAULT_NR_FILTERS: NeedsReviewFilters = DEFAULT_NEEDS_REVIEW_FILTERS;
+export const DEFAULT_FAIL_FILTERS: FailuresFilters = DEFAULT_FAILURE_FILTERS;
+export const DEFAULT_APPROVED_FILTERS: ApprovedFilters = DEFAULT_APPROVED_FILTERS_STATE;
 
 export function useReviewWorkspaceState() {
   const [view, setView] = useState<ReviewView>("needs-review");

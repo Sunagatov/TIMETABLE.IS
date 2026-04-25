@@ -1,28 +1,11 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
+import {
+  APPROVED_STATUS_FILTER_OPTIONS,
+  ITEM_TYPE_FILTER_OPTIONS,
+  PRIORITY_FILTER_OPTIONS,
+  REVIEW_LIST_SORT_OPTIONS
+} from "../reviewConstants";
 import type { ApprovedFilters, ItemStatus, ItemType, ListSort, MemoraCategory, Priority } from "../types/reviewTypes";
-
-const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
-const PRIORITY_OPTIONS = [
-  "ALL",
-  "URGENT_IMPORTANT",
-  "URGENT_NOT_IMPORTANT",
-  "NOT_URGENT_IMPORTANT",
-  "NOT_URGENT_NOT_IMPORTANT",
-  "NOT_APPLICABLE"
-];
-const STATUS_OPTIONS = [
-  "ALL",
-  "HUMAN_APPROVED",
-  "HUMAN_EDITED_APPROVED"
-];
-const SORT_OPTIONS: ListSort[] = [
-  "createdAt-desc",
-  "createdAt-asc",
-  "title-asc",
-  "title-desc",
-  "category-asc",
-  "category-desc"
-];
 
 type Props = {
   filters: ApprovedFilters;
@@ -54,25 +37,25 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
         <FilterSelect
           label="Type"
           value={filters.type}
-          options={TYPE_OPTIONS}
+          options={ITEM_TYPE_FILTER_OPTIONS}
           onChange={(v) => set({ type: v as ItemType | "ALL" })}
         />
         <FilterSelect
           label="Priority"
           value={filters.priority}
-          options={PRIORITY_OPTIONS}
+          options={PRIORITY_FILTER_OPTIONS}
           onChange={(v) => set({ priority: v as Priority | "ALL" })}
         />
         <FilterSelect
           label="Status"
           value={filters.status}
-          options={STATUS_OPTIONS}
+          options={APPROVED_STATUS_FILTER_OPTIONS}
           onChange={(v) => set({ status: v as Extract<ItemStatus, "HUMAN_APPROVED" | "HUMAN_EDITED_APPROVED"> | "ALL" })}
         />
         <FilterSelect
           label="Sort"
           value={filters.sort}
-          options={SORT_OPTIONS}
+          options={REVIEW_LIST_SORT_OPTIONS}
           onChange={(v) => set({ sort: v as ListSort })}
         />
       </div>

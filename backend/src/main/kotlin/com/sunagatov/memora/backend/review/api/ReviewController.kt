@@ -11,64 +11,66 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping("/api/review")
 class ReviewController(
     private val reviewService: ReviewService
 ) {
 
-    @GetMapping("/api/review/needs-review")
+    @GetMapping("/needs-review")
     fun getNeedsReview(@ModelAttribute query: ItemListQueryRequest): List<MemoraItem> =
         reviewService.getNeedsReview(query)
 
-    @GetMapping("/api/review/failures")
+    @GetMapping("/failures")
     fun getFailures(@ModelAttribute query: ItemListQueryRequest): List<MemoraItem> =
         reviewService.getFailures(query)
 
-    @PostMapping("/api/review/{itemId}/approve")
+    @PostMapping("/{itemId}/approve")
     fun approve(@PathVariable itemId: String): MemoraItem =
         reviewService.approve(itemId)
 
-    @PostMapping("/api/review/{itemId}/edit-and-approve")
+    @PostMapping("/{itemId}/edit-and-approve")
     fun editAndApprove(
         @PathVariable itemId: String,
         @Valid @RequestBody request: EditAndApproveRequest
     ): MemoraItem = reviewService.editAndApprove(itemId, request)
 
-    @PostMapping("/api/review/{itemId}/category-proposal/approve")
+    @PostMapping("/{itemId}/category-proposal/approve")
     fun approveCategoryProposal(@PathVariable itemId: String): MemoraItem =
         reviewService.approveCategoryProposal(itemId)
 
-    @PostMapping("/api/review/{itemId}/category-proposal/reject")
+    @PostMapping("/{itemId}/category-proposal/reject")
     fun rejectCategoryProposal(@PathVariable itemId: String): MemoraItem =
         reviewService.rejectCategoryProposal(itemId)
 
-    @PostMapping("/api/review/{itemId}/reject")
+    @PostMapping("/{itemId}/reject")
     fun reject(@PathVariable itemId: String): MemoraItem =
         reviewService.reject(itemId)
 
-    @DeleteMapping("/api/review/{itemId}/trash")
+    @DeleteMapping("/{itemId}/trash")
     fun deleteToTrash(@PathVariable itemId: String): MemoraItem =
         reviewService.deleteToTrash(itemId)
 
-    @PostMapping("/api/review/{itemId}/retry")
+    @PostMapping("/{itemId}/retry")
     fun retry(@PathVariable itemId: String): MemoraItem =
         reviewService.retry(itemId)
 
-    @PostMapping("/api/review/{itemId}/regenerate-cleaned-text")
+    @PostMapping("/{itemId}/regenerate-cleaned-text")
     fun regenerateCleanedText(@PathVariable itemId: String): MemoraItem =
         reviewService.regenerateCleanedText(itemId)
 
-    @PostMapping("/api/review/{itemId}/regenerate-answer")
+    @PostMapping("/{itemId}/regenerate-answer")
     fun regenerateAnswer(@PathVariable itemId: String): MemoraItem =
         reviewService.regenerateAnswer(itemId)
 
-    @PostMapping("/api/review/{itemId}/regenerate-category-proposal")
+    @PostMapping("/{itemId}/regenerate-category-proposal")
     fun regenerateCategoryProposal(@PathVariable itemId: String): MemoraItem =
         reviewService.regenerateCategoryProposal(itemId)
 
-    @PostMapping("/api/review/{itemId}/regenerate-all")
+    @PostMapping("/{itemId}/regenerate-all")
     fun regenerateAll(@PathVariable itemId: String): MemoraItem =
         reviewService.regenerateAll(itemId)
 }

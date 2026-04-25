@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/capture/telegram")
+@RequestMapping(TELEGRAM_CAPTURE_BASE_PATH)
 class TelegramIngestController(
     private val telegramCaptureService: TelegramCaptureService
 ) {

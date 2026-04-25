@@ -1,23 +1,10 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
+import {
+  ITEM_TYPE_FILTER_OPTIONS,
+  PRIORITY_FILTER_OPTIONS,
+  REVIEW_LIST_SORT_OPTIONS
+} from "../reviewConstants";
 import type { ItemType, ListSort, MemoraCategory, NeedsReviewFilters, Priority } from "../types/reviewTypes";
-
-const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
-const PRIORITY_OPTIONS = [
-  "ALL",
-  "URGENT_IMPORTANT",
-  "URGENT_NOT_IMPORTANT",
-  "NOT_URGENT_IMPORTANT",
-  "NOT_URGENT_NOT_IMPORTANT",
-  "NOT_APPLICABLE"
-];
-const SORT_OPTIONS: ListSort[] = [
-  "createdAt-desc",
-  "createdAt-asc",
-  "title-asc",
-  "title-desc",
-  "category-asc",
-  "category-desc"
-];
 
 type Props = {
   filters: NeedsReviewFilters;
@@ -49,19 +36,19 @@ export function NeedsReviewFiltersBar({ filters, categories, onChange, onReset }
         <FilterSelect
           label="Type"
           value={filters.type}
-          options={TYPE_OPTIONS}
+          options={ITEM_TYPE_FILTER_OPTIONS}
           onChange={(v) => set({ type: v as ItemType | "ALL" })}
         />
         <FilterSelect
           label="Priority"
           value={filters.priority}
-          options={PRIORITY_OPTIONS}
+          options={PRIORITY_FILTER_OPTIONS}
           onChange={(v) => set({ priority: v as Priority | "ALL" })}
         />
         <FilterSelect
           label="Sort"
           value={filters.sort}
-          options={SORT_OPTIONS}
+          options={REVIEW_LIST_SORT_OPTIONS}
           onChange={(v) => set({ sort: v as ListSort })}
         />
       </div>

@@ -102,7 +102,7 @@ class ItemQueryService {
     }
 
     private fun parseSort(sort: String?): SortRequest {
-        val value = sort?.trim().takeIf { !it.isNullOrBlank() } ?: "createdAt-desc"
+        val value = sort?.trim().takeIf { !it.isNullOrBlank() } ?: DEFAULT_SORT
         val parts = value.split("-")
         require(parts.size == 2) { "Invalid sort value: $value" }
 
@@ -136,5 +136,9 @@ class ItemQueryService {
     private enum class SortDirection {
         ASC,
         DESC
+    }
+
+    private companion object {
+        const val DEFAULT_SORT = "createdAt-desc"
     }
 }

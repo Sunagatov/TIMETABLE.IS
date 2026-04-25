@@ -4,6 +4,8 @@ import com.sunagatov.memora.backend.auth.security.SessionAuthFilter
 import com.sunagatov.memora.backend.auth.session.InMemorySessionStore
 import com.sunagatov.memora.backend.auth.session.SessionCookieFactory
 import com.sunagatov.memora.backend.auth.session.SessionService
+import com.sunagatov.memora.backend.capture.api.TELEGRAM_BOT_TOKEN_HEADER
+import com.sunagatov.memora.backend.capture.api.TELEGRAM_CAPTURE_INGEST_PATH
 import com.sunagatov.memora.backend.capture.security.BotIngestTokenFilter
 import com.sunagatov.memora.backend.config.MemoraProperties
 import java.time.Instant
@@ -73,11 +75,11 @@ class AuthSecurityTests {
     @Test
     fun `bot capture endpoint rejects invalid token`() {
         val filter = BotIngestTokenFilter(testProperties(botIngestToken = "expected-token"))
-        val request = MockHttpServletRequest("POST", "/api/capture/telegram/ingest")
+        val request = MockHttpServletRequest("POST", TELEGRAM_CAPTURE_INGEST_PATH)
         val response = MockHttpServletResponse()
         var reachedController = false
 
-        request.addHeader("X-Memora-Bot-Token", "wrong-token")
+        request.addHeader(TELEGRAM_BOT_TOKEN_HEADER, "wrong-token")
         filter.doFilter(request, response) { _, _ -> reachedController = true }
 
         assertEquals(401, response.status)
