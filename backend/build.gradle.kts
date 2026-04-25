@@ -19,7 +19,6 @@ repositories {
 }
 
 val langchain4jVersion = "1.13.0"
-val langchain4jSpringBootVersion = "1.13.0-beta23"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -28,7 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("dev.langchain4j:langchain4j:$langchain4jVersion")
-    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot4-starter:$langchain4jSpringBootVersion")
+    implementation("dev.langchain4j:langchain4j-open-ai:$langchain4jVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
