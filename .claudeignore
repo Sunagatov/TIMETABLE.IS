@@ -3,6 +3,7 @@
 Thumbs.db
 .idea/
 .vscode/
+.claude/settings.local.json
 
 # Secrets — never read these
 apps/**/.env
@@ -19,11 +20,19 @@ apps/**/.env.*
 *.dump
 /tmp/
 
-# Ansible inventory and generated outputs (large, rarely relevant)
-ansible/inventory/
-ansible/*.retry
+# Dependency trees and generated build output
+frontend/node_modules/
+frontend/dist/
+backend/.gradle/
+backend/build/
+telegram-bot/.gradle/
+telegram-bot/build/
+frontend/*.tsbuildinfo
+frontend/coverage/
 
-# Goss test output
-goss/*.json
-infra/**/.env
-infra/**/.env.*
+# Patch/archive leftovers
+*.zip
+install_*_patch.sh
+apply_*_patch.sh
+.patch-backup/
+patch-backup/
