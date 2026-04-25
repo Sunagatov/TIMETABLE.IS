@@ -5,10 +5,12 @@ import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.openai.OpenAiChatModel
 import dev.langchain4j.service.AiServices
 import java.time.Duration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
+@ConditionalOnProperty(prefix = "memora", name = ["ai-mode"], havingValue = "openai")
 class LangChain4jAiConfig {
 
     @Bean

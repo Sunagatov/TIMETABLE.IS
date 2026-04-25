@@ -6,6 +6,7 @@ import com.sunagatov.memora.backend.item.ai.AiTextInput
 import com.sunagatov.memora.backend.item.ai.LangChain4jCategoryPathResponse
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPort
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPrompts
+import com.sunagatov.memora.backend.item.ai.LangChain4jQuestionAnswerResponse
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiResponse
 import com.sunagatov.memora.backend.item.ai.MemoraStructuredAiService
 import com.sunagatov.memora.backend.item.model.AnswerStatus
@@ -189,6 +190,30 @@ class AiAdapterTests {
     }
 
     @Test
+    fun `answer regeneration does not depend on reclassification`() {
+        val adapter = adapter(
+            generateDraft = {
+                LangChain4jMemoraAiResponse(
+                    title = "Thought",
+                    cleanedText = "What is Kotlin?",
+                    type = "THOUGHT",
+                    priority = "NOT_APPLICABLE",
+                    categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                    answer = null
+                )
+            },
+            generateQuestionAnswer = {
+                LangChain4jQuestionAnswerResponse(answer = "A modern programming language.")
+            }
+        )
+
+        val draft = adapter.generateAnswerDraft("What is Kotlin?")
+
+        assertEquals(AnswerStatus.GENERATED, draft.answerStatus)
+        assertEquals("A modern programming language.", draft.answer)
+    }
+
+    @Test
     fun `adapter falls back to deterministic output when LangChain4j call fails and fallback is enabled`() {
         val defaultPath = CategoryPath("Default", "General")
         val adapter = adapter(
@@ -241,6 +266,9 @@ class AiAdapterTests {
 
     private fun adapter(
         properties: MemoraProperties = testProperties(),
+        generateQuestionAnswer: (String) -> LangChain4jQuestionAnswerResponse = {
+            LangChain4jQuestionAnswerResponse(answer = "Generated answer")
+        },
         generateDraft: (String) -> LangChain4jMemoraAiResponse
     ): LangChain4jMemoraAiPort =
         LangChain4jMemoraAiPort(
@@ -248,6 +276,9 @@ class AiAdapterTests {
             aiService = object : MemoraStructuredAiService {
                 override fun generateDraft(prompt: String): LangChain4jMemoraAiResponse =
                     generateDraft.invoke(prompt)
+
+                override fun generateQuestionAnswer(prompt: String): LangChain4jQuestionAnswerResponse =
+                    generateQuestionAnswer.invoke(prompt)
             }
         )
 

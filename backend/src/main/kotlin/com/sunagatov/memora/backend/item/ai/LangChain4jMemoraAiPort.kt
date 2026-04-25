@@ -28,14 +28,7 @@ internal class LangChain4jMemoraAiPort(
         requestDraft(input, includeCategory = true).categoryDraft
 
     override fun generateAnswerDraft(cleanedText: String): AiAnswerDraft =
-        requestDraft(
-            input = AiTextInput(
-                rawText = cleanedText,
-                existingCategoryPaths = emptyList(),
-                defaultCategoryPath = CategoryPath("Default", "General")
-            ),
-            includeCategory = false
-        ).answerDraft
+        requestAnswerDraft(cleanedText)
 
     override fun generateAllDraft(input: AiTextInput): AiAllDraft =
         requestDraft(input, includeCategory = true)
@@ -55,6 +48,23 @@ internal class LangChain4jMemoraAiPort(
                 throw exception
             }
             deterministicFallback.generateAllDraft(input)
+        }
+    }
+
+    private fun requestAnswerDraft(cleanedText: String): AiAnswerDraft {
+        require(properties.aiApiKey.isNotBlank()) {
+            "OpenAI-compatible AI requires MEMORA_AI_API_KEY"
+        }
+
+        return try {
+            aiService.generateQuestionAnswer(
+                LangChain4jMemoraAiPrompts.questionAnswerUserPrompt(cleanedText)
+            ).toAnswerDraft()
+        } catch (exception: Exception) {
+            if (!properties.aiFallbackToDeterministic) {
+                throw exception
+            }
+            deterministicFallback.generateAnswerDraft(cleanedText)
         }
     }
 
@@ -128,6 +138,19 @@ internal class LangChain4jMemoraAiPort(
             AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
         }
 
+    private fun LangChain4jQuestionAnswerResponse.toAnswerDraft(): AiAnswerDraft {
+        val normalized = answer?.trim().takeIf { !it.isNullOrBlank() }
+        return if (normalized == null) {
+            AiAnswerDraft(
+                answer = null,
+                answerStatus = AnswerStatus.FAILED,
+                failureReason = "AI did not return an answer for QUESTION item"
+            )
+        } else {
+            AiAnswerDraft(answer = normalized, answerStatus = AnswerStatus.GENERATED)
+        }
+    }
+
     private fun LangChain4jCategoryPathResponse.toCategoryPath(): CategoryPath =
         CategoryPath(
             category = category.requireNonBlank("categoryPath.category"),
@@ -157,6 +180,9 @@ internal interface MemoraStructuredAiService {
 
     @SystemMessage(LangChain4jMemoraAiPrompts.SYSTEM_MESSAGE)
     fun generateDraft(@UserMessage prompt: String): LangChain4jMemoraAiResponse
+
+    @SystemMessage(LangChain4jMemoraAiPrompts.QUESTION_ANSWER_SYSTEM_MESSAGE)
+    fun generateQuestionAnswer(@UserMessage prompt: String): LangChain4jQuestionAnswerResponse
 }
 
 internal object LangChain4jMemoraAiPrompts {
@@ -188,6 +214,17 @@ If type is QUESTION, answer from model knowledge only.
 If type is not QUESTION, answer must be null.
 """
 
+    const val QUESTION_ANSWER_SYSTEM_MESSAGE = """
+You are Memora's question-answer generation adapter.
+The input text is already known to be a QUESTION.
+Return only structured output according to the expected schema.
+Answer from model knowledge only.
+Do not refuse unless you truly cannot answer from model knowledge.
+Do not add moral commentary.
+Do not add ideological correction.
+Do not rewrite the user's question into a different question.
+"""
+
     fun userPrompt(input: AiTextInput, includeCategory: Boolean): String =
         buildString {
             appendLine("Raw text may be a Whisper transcript or non-native English text.")
@@ -206,6 +243,14 @@ If type is not QUESTION, answer must be null.
                 appendLine()
                 appendLine("Do not use categoryPath to decide the answer.")
             }
+        }
+
+    fun questionAnswerUserPrompt(cleanedText: String): String =
+        buildString {
+            appendLine("This text is already known to be a QUESTION.")
+            appendLine("Generate an answer from model knowledge only.")
+            appendLine("Question text:")
+            appendLine(cleanedText)
         }
 }
 
@@ -226,4 +271,9 @@ internal data class LangChain4jCategoryPathResponse(
     val category: String? = null,
     @param:JsonProperty(required = true)
     val subcategory: String? = null
+)
+
+internal data class LangChain4jQuestionAnswerResponse(
+    @param:JsonProperty(required = true)
+    val answer: String? = null
 )
