@@ -17,7 +17,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - backend 2-level category model and CRUD baseline
 - backend explicit item lifecycle/status model
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
-- backend deterministic AI port for local/dev/test fallback cleaned text, type, category proposal, answer generation, and regeneration actions; OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai` for real V1 polishing
+- backend deterministic AI port for local/dev/test fallback cleaned text, type, category proposal, answer generation, and regeneration actions; LangChain4j-backed OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai` for real V1 polishing
 - backend Mongo-backed sessions by default; in-memory session store is test/local only with `MEMORA_STORAGE_MODE=in-memory`
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend MongoDB persistence (Spring Boot 4; use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)

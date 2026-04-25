@@ -36,7 +36,7 @@ Current areas:
 - `item`
 - `review`
 - `transcription` — voice transcription pipeline: `VoiceTranscriptionService` (interface), `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
-- `item/ai` — deterministic AI adapter for local/dev/test fallback; OpenAI-compatible adapter when `MEMORA_AI_MODE=openai` for real V1 polishing
+- `item/ai` — deterministic AI adapter for local/dev/test fallback; LangChain4j-backed OpenAI-compatible adapter when `MEMORA_AI_MODE=openai` for real V1 polishing
 
 Do not drift back into a broad global technical-layer structure.
 
@@ -142,7 +142,7 @@ All three list endpoints share the same query param model:
 - `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` (default: 120)
 - `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` (default: 26214400)
 - `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` (default: 600)
-- `MEMORA_AI_MODE` (default: `deterministic`; `openai` is required for real V1 AI polishing and enables `OpenAiCompatibleMemoraAiPort`)
+- `MEMORA_AI_MODE` (default: `deterministic`; `openai` is required for real V1 AI polishing and enables the LangChain4j-backed text AI adapter)
 - `MEMORA_AI_API_KEY` (required only in `openai` AI mode)
 - `MEMORA_AI_API_BASE_URL` (default: `https://api.openai.com`)
 - `MEMORA_AI_MODEL` (default: `gpt-4o-mini`)

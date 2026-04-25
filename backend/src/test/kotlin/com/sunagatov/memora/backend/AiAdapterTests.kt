@@ -1,107 +1,258 @@
 package com.sunagatov.memora.backend
 
-import com.sun.net.httpserver.HttpExchange
-import com.sun.net.httpserver.HttpServer
 import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.item.ai.AiTextInput
-import com.sunagatov.memora.backend.item.ai.OpenAiCompatibleMemoraAiPort
+import com.sunagatov.memora.backend.item.ai.LangChain4jCategoryPathResponse
+import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPort
+import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPrompts
+import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiResponse
+import com.sunagatov.memora.backend.item.ai.MemoraStructuredAiService
+import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.ItemType
-import java.net.InetSocketAddress
+import com.sunagatov.memora.backend.item.model.Priority
+import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class AiAdapterTests {
 
     @Test
-    fun `openai compatible adapter falls back to deterministic draft on provider failure when enabled`() {
+    fun `adapter maps valid structured output to Memora drafts`() {
         val defaultPath = CategoryPath("Default", "General")
-
-        withServer { server ->
-            server.createContext("/v1/chat/completions") { exchange ->
-                exchange.respond(500, "provider unavailable")
-            }
-
-            val adapter = OpenAiCompatibleMemoraAiPort(
-                testProperties(aiApiBaseUrl = server.baseUrl())
+        val existingPath = CategoryPath("Work", "Backend")
+        val adapter = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Backend note",
+                cleanedText = "Backend note with polished English.",
+                type = "IDEA",
+                priority = "URGENT_IMPORTANT",
+                categoryPath = LangChain4jCategoryPathResponse("Work", "Backend"),
+                categoryPathIsExisting = true,
+                answer = null
             )
-
-            val draft = adapter.generateAllDraft(
-                AiTextInput(
-                    rawText = "What is Kotlin?",
-                    existingCategoryPaths = listOf(defaultPath),
-                    defaultCategoryPath = defaultPath
-                )
-            )
-
-            assertEquals("What is Kotlin?", draft.textDraft.cleanedText)
-            assertEquals(ItemType.QUESTION, draft.textDraft.type)
-            assertEquals("Model-knowledge placeholder answer: What is Kotlin?", draft.answerDraft.answer)
         }
+
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "backend note",
+                existingCategoryPaths = listOf(defaultPath, existingPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals("Backend note", draft.textDraft.title)
+        assertEquals("Backend note with polished English.", draft.textDraft.cleanedText)
+        assertEquals(ItemType.IDEA, draft.textDraft.type)
+        assertEquals(Priority.URGENT_IMPORTANT, draft.textDraft.priority)
+        assertEquals(existingPath, draft.categoryDraft.aiCategoryPath)
+        assertEquals(existingPath, draft.categoryDraft.currentCategoryPath)
+        assertNull(draft.categoryDraft.proposedCategoryPath)
+        assertEquals(ProposedCategoryStatus.NONE, draft.categoryDraft.proposedCategoryStatus)
+        assertNull(draft.answerDraft.answer)
+        assertEquals(AnswerStatus.NONE, draft.answerDraft.answerStatus)
     }
 
     @Test
-    fun `openai compatible adapter prefers backend existing category over false ai boolean`() {
+    fun `invalid enum values fall back safely`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val adapter = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Odd output",
+                cleanedText = "Odd output",
+                type = "MAYBE",
+                priority = "SOMEDAY",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General")
+            )
+        }
+
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "odd output",
+                existingCategoryPaths = listOf(defaultPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals(ItemType.OTHER, draft.textDraft.type)
+        assertEquals(Priority.NOT_APPLICABLE, draft.textDraft.priority)
+    }
+
+    @Test
+    fun `existing category wins even when ai marks it non-existing`() {
         val defaultPath = CategoryPath("Default", "General")
         val existingPath = CategoryPath("Work", "Backend")
+        val adapter = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Backend note",
+                cleanedText = "Backend note",
+                type = "IDEA",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Work", "Backend"),
+                categoryPathIsExisting = false
+            )
+        }
 
-        withServer { server ->
-            server.createContext("/v1/chat/completions") { exchange ->
-                exchange.respond(
-                    200,
-                    """
-                    {
-                      "choices": [
-                        {
-                          "message": {
-                            "content": "{\"title\":\"Backend note\",\"cleanedText\":\"Backend note\",\"type\":\"IDEA\",\"priority\":\"NOT_APPLICABLE\",\"categoryPath\":{\"category\":\"Work\",\"subcategory\":\"Backend\"},\"categoryPathIsExisting\":false,\"answer\":null}"
-                          }
-                        }
-                      ]
-                    }
-                    """.trimIndent()
-                )
-            }
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "backend note",
+                existingCategoryPaths = listOf(defaultPath, existingPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
 
-            val draft = adapter(server).generateAllDraft(
+        assertEquals(existingPath, draft.categoryDraft.currentCategoryPath)
+        assertNull(draft.categoryDraft.proposedCategoryPath)
+        assertEquals(ProposedCategoryStatus.NONE, draft.categoryDraft.proposedCategoryStatus)
+    }
+
+    @Test
+    fun `default category path does not create a proposal`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val adapter = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Uncertain note",
+                cleanedText = "Uncertain note",
+                type = "THOUGHT",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                categoryPathIsExisting = false
+            )
+        }
+
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "uncertain note",
+                existingCategoryPaths = listOf(defaultPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals(defaultPath, draft.categoryDraft.currentCategoryPath)
+        assertNull(draft.categoryDraft.proposedCategoryPath)
+        assertEquals(ProposedCategoryStatus.NONE, draft.categoryDraft.proposedCategoryStatus)
+    }
+
+    @Test
+    fun `question answer behavior remains explicit`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val withAnswer = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Question",
+                cleanedText = "What is Kotlin?",
+                type = "QUESTION",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                answer = "A programming language."
+            )
+        }
+        val missingAnswer = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Question",
+                cleanedText = "What is Kotlin?",
+                type = "QUESTION",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                answer = "   "
+            )
+        }
+        val nonQuestion = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "Thought",
+                cleanedText = "Kotlin has good ergonomics.",
+                type = "THOUGHT",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                answer = "This should be ignored."
+            )
+        }
+
+        val generated = withAnswer.generateAllDraft(
+            AiTextInput("What is Kotlin?", listOf(defaultPath), defaultPath)
+        )
+        val failed = missingAnswer.generateAllDraft(
+            AiTextInput("What is Kotlin?", listOf(defaultPath), defaultPath)
+        )
+        val none = nonQuestion.generateAllDraft(
+            AiTextInput("Kotlin has good ergonomics.", listOf(defaultPath), defaultPath)
+        )
+
+        assertEquals(AnswerStatus.GENERATED, generated.answerDraft.answerStatus)
+        assertEquals("A programming language.", generated.answerDraft.answer)
+        assertEquals(AnswerStatus.FAILED, failed.answerDraft.answerStatus)
+        assertContains(failed.answerDraft.failureReason ?: "", "did not return an answer")
+        assertEquals(AnswerStatus.NONE, none.answerDraft.answerStatus)
+        assertNull(none.answerDraft.answer)
+    }
+
+    @Test
+    fun `adapter falls back to deterministic output when LangChain4j call fails and fallback is enabled`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val adapter = adapter(
+            properties = testProperties(aiFallbackToDeterministic = true)
+        ) {
+            throw IllegalStateException("provider unavailable")
+        }
+
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "What is Kotlin?",
+                existingCategoryPaths = listOf(defaultPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals("What is Kotlin?", draft.textDraft.cleanedText)
+        assertEquals(ItemType.QUESTION, draft.textDraft.type)
+        assertEquals("Model-knowledge placeholder answer: What is Kotlin?", draft.answerDraft.answer)
+    }
+
+    @Test
+    fun `adapter propagates LangChain4j failures when fallback is disabled`() {
+        val adapter = adapter(
+            properties = testProperties(aiFallbackToDeterministic = false)
+        ) {
+            throw IllegalStateException("provider unavailable")
+        }
+
+        val exception = assertFailsWith<IllegalStateException> {
+            adapter.generateAllDraft(
                 AiTextInput(
-                    rawText = "Backend note",
-                    existingCategoryPaths = listOf(defaultPath, existingPath),
-                    defaultCategoryPath = defaultPath
+                    rawText = "hello",
+                    existingCategoryPaths = listOf(CategoryPath("Default", "General")),
+                    defaultCategoryPath = CategoryPath("Default", "General")
                 )
             )
-
-            assertEquals(existingPath, draft.categoryDraft.aiCategoryPath)
-            assertNull(draft.categoryDraft.proposedCategoryPath)
-            assertEquals(existingPath, draft.categoryDraft.currentCategoryPath)
         }
+
+        assertContains(exception.message ?: "", "provider unavailable")
     }
 
-    private fun adapter(server: HttpServer): OpenAiCompatibleMemoraAiPort =
-        OpenAiCompatibleMemoraAiPort(testProperties(aiApiBaseUrl = server.baseUrl()))
-
-    private fun withServer(block: (HttpServer) -> Unit) {
-        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
-        try {
-            server.start()
-            block(server)
-        } finally {
-            server.stop(0)
-        }
+    @Test
+    fun `prompt keeps the meaning-preservation rules explicit`() {
+        assertContains(LangChain4jMemoraAiPrompts.SYSTEM_MESSAGE, "Do not summarize.")
+        assertContains(LangChain4jMemoraAiPrompts.SYSTEM_MESSAGE, "Preserve Zufar's intended meaning as closely as possible.")
+        assertContains(LangChain4jMemoraAiPrompts.SYSTEM_MESSAGE, "Do not change opinions or factual claims.")
+        assertContains(LangChain4jMemoraAiPrompts.SYSTEM_MESSAGE, "The result should feel like the same thought said by Zufar in excellent, fluent, clear English.")
     }
 
-    private fun HttpServer.baseUrl(): String =
-        "http://${address.hostString}:${address.port}"
-
-    private fun HttpExchange.respond(status: Int, body: String) {
-        val bytes = body.toByteArray()
-        sendResponseHeaders(status, bytes.size.toLong())
-        responseBody.use { it.write(bytes) }
-    }
+    private fun adapter(
+        properties: MemoraProperties = testProperties(),
+        generateDraft: (String) -> LangChain4jMemoraAiResponse
+    ): LangChain4jMemoraAiPort =
+        LangChain4jMemoraAiPort(
+            properties = properties,
+            aiService = object : MemoraStructuredAiService {
+                override fun generateDraft(prompt: String): LangChain4jMemoraAiResponse =
+                    generateDraft.invoke(prompt)
+            }
+        )
 
     private fun testProperties(
-        aiApiBaseUrl: String
+        aiFallbackToDeterministic: Boolean = true
     ): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
@@ -113,8 +264,10 @@ class AiAdapterTests {
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2,
+            aiMode = "openai",
             aiApiKey = "ai-key",
-            aiApiBaseUrl = aiApiBaseUrl,
-            aiFallbackToDeterministic = true
+            aiApiBaseUrl = "http://localhost:8081",
+            aiModel = "gpt-4o-mini",
+            aiFallbackToDeterministic = aiFallbackToDeterministic
         )
 }

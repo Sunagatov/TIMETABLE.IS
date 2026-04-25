@@ -30,7 +30,7 @@ Spring Boot config via `application.yml` with env var overrides:
 | `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription-model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
 | `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription-language` | — | Optional ISO-639-1 language hint |
 | `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription-timeout-seconds` | `120` | HTTP timeout for transcription calls |
-| `MEMORA_AI_MODE` | `memora.ai-mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only |
+| `MEMORA_AI_MODE` | `memora.ai-mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only; `openai` mode is implemented through LangChain4j in the backend |
 | `MEMORA_AI_API_KEY` | `memora.ai-api-key` | — | Required when `MEMORA_AI_MODE=openai`; production validation requires non-blank |
 | `MEMORA_AI_API_BASE_URL` | `memora.ai-api-base-url` | `https://api.openai.com` | Required and validated non-blank when production validation is enabled |
 | `MEMORA_AI_MODEL` | `memora.ai-model` | `gpt-4o-mini` | Required and validated non-blank when production validation is enabled |
@@ -45,6 +45,7 @@ Production-like AI safety:
 - when production validation is enabled, startup fails unless AI mode is `openai`, `MEMORA_AI_API_KEY` is non-blank, `MEMORA_AI_API_BASE_URL` is non-blank, `MEMORA_AI_MODEL` is non-blank, and deterministic AI fallback is disabled
 - missing or broken real AI must become visible startup/configuration failure, not fake success
 - the same validator also activates for Spring `prod` / `production` profiles
+- text polishing/classification uses LangChain4j with Memora-owned env keys; Whisper transcription remains separate and is not handled by LangChain4j
 
 ## Backend validation commands
 

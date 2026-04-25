@@ -150,7 +150,7 @@ Also review:
 
 If AI mode or AI provider config changes, also review:
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/config/ProductionConfigValidator.kt`
-- `backend/src/main/kotlin/com/sunagatov/memora/backend/item/ai/OpenAiCompatibleMemoraAiPort.kt`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/item/ai/LangChain4jMemoraAiPort.kt`
 - `.project/docs/ai/invariants.md`
 
 Keep these facts stable:

@@ -15,8 +15,8 @@ backend-owned state transitions and business rules.
 - voice transcription through Telegram download, audio preparation, and an
   OpenAI-compatible `/v1/audio/transcriptions` API
 - deterministic AI adapter for local/dev/test fallback by default, with
-  OpenAI-compatible text AI mode via `MEMORA_AI_MODE=openai` for real V1
-  polishing
+  LangChain4j-backed OpenAI-compatible text AI mode via
+  `MEMORA_AI_MODE=openai` for real V1 polishing
 - review workflow for Needs Review, Failures, Approved, retry, approve,
   edit-and-approve, reject, trash, and AI regeneration actions
 - 2-level category CRUD with rename cascade and non-empty delete protection
@@ -75,6 +75,13 @@ AI:
 - `MEMORA_AI_TIMEOUT_SECONDS` default `60`
 - `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` default `true`; local/dev only
 - `MEMORA_AI_AUTO_RETRY_ATTEMPTS` default `2`
+
+Notes:
+
+- `MEMORA_AI_MODE=openai` keeps the existing Memora runtime contract, but the
+  backend now implements text polishing/classification through LangChain4j.
+- Whisper transcription remains separate and still uses the
+  OpenAI-compatible `/v1/audio/transcriptions` path.
 
 Production safety:
 
