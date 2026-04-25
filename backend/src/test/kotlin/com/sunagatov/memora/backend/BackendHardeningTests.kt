@@ -55,7 +55,7 @@ class BackendHardeningTests {
             appPasswordHash = appPasswordHash,
             sessionDays = 30,
             botIngestToken = botIngestToken,
-            defaultCategoryPath = "Default/General/Inbox",
+            defaultCategoryPath = "Default/General",
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2

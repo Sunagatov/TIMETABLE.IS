@@ -86,7 +86,7 @@ All three list endpoints share the same query param model:
 - `type` — IDEA | THOUGHT | QUESTION | REMINDER | OTHER
 - `status` — exact ItemStatus enum value
 - `priority` — URGENT_IMPORTANT | URGENT_NOT_IMPORTANT | NOT_URGENT_IMPORTANT | NOT_URGENT_NOT_IMPORTANT | NOT_APPLICABLE
-- `category`, `subcategory`, `subsubcategory` — partial or full 3-level path (each level optional)
+- `category`, `subcategory` — partial or full 2-level path (each level optional)
 - `createdFrom`, `createdTo` — ISO date (YYYY-MM-DD), inclusive range via UTC day boundaries
 - `sort` — format `field-direction`
   - fields: `createdAt`, `title`, `category`
@@ -97,7 +97,7 @@ All three list endpoints share the same query param model:
 
 ## Category invariants
 
-- Exactly 3 levels: `category`, `subcategory`, `subsubcategory` — all required, non-blank
+- Exactly 2 levels: `category`, `subcategory` — both required, non-blank
 - `CategoryService.rename()` cascades `categoryPath` on all linked items
 - `CategoryService.rename()` does NOT update `aiCategoryPath` — original AI output is preserved
 - `CategoryService.delete()` blocked if any item uses that path
@@ -130,7 +130,7 @@ All three list endpoints share the same query param model:
 - `BACKEND_COOKIE_SECURE` (default: `true`; set `false` only for local HTTP dev)
 - `BACKEND_BOT_INGEST_TOKEN`
 - `MEMORA_OWNER_TELEGRAM_USER_ID` (String, compared to `request.telegramUserId`)
-- `DEFAULT_CATEGORY_PATH` (format: `Level1/Level2/Level3`, default: `Default/General/Inbox`)
+- `DEFAULT_CATEGORY_PATH` (format: `Level1/Level2`; legacy `Level1/Level2/Level3` tolerated with level 3 ignored, default: `Default/General`)
 - `MEMORA_STORAGE_MODE` (default: `mongo`; `in-memory` is for tests/local only)
 - `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` (default: 3)
 - `MEMORA_AI_AUTO_RETRY_ATTEMPTS` (default: 2)
@@ -158,7 +158,7 @@ All three list endpoints share the same query param model:
 - keep status transitions explicit
 - keep code runnable
 - do not move deployment/runtime concerns here
-- keep category paths exactly 3 levels in V1
+- keep category paths exactly 2 levels in V1
 - preserve original AI output separately from latest human-facing item values
 - keep direct `PATCH /api/items/{itemId}` approved-only
 - use `edit-and-approve` for reviewable edits

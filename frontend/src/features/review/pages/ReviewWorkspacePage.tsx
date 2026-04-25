@@ -189,6 +189,5 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
 
 function sameFilter(left: CategoryPathFilter, right: CategoryPathFilter): boolean {
   return left.category === right.category &&
-    left.subcategory === right.subcategory &&
-    left.subsubcategory === right.subsubcategory;
+    left.subcategory === right.subcategory;
 }

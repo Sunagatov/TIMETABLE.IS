@@ -52,8 +52,8 @@ If uncertain, use `OTHER`.
 
 ## FR-10 AI category path
 Memora shall:
-1. Try to match an existing category/subcategory/subsubcategory path.
-2. If no existing path fits, AI may suggest a new 3-level category path.
+1. Try to match an existing category/subcategory path.
+2. If no existing path fits, AI may suggest a new 2-level category path.
 3. Suggested new paths must be reviewed and approved by the human during item review.
 4. Once the human approves a suggested path, it becomes permanently reusable.
 5. If category inference fails or confidence is too low, use the default category path.
@@ -137,7 +137,6 @@ The web UI shall support filtering by:
 - creation date range
 - category
 - subcategory
-- subsubcategory
 - type
 - status
 - priority

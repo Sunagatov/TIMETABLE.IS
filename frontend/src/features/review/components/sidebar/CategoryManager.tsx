@@ -12,7 +12,6 @@ import { readableErrorMessage } from "../../../../shared/api/httpClient";
 type CategoryDraft = {
   category: string;
   subcategory: string;
-  subsubcategory: string;
 };
 
 type Props = {
@@ -27,7 +26,7 @@ type Props = {
 
 export function CategoryManager(props: Props) {
   const [manageOpen, setManageOpen] = useState(false);
-  const [draft, setDraft] = useState<CategoryDraft>({ category: "", subcategory: "", subsubcategory: "" });
+  const [draft, setDraft] = useState<CategoryDraft>({ category: "", subcategory: "" });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const isEditing = editingCategoryId !== null;
@@ -61,7 +60,7 @@ export function CategoryManager(props: Props) {
     try {
       await props.onDeleteCategory(categoryId);
       if (sameFilter(props.categoryFilter, target.path)) {
-        props.onCategoryFilterChange({ category: "", subcategory: "", subsubcategory: "" });
+        props.onCategoryFilterChange({ category: "", subcategory: "" });
       }
       if (editingCategoryId === categoryId) clearDraft();
     } catch (error) {
@@ -104,14 +103,14 @@ export function CategoryManager(props: Props) {
 
   function loadDraft(path: CategoryPathRequest, categoryId: string) {
     setEditingCategoryId(categoryId);
-    setDraft({ category: path.category, subcategory: path.subcategory, subsubcategory: path.subsubcategory });
+    setDraft({ category: path.category, subcategory: path.subcategory });
     setMessage(null);
     setManageOpen(true);
   }
 
   function clearDraft() {
     setEditingCategoryId(null);
-    setDraft({ category: "", subcategory: "", subsubcategory: "" });
+    setDraft({ category: "", subcategory: "" });
   }
 }
 
@@ -129,7 +128,6 @@ function CategoryForm(props: {
     <form className="space-y-2.5" onSubmit={props.onSubmit}>
       <DarkDraftField label="Category" value={props.draft.category} onChange={(category) => props.setDraft((draft) => ({ ...draft, category }))} />
       <DarkDraftField label="Subcategory" value={props.draft.subcategory} onChange={(subcategory) => props.setDraft((draft) => ({ ...draft, subcategory }))} />
-      <DarkDraftField label="Subsubcategory" value={props.draft.subsubcategory} onChange={(subsubcategory) => props.setDraft((draft) => ({ ...draft, subsubcategory }))} />
       <div className="flex flex-wrap gap-2 pt-1">
         <button type="submit" disabled={props.isBusy} className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60">
           {props.busyAction === "category-create" || props.busyAction === "category-rename" ? "Saving..." : props.isEditing ? "Rename" : "Create"}
@@ -157,7 +155,7 @@ function CategoryPathList(props: {
       <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600">All paths</p>
       {props.categories.map((category) => (
         <div key={category.id} className="rounded-lg border border-white/8 bg-white/4 px-3 py-2">
-          <p className="truncate text-xs text-stone-400">{category.path.category} / {category.path.subcategory} / {category.path.subsubcategory}</p>
+          <p className="truncate text-xs text-stone-400">{category.path.category} / {category.path.subcategory}</p>
           <div className="mt-1.5 flex gap-3">
             <button type="button" className="text-[11px] font-medium text-stone-500 transition hover:text-stone-200" onClick={() => props.onEdit(category)}>Edit</button>
             <button type="button" disabled={props.isBusy} className="text-[11px] font-medium text-red-500/70 transition hover:text-red-400 disabled:opacity-50" onClick={() => props.onDelete(category.id)}>Delete</button>
@@ -180,20 +178,18 @@ function DarkDraftField(props: { label: string; value: string; onChange: (value:
 function trimDraft(draft: CategoryDraft): CategoryPathRequest {
   return {
     category: draft.category.trim(),
-    subcategory: draft.subcategory.trim(),
-    subsubcategory: draft.subsubcategory.trim()
+    subcategory: draft.subcategory.trim()
   };
 }
 
 function validatePath(path: CategoryPathRequest): string | null {
-  if (!path.category || !path.subcategory || !path.subsubcategory) {
-    return "Category, subcategory, and subsubcategory are all required.";
+  if (!path.category || !path.subcategory) {
+    return "Category and subcategory are required.";
   }
   return null;
 }
 
 function sameFilter(left: CategoryPathFilter, right: CategoryPathRequest): boolean {
   return left.category === right.category &&
-    left.subcategory === right.subcategory &&
-    left.subsubcategory === right.subsubcategory;
+    left.subcategory === right.subcategory;
 }

@@ -54,18 +54,17 @@ If AI is uncertain, it must use `OTHER`.
 
 ## Category model
 
-Exactly three levels:
+Exactly two levels:
 - category
 - subcategory
-- subsubcategory
 
 No arbitrary depth in V1.
 
 ### AI category behavior
 
 AI should:
-1. Try to match an existing category/subcategory/subsubcategory path.
-2. If no existing path fits well, AI may suggest a new 3-level category path.
+1. Try to match an existing category/subcategory path.
+2. If no existing path fits well, AI may suggest a new 2-level category path.
 3. Suggested new category paths must be reviewed and approved by the human during item review.
 4. Once approved, the path becomes reusable for future items.
 5. If category selection/suggestion fails or confidence is low, use the default category path.

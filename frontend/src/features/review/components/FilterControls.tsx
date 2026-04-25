@@ -4,7 +4,6 @@ import type { MemoraCategory } from "../types/reviewTypes";
 export type CascadeFilterState = {
   category: string;
   subcategory: string;
-  subsubcategory: string;
 };
 
 export function FilterSelect(props: {
@@ -67,11 +66,9 @@ export function ResetButton(props: { onClick: () => void }) {
 export function CategoryCascade(props: {
   category: string;
   subcategory: string;
-  subsubcategory: string;
   categories: MemoraCategory[];
   onCategoryChange: (v: string) => void;
   onSubcategoryChange: (v: string) => void;
-  onSubsubcategoryChange: (v: string) => void;
 }) {
   const categoryOptions = useMemo(
     () => uniqueSorted(props.categories.map((c) => c.path.category)),
@@ -86,21 +83,9 @@ export function CategoryCascade(props: {
       ),
     [props.categories, props.category]
   );
-  const subsubcategoryOptions = useMemo(
-    () =>
-      uniqueSorted(
-        props.categories
-          .filter((c) => {
-            if (props.category && c.path.category !== props.category) return false;
-            return !(props.subcategory && c.path.subcategory !== props.subcategory);
-          })
-          .map((c) => c.path.subsubcategory)
-      ),
-    [props.categories, props.category, props.subcategory]
-  );
 
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       <FilterSelect
         label="Category"
         value={props.category}
@@ -115,13 +100,6 @@ export function CategoryCascade(props: {
         onChange={props.onSubcategoryChange}
         emptyLabel="All subcategories"
       />
-      <FilterSelect
-        label="Sub-subcategory"
-        value={props.subsubcategory}
-        options={["", ...subsubcategoryOptions]}
-        onChange={props.onSubsubcategoryChange}
-        emptyLabel="All"
-      />
     </div>
   );
 }
@@ -132,14 +110,11 @@ export function uniqueSorted(values: string[]): string[] {
 
 export function updateCascadeFilter<T extends CascadeFilterState>(
   filters: T,
-  level: "category" | "subcategory" | "subsubcategory",
+  level: "category" | "subcategory",
   value: string
 ): T {
   if (level === "category") {
-    return { ...filters, category: value, subcategory: "", subsubcategory: "" };
+    return { ...filters, category: value, subcategory: "" };
   }
-  if (level === "subcategory") {
-    return { ...filters, subcategory: value, subsubcategory: "" };
-  }
-  return { ...filters, subsubcategory: value };
+  return { ...filters, subcategory: value };
 }

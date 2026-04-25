@@ -5,8 +5,7 @@ import { priorityLabel } from "./itemDetailUtils";
 export function ItemMetadataChips({ item }: { item: MemoraItem }) {
   const categoryLabel = [
     item.categoryPath.category,
-    item.categoryPath.subcategory,
-    item.categoryPath.subsubcategory
+    item.categoryPath.subcategory
   ].filter(Boolean).join(" > ");
 
   return (

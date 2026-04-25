@@ -65,7 +65,7 @@ cd telegram-bot
 
 ## Category Smoke
 
-1. Create a 3-level category.
+1. Create a 2-level category.
 2. Assign an item to it during review or approved edit.
 3. Confirm deleting the non-empty category is blocked.
 4. Rename the category.

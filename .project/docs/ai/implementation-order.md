@@ -36,7 +36,7 @@ Already present in backend:
 - failures page with backend-backed filter/sort
 - approved items page with backend-backed filter/sort
 - item detail panel (AI output vs human-facing comparison)
-- category sidebar (collapsible 3-level tree)
+- category sidebar (collapsible 2-level tree)
 - category management UI (create, rename, delete)
 - API client
 

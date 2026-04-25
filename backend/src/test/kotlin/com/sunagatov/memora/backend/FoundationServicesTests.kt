@@ -73,7 +73,6 @@ class FoundationServicesTests {
         assertEquals(ItemStatus.AI_PROCESSED_UNREVIEWED, stored.status)
         assertEquals("Default", stored.categoryPath.category)
         assertEquals("General", stored.categoryPath.subcategory)
-        assertEquals("Inbox", stored.categoryPath.subsubcategory)
         assertEquals("Remember to review kotlin contracts", stored.cleanedText)
     }
 
@@ -300,8 +299,7 @@ class FoundationServicesTests {
             CreateCategoryRequest(
                 path = CategoryPathRequest(
                     category = "Work",
-                    subcategory = "Backend",
-                    subsubcategory = "Memora"
+                    subcategory = "Backend"
                 )
             )
         )
@@ -318,7 +316,7 @@ class FoundationServicesTests {
         val approved = reviewService.editAndApprove(
             ingested.id,
             EditAndApproveRequest(
-                categoryPath = CategoryPathRequest("Work", "Backend", "Memora")
+                categoryPath = CategoryPathRequest("Work", "Backend")
             )
         )
 
@@ -329,16 +327,15 @@ class FoundationServicesTests {
             RenameCategoryRequest(
                 path = CategoryPathRequest(
                     category = "Work",
-                    subcategory = "Backend",
-                    subsubcategory = "Foundation"
+                    subcategory = "Foundation"
                 )
             )
         )
 
         val updated = itemService.getById(ingested.id)
 
-        assertEquals("Foundation", renamedCategory.path.subsubcategory)
-        assertEquals("Foundation", updated.categoryPath.subsubcategory)
+        assertEquals("Foundation", renamedCategory.path.subcategory)
+        assertEquals("Foundation", updated.categoryPath.subcategory)
         assertEquals(ItemStatus.HUMAN_EDITED_APPROVED, updated.status)
         assertNotNull(updated.updatedAt)
     }
@@ -587,8 +584,7 @@ class FoundationServicesTests {
             CreateCategoryRequest(
                 path = CategoryPathRequest(
                     category = "Work",
-                    subcategory = "Ops",
-                    subsubcategory = "Infra"
+                    subcategory = "Ops"
                 )
             )
         )
@@ -603,7 +599,7 @@ class FoundationServicesTests {
         )
         reviewService.editAndApprove(
             ingested.id,
-            EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Ops", "Infra"))
+            EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Ops"))
         )
 
         assertFailsWith<IllegalArgumentException> {
@@ -702,7 +698,7 @@ class FoundationServicesTests {
         val itemService = ItemService(itemStore, categoryService, ItemQueryService())
         val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
 
-        categoryService.create(CreateCategoryRequest(CategoryPathRequest("Work", "Code", "Kotlin")))
+        categoryService.create(CreateCategoryRequest(CategoryPathRequest("Work", "Code")))
 
         val inDefault = captureService.ingest(
             TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-catflt-1", text = "default inbox item")
@@ -712,7 +708,7 @@ class FoundationServicesTests {
         val inWork = captureService.ingest(
             TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-catflt-2", text = "work kotlin item")
         )
-        reviewService.editAndApprove(inWork.id, EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Code", "Kotlin")))
+        reviewService.editAndApprove(inWork.id, EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Code")))
 
         val all = itemService.listApproved()
         assertEquals(2, all.size)
@@ -722,7 +718,7 @@ class FoundationServicesTests {
         assertEquals(inWork.id, workOnly.single().id)
 
         val defaultOnly = itemService.listApproved(
-            ItemListQueryRequest(category = "Default", subcategory = "General", subsubcategory = "Inbox")
+            ItemListQueryRequest(category = "Default", subcategory = "General")
         )
         assertEquals(1, defaultOnly.size)
         assertEquals(inDefault.id, defaultOnly.single().id)
@@ -949,17 +945,17 @@ class FoundationServicesTests {
             override fun generateCategoryDraft(input: AiTextInput): AiCategoryDraft =
                 if (calls == 0) {
                     AiCategoryDraft(
-                        aiCategoryPath = CategoryPath("Default", "General", "Inbox"),
+                        aiCategoryPath = CategoryPath("Default", "General"),
                         proposedCategoryPath = null,
                         proposedCategoryStatus = ProposedCategoryStatus.NONE,
-                        currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                        currentCategoryPath = CategoryPath("Default", "General")
                     )
                 } else {
                     AiCategoryDraft(
-                        aiCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
-                        proposedCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                        aiCategoryPath = CategoryPath("Ideas", "Finance"),
+                        proposedCategoryPath = CategoryPath("Ideas", "Finance"),
                         proposedCategoryStatus = ProposedCategoryStatus.PENDING_REVIEW,
-                        currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                        currentCategoryPath = CategoryPath("Default", "General")
                     )
                 }
 
@@ -971,10 +967,10 @@ class FoundationServicesTests {
                     AiAllDraft(
                         textDraft = AiTextDraft("First title", "First cleaned", ItemType.THOUGHT, Priority.NOT_APPLICABLE),
                         categoryDraft = AiCategoryDraft(
-                            aiCategoryPath = CategoryPath("Default", "General", "Inbox"),
+                            aiCategoryPath = CategoryPath("Default", "General"),
                             proposedCategoryPath = null,
                             proposedCategoryStatus = ProposedCategoryStatus.NONE,
-                            currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                            currentCategoryPath = CategoryPath("Default", "General")
                         ),
                         answerDraft = AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
                     )
@@ -982,10 +978,10 @@ class FoundationServicesTests {
                     AiAllDraft(
                         textDraft = AiTextDraft("Second title", "Second cleaned", ItemType.IDEA, Priority.URGENT_IMPORTANT),
                         categoryDraft = AiCategoryDraft(
-                            aiCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
-                            proposedCategoryPath = CategoryPath("Ideas", "Finance", "Money"),
+                            aiCategoryPath = CategoryPath("Ideas", "Finance"),
+                            proposedCategoryPath = CategoryPath("Ideas", "Finance"),
                             proposedCategoryStatus = ProposedCategoryStatus.PENDING_REVIEW,
-                            currentCategoryPath = CategoryPath("Default", "General", "Inbox")
+                            currentCategoryPath = CategoryPath("Default", "General")
                         ),
                         answerDraft = AiAnswerDraft(answer = null, answerStatus = AnswerStatus.NONE)
                     )
@@ -1170,7 +1166,7 @@ class FoundationServicesTests {
             appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
             sessionDays = 30,
             botIngestToken = "bot-token",
-            defaultCategoryPath = "Default/General/Inbox",
+            defaultCategoryPath = "Default/General",
             ownerTelegramUserId = ownerTelegramUserId,
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2,

@@ -22,7 +22,7 @@
   - `QUESTION`
   - `REMINDER`
   - `OTHER`
-- category tree is exactly 3 levels in V1
+- category tree is exactly 2 levels in V1
 - original AI output and latest human version both remain visible
 - answer lifecycle is explicit and may be `NONE`, `GENERATED`, `EDITED`, `REJECTED`, `DELETED`, or `FAILED`
 - category proposals are explicit and use `proposedCategoryPath` plus `proposedCategoryStatus`
@@ -52,7 +52,7 @@
 
 ## Category invariants
 
-- exactly 3 levels required: category, subcategory, subsubcategory — all non-blank
+- exactly 2 levels required: category, subcategory — both non-blank
 - category rename cascades `categoryPath` on linked items; `aiCategoryPath` is NOT updated (preserves original AI output)
 - category delete blocked when any item uses that path
 - category delete blocked for the default category path
@@ -77,7 +77,7 @@
 - no session token is stored in `localStorage` or `sessionStorage`
 - sidebar category filter updates only the active list view
 - edit forms must not lose unsaved user changes because categories refetched in the background
-- category tree and category manager must respect exactly 3 levels
+- category tree and category manager must respect exactly 2 levels
 - mobile keeps the simple sidebar/list/detail panel model unless a task explicitly changes navigation
 
 ## V1 non-features / limitations

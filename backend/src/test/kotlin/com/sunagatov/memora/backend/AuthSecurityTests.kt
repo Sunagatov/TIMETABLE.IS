@@ -94,7 +94,7 @@ class AuthSecurityTests {
             appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
             sessionDays = 30,
             botIngestToken = botIngestToken,
-            defaultCategoryPath = "Default/General/Inbox",
+            defaultCategoryPath = "Default/General",
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2

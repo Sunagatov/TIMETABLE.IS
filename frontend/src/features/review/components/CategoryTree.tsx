@@ -26,7 +26,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
     });
   }
 
-  const activeLabel = [filter.category, filter.subcategory, filter.subsubcategory]
+  const activeLabel = [filter.category, filter.subcategory]
     .filter(Boolean)
     .join(" / ");
 
@@ -91,7 +91,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                     type="button"
                     onClick={() => {
                       toggle(catKey);
-                      onSelect({ category, subcategory: "", subsubcategory: "" });
+                      onSelect({ category, subcategory: "" });
                     }}
                     className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs font-semibold transition ${catBtnClass}`}
                   >
@@ -105,7 +105,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                     <div className={`ml-3 mt-0.5 space-y-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`}>
                       {[...subMap.entries()]
                         .sort(([a], [b]) => a.localeCompare(b))
-                        .map(([subcategory, leaves]) => {
+                        .map(([subcategory]) => {
                           const subKey = `sub:${category}/${subcategory}`;
                           const subOpen = expandedKeys.has(subKey);
                           const subActive = catActive && filter.subcategory === subcategory;
@@ -124,7 +124,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                                 type="button"
                                 onClick={() => {
                                   toggle(subKey);
-                                  onSelect({ category, subcategory, subsubcategory: "" });
+                                  onSelect({ category, subcategory });
                                 }}
                                 className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${subBtnClass}`}
                               >
@@ -135,42 +135,7 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                               </button>
 
                               {subOpen && (
-                                <div className={`ml-3 mt-0.5 space-y-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`}>
-                                  {leaves
-                                    .sort((a, b) =>
-                                      a.path.subsubcategory.localeCompare(b.path.subsubcategory)
-                                    )
-                                    .map((cat) => {
-                                      const leafActive =
-                                        subActive &&
-                                        filter.subsubcategory === cat.path.subsubcategory;
-
-                                      const leafClass = dark
-                                        ? leafActive
-                                          ? "bg-amber-500/20 text-amber-300 font-semibold"
-                                          : "text-stone-500 hover:bg-white/6 hover:text-stone-300"
-                                        : leafActive
-                                          ? "bg-stone-900 font-medium text-white"
-                                          : "text-stone-600 hover:bg-stone-100";
-
-                                      return (
-                                        <button
-                                          key={cat.id}
-                                          type="button"
-                                          onClick={() =>
-                                            onSelect({
-                                              category,
-                                              subcategory,
-                                              subsubcategory: cat.path.subsubcategory
-                                            })
-                                          }
-                                          className={`w-full truncate rounded-lg px-2.5 py-1.5 text-left text-xs transition ${leafClass}`}
-                                        >
-                                          {cat.path.subsubcategory}
-                                        </button>
-                                      );
-                                    })}
-                                </div>
+                                <div className={`ml-3 mt-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`} />
                               )}
                             </div>
                           );

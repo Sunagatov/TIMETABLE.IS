@@ -17,7 +17,7 @@ Spring Boot config via `application.yml` with env var overrides:
 | `BACKEND_SESSION_DAYS` | `memora.session-days` | `30` | session lifetime |
 | `BACKEND_BOT_INGEST_TOKEN` | `memora.bot-ingest-token` | `change-me` | `X-Memora-Bot-Token` value |
 | `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request; blank config rejects ingest |
-| `DEFAULT_CATEGORY_PATH` | `memora.default-category-path` | `Default/General/Inbox` | format: `L1/L2/L3` |
+| `DEFAULT_CATEGORY_PATH` | `memora.default-category-path` | `Default/General` | format: `L1/L2` (legacy `L1/L2/L3` tolerated with level 3 ignored) |
 | `MEMORA_TELEGRAM_BOT_TOKEN` | `memora.telegram-bot-token` | — | Required for voice download from Telegram; validated non-blank in transcription service |
 | `MEMORA_TELEGRAM_API_BASE_URL` | `memora.telegram-api-base-url` | `https://api.telegram.org` | Telegram API base |
 | `MEMORA_STORAGE_MODE` | `memora.storage.mode` | `mongo` | Storage backend; `mongo` is default, `in-memory` is for tests/local only |

@@ -16,7 +16,6 @@ export const DEFAULT_NR_FILTERS: NeedsReviewFilters = {
   priority: "ALL",
   category: "",
   subcategory: "",
-  subsubcategory: "",
   createdFrom: "",
   createdTo: "",
   sort: "createdAt-desc"
@@ -29,7 +28,6 @@ export const DEFAULT_FAIL_FILTERS: FailuresFilters = {
   status: "ALL",
   category: "",
   subcategory: "",
-  subsubcategory: "",
   createdFrom: "",
   createdTo: "",
   sort: "createdAt-desc"
@@ -42,7 +40,6 @@ export const DEFAULT_APPROVED_FILTERS: ApprovedFilters = {
   status: "ALL",
   category: "",
   subcategory: "",
-  subsubcategory: "",
   createdFrom: "",
   createdTo: "",
   sort: "createdAt-desc"
@@ -118,7 +115,6 @@ function activeCategoryForView(
   const filters = view === "needs-review" ? nrFilters : view === "failures" ? failFilters : approvedFilters;
   return {
     category: filters.category,
-    subcategory: filters.subcategory,
-    subsubcategory: filters.subsubcategory
+    subcategory: filters.subcategory
   };
 }

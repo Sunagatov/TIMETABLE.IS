@@ -63,7 +63,7 @@ frontend/src/
 - Every user-visible action must call a backend API and surface failed calls visibly.
 - A 401 from any backend API call returns the user to login.
 - Do not store auth tokens in browser storage.
-- Keep category paths exactly 3 levels: `category`, `subcategory`, `subsubcategory`.
+- Keep category paths exactly 2 levels: `category`, `subcategory`.
 - Use `createdFrom` and `createdTo` exactly for date filters.
 - Do not add labels or manual web item creation in V1.
 - Search is plain backend keyword search, not semantic search.

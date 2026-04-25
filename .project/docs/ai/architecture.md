@@ -32,7 +32,7 @@ Owns production/deployment/runtime truth.
 - current backend feature areas:
   - `auth` — login, logout, session check, session cookie
   - `capture` — Telegram ingest, failure notification polling/ack
-  - `category` — 3-level category CRUD
+  - `category` — 2-level category CRUD
   - `item` — item model, lifecycle, query service
   - `review` — needs-review/failures lists + approve/reject/retry/trash/edit-and-approve
   - `health` — `GET /api/health`

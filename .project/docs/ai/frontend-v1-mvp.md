@@ -93,7 +93,7 @@ Review feature landmarks:
 - `hooks/useReviewQueries.ts` — React Query list/detail/category queries
 - `hooks/useReviewActions.ts` — item action mutations and invalidation
 - `pages/ReviewWorkspacePage.tsx` — page orchestration and layout wiring
-- `components/CategoryTree.tsx` — collapsible 3-level category filter tree
+- `components/CategoryTree.tsx` — collapsible 2-level category filter tree
 - `components/sidebar/CategoryManager.tsx` — category create/rename/delete UI
 - `components/item-detail/*` — detail rendering, edit form, action toolbar, editor utilities
 - `components/workspace/*` — responsive layout helpers
@@ -158,7 +158,6 @@ All list endpoints accept the same backend query params:
 - `priority`
 - `category`
 - `subcategory`
-- `subsubcategory`
 - `createdFrom`
 - `createdTo`
 - `sort`
@@ -330,14 +329,14 @@ Relevant files:
 Category paths are exactly 3 levels:
 
 ```text
-category / subcategory / subsubcategory
+category / subcategory
 ```
 
 Frontend category behavior:
 
 - Tree is collapsible.
 - Category and subcategory clicks update the active category filter at that level.
-- Leaf clicks filter exact 3-level path.
+- Subcategory clicks filter exact 2-level path.
 - Clear filter works.
 - Active filter is visually indicated.
 - Create requires all 3 levels non-blank before API call.

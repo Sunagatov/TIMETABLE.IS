@@ -56,7 +56,7 @@ export function ReviewSidebar(props: Props) {
           errorMessage={props.categoriesError}
           filter={props.categoryFilter}
           onSelect={props.onCategoryFilterChange}
-          onClearFilter={() => props.onCategoryFilterChange({ category: "", subcategory: "", subsubcategory: "" })}
+          onClearFilter={() => props.onCategoryFilterChange({ category: "", subcategory: "" })}
           dark
         />
         <CategoryManager

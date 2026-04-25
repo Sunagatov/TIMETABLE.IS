@@ -8,7 +8,7 @@ Memora frontend is the authenticated web review workspace for V1.
 - Review-first workspace with Needs Review as the default authenticated landing.
 - Three backend-backed list views: Needs Review, Failures, and Approved.
 - Search, filters, date range (`createdFrom`/`createdTo`), category path filters, and sort use backend query params.
-- Sidebar category tree and category management for exact 3-level paths: category / subcategory / subsubcategory.
+- Sidebar category tree and category management for exact 2-level paths: category / subcategory.
 - Item detail shows current human-facing values beside original AI values, plus raw input/transcript and Telegram trace metadata.
 - Review actions: approve, edit and approve, reject, delete to trash, retry failures, category proposal accept/dismiss, and AI regeneration actions.
 - Approved items use the direct approved-only edit path and remain approved after save.

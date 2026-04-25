@@ -41,11 +41,9 @@ export function NeedsReviewFiltersBar({ filters, categories, onChange, onReset }
       <CategoryCascade
         category={filters.category}
         subcategory={filters.subcategory}
-        subsubcategory={filters.subsubcategory}
         categories={categories}
         onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
         onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
-        onSubsubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subsubcategory", v))}
       />
       <div className="grid gap-3 md:grid-cols-3">
         <FilterSelect

@@ -108,7 +108,7 @@ State guards:
 
 Current behavior:
 - approved item edits stay approved in V1 (result is always `HUMAN_EDITED_APPROVED`)
-- editable fields: title, cleanedText, rawTranscript, type, 3-level categoryPath, priority, answer, answerStatus
+- editable fields: title, cleanedText, rawTranscript, type, 2-level categoryPath, priority, answer, answerStatus
 - `MemoraItem` uses `id` as primary identifier; `memoraId` only appears in accept/notification payloads
 - approved list endpoint returns only `HUMAN_APPROVED` and `HUMAN_EDITED_APPROVED` items
 - answer status values include `NONE`, `GENERATED`, `EDITED`, `REJECTED`, `DELETED`, `FAILED`
@@ -127,7 +127,6 @@ All three list endpoints accept these query params via `ItemListQueryRequest`:
 | `priority` | enum | URGENT_IMPORTANT, URGENT_NOT_IMPORTANT, NOT_URGENT_IMPORTANT, NOT_URGENT_NOT_IMPORTANT, NOT_APPLICABLE |
 | `category` | string | exact level-1 match |
 | `subcategory` | string | exact level-2 match |
-| `subsubcategory` | string | exact level-3 match |
 | `createdFrom` | date | ISO date YYYY-MM-DD, inclusive (UTC day start) |
 | `createdTo` | date | ISO date YYYY-MM-DD, inclusive (UTC day end) |
 | `sort` | string | format `field-direction`, e.g. `createdAt-desc` |
@@ -147,8 +146,8 @@ Current backend endpoints:
 - `DELETE /api/categories/{categoryId}`
 
 Current behavior:
-- category paths are exact 3-level leaf paths only (category/subcategory/subsubcategory, all non-blank)
-- default category path is bootstrapped automatically (`Default/General/Inbox`)
+- category paths are exact 2-level leaf paths only (category/subcategory, both non-blank)
+- default category path is bootstrapped automatically (`Default/General`)
 - category delete blocked if path is still used by any item
 - category delete blocked for the default category path
 - category rename cascades `categoryPath` on all linked items

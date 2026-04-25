@@ -17,7 +17,7 @@ It is not an authority that should replace the user's meaning.
 - infer item type (including `QUESTION`)
 - generate an answer when item type is `QUESTION` (model knowledge only)
 - infer category path from existing categories when a good match exists
-- suggest a new 3-level category path when no existing path fits
+- suggest a new 2-level category path when no existing path fits
 - suggest priority when confidence is high
 - regenerate AI outputs (cleaned text, answer, category proposal) when requested
 
@@ -25,6 +25,7 @@ It is not an authority that should replace the user's meaning.
 
 ### Preserve intended meaning
 AI must stay semantically close to the user's intended meaning.
+The cleaned text should feel like the same thought expressed in fluent natural English, not a summary or a simplified note.
 
 ### Improve language, not worldview
 AI may improve language quality and clarity.
@@ -35,7 +36,7 @@ If the user says something wrong, speculative, exaggerated, or subjective, AI sh
 
 ### Category preference order
 1. Match an existing category path if a good fit exists.
-2. If no existing path fits, suggest a new 3-level path requiring human approval.
+2. If no existing path fits, suggest a new 2-level path requiring human approval.
 3. If uncertain, fall back to default category path.
 
 ### Answer behavior for QUESTION items

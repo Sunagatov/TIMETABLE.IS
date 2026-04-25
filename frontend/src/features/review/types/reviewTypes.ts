@@ -1,7 +1,6 @@
 export type CategoryPath = {
   category: string;
   subcategory: string;
-  subsubcategory: string;
 };
 
 export type SourceType = "TELEGRAM_TEXT" | "TELEGRAM_VOICE";
@@ -77,13 +76,11 @@ export type MemoraCategory = {
 export type CategoryPathRequest = {
   category: string;
   subcategory: string;
-  subsubcategory: string;
 };
 
 export type CategoryPathFilter = {
   category: string;
   subcategory: string;
-  subsubcategory: string;
 };
 
 export type CreateCategoryRequest = {
@@ -122,7 +119,6 @@ export type ListParams = {
   status?: ItemStatus;
   category?: string;
   subcategory?: string;
-  subsubcategory?: string;
   createdFrom?: string;
   createdTo?: string;
   sort?: string;
@@ -134,7 +130,6 @@ export type NeedsReviewFilters = {
   priority: Priority | "ALL";
   category: string;
   subcategory: string;
-  subsubcategory: string;
   createdFrom: string;
   createdTo: string;
   sort: ListSort;
@@ -147,7 +142,6 @@ export type FailuresFilters = {
   status: Extract<ItemStatus, "TRANSCRIPTION_FAILED" | "AI_PROCESSING_FAILED"> | "ALL";
   category: string;
   subcategory: string;
-  subsubcategory: string;
   createdFrom: string;
   createdTo: string;
   sort: ListSort;
@@ -160,7 +154,6 @@ export type ApprovedFilters = {
   status: Extract<ItemStatus, "HUMAN_APPROVED" | "HUMAN_EDITED_APPROVED"> | "ALL";
   category: string;
   subcategory: string;
-  subsubcategory: string;
   createdFrom: string;
   createdTo: string;
   sort: ListSort;

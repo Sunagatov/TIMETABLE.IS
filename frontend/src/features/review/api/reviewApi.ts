@@ -10,7 +10,7 @@ import type {
 
 export function buildQuery(params: Record<string, string | undefined>): string {
   const entries = (Object.entries(params) as [string, string | undefined][]).filter(
-    ([, v]) => Boolean(v) && v !== "ALL"
+    ([key, v]) => key !== "subsubcategory" && Boolean(v) && v !== "ALL"
   ) as [string, string][];
   if (!entries.length) return "";
   return "?" + new URLSearchParams(entries).toString();

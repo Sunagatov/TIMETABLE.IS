@@ -12,7 +12,7 @@
 - cleaned text generation
 - AI title suggestion
 - AI type suggestion (including `QUESTION` type)
-- AI category path suggestion: prefer existing paths; if no suitable path exists, AI may suggest a new 3-level path requiring human approval
+- AI category path suggestion: prefer existing paths; if no suitable path exists, AI may suggest a new 2-level path requiring human approval
 - AI priority suggestion only if confidence is high
 - AI-generated answer for `QUESTION`-type items (model knowledge only)
 - AI output regeneration (cleaned text, answer, category proposal)

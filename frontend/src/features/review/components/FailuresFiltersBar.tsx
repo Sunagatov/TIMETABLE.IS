@@ -42,11 +42,9 @@ export function FailuresFiltersBar({ filters, categories, onChange, onReset }: P
       <CategoryCascade
         category={filters.category}
         subcategory={filters.subcategory}
-        subsubcategory={filters.subsubcategory}
         categories={categories}
         onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
         onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
-        onSubsubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subsubcategory", v))}
       />
       <div className="grid gap-3 md:grid-cols-4">
         <FilterSelect label="Type" value={filters.type} options={TYPE_OPTIONS} onChange={(v) => set({ type: v as ItemType | "ALL" })} />

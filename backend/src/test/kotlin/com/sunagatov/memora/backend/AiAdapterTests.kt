@@ -15,7 +15,7 @@ class AiAdapterTests {
 
     @Test
     fun `openai compatible adapter falls back to deterministic draft on provider failure when enabled`() {
-        val defaultPath = CategoryPath("Default", "General", "Inbox")
+        val defaultPath = CategoryPath("Default", "General")
 
         withServer { server ->
             server.createContext("/v1/chat/completions") { exchange ->
@@ -68,7 +68,7 @@ class AiAdapterTests {
             appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
             sessionDays = 30,
             botIngestToken = "bot-token",
-            defaultCategoryPath = "Default/General/Inbox",
+            defaultCategoryPath = "Default/General",
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2,

@@ -56,7 +56,7 @@ Current status:
 - complete as a backend-backed review-first workspace
 - default landing is Needs Review
 - all three views (Needs Review, Failures, Approved) use backend-backed query params
-- query params: keyword, type, priority, status, category path (category/subcategory/subsubcategory), createdFrom, createdTo, sort
+- query params: keyword, type, priority, status, category path (category/subcategory), createdFrom, createdTo, sort
 - item detail shows AI output vs human-facing comparison with all review actions
 
 ## Phase 5 — category management

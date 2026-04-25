@@ -5,24 +5,20 @@ describe("updateCascadeFilter", () => {
   it("clears dependent lower-level values when category changes", () => {
     expect(updateCascadeFilter({
       category: "Work",
-      subcategory: "Planning",
-      subsubcategory: "Roadmap"
+      subcategory: "Planning"
     }, "category", "Personal")).toEqual({
       category: "Personal",
-      subcategory: "",
-      subsubcategory: ""
+      subcategory: ""
     });
   });
 
-  it("clears subsubcategory when subcategory changes", () => {
+  it("keeps category and updates subcategory", () => {
     expect(updateCascadeFilter({
       category: "Work",
-      subcategory: "Planning",
-      subsubcategory: "Roadmap"
+      subcategory: "Planning"
     }, "subcategory", "Notes")).toEqual({
       category: "Work",
-      subcategory: "Notes",
-      subsubcategory: ""
+      subcategory: "Notes"
     });
   });
 });

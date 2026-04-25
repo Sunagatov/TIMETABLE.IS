@@ -31,7 +31,6 @@ Frontend shall use password-based login with backend-managed session.
 Items shall have:
 - category
 - subcategory
-- subsubcategory
 
 ## FR-09 Backend reuse
 Business logic shall be reusable by future clients beyond Telegram.

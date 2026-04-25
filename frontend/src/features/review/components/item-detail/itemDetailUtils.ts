@@ -108,7 +108,7 @@ export function formatDate(value: string) {
 }
 
 export function formatCategoryPath(path: CategoryPath) {
-  return `${path.category} / ${path.subcategory} / ${path.subsubcategory}`;
+  return `${path.category} / ${path.subcategory}`;
 }
 
 export function proposalLabel(status: string) {
@@ -128,6 +128,5 @@ export function priorityLabel(priority: string): string {
 
 export function samePath(left: CategoryPath, right: CategoryPath): boolean {
   return left.category === right.category &&
-    left.subcategory === right.subcategory &&
-    left.subsubcategory === right.subsubcategory;
+    left.subcategory === right.subcategory;
 }

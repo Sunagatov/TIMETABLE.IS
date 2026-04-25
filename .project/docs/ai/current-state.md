@@ -14,7 +14,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - backend unified ingest baseline for Telegram text and nested voice metadata
 - backend bot-facing failure notification polling and delivery acknowledgement endpoints
 - backend review queue APIs for Needs Review, Failures, and approved items
-- backend 3-level category model and CRUD baseline
+- backend 2-level category model and CRUD baseline
 - backend explicit item lifecycle/status model
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
 - backend deterministic AI port for local/default cleaned text, type, category proposal, answer generation, and regeneration actions; optional OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai`
@@ -25,10 +25,10 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - frontend session-aware login + review workspace
 - frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
 - frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
-- frontend category sidebar with collapsible 3-level tree and category management UI (create, rename, delete)
+- frontend category sidebar with collapsible 2-level tree and category management UI (create, rename, delete)
 - frontend item detail panel with AI output vs human-facing value comparison and all review actions
 - frontend HTTP client normalizes backend JSON errors, 204 responses, non-JSON failures, network failures, and 401 unauthorized session expiry
-- frontend category UI supports selecting category, subcategory, or leaf filters from a collapsible exact 3-level tree
+- frontend category UI supports selecting category or subcategory filters from a collapsible exact 2-level tree
 - frontend edit forms preserve unsaved edits across category refetches while edit mode is open
 - frontend answer editing enforces that generated/edited answers require non-blank answer text
 - frontend focused Vitest coverage exists for query param stripping, cascade filter resets, item detail answer payload behavior, workspace list params, and HTTP error handling
@@ -65,11 +65,11 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), answer generation or answer failure visibility, and category proposal support
 - async processing maps HTTP/IO exceptions to visible failure states instead of leaving accepted items in `RECEIVED`
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`
-- category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
+- category paths are exact leaf paths with `category`, `subcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID; blank backend owner config is rejected
 - Telegram bot currently uses Telegram long polling, not webhook delivery; it remains a thin adapter and must not contain transcription, AI, category/review, persistence, lifecycle, or retry-state logic
-- all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `subsubcategory`, `createdFrom`, `createdTo`, `sort`
+- all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `createdFrom`, `createdTo`, `sort`
 - review endpoints now include category-proposal approval/rejection and AI output regeneration actions
 
 ## Default backend validation

@@ -9,6 +9,12 @@ describe("buildQuery", () => {
   it("preserves createdFrom and createdTo names", () => {
     expect(buildQuery({ createdFrom: "2026-01-01", createdTo: "2026-01-31" })).toBe("?createdFrom=2026-01-01&createdTo=2026-01-31");
   });
+
+  it("does not send subsubcategory", () => {
+    expect(buildQuery({ category: "Work", subcategory: "Code", subsubcategory: "Legacy" })).toBe(
+      "?category=Work&subcategory=Code"
+    );
+  });
 });
 
 describe("view endpoints", () => {

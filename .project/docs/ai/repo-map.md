@@ -19,7 +19,7 @@
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/`
   - `auth/` — login, logout, session cookie flow, session stores.
   - `capture/` — Telegram ingest, bot auth, failure notification polling/ack services.
-  - `category/` — exact 3-level category model, CRUD, store implementations.
+  - `category/` — exact 2-level category model, CRUD, store implementations.
   - `common/` — API error response and global exception handler.
   - `config/` — Memora properties, security, async processing, production config validation.
   - `health/` — health endpoint.
