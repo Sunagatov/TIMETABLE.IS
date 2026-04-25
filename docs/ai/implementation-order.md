@@ -57,7 +57,10 @@ Current shell status:
 Current adapter status:
 - present as a Kotlin thin adapter
 - unified ingest contract is in place
+- `/start` and `/help` are handled locally and never ingested
+- owner text and voice messages are forwarded; unsupported owner messages receive guidance; unauthorized users are ignored
 - failure notifications are polled from backend and delivered/acknowledged
+- backend timeout config and non-spammy backend-down polling logs are in place
 
 ### Phase 4 — persistence upgrade
 

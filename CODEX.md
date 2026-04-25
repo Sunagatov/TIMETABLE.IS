@@ -50,6 +50,19 @@ Compact guidance for Codex CLI.
   - retry: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
   - PATCH: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
 
+## Current Telegram bot reality
+
+- Kotlin long-polling thin adapter in `telegram-bot/`; use `telegram-bot/AGENTS.md` before bot work
+- no backend business logic belongs in the bot: no DB writes, transcription, Whisper/AI calls, category/review/item lifecycle logic, or retry state
+- commands `/start` and `/help` are local-only and never forwarded as captured text
+- supported owner messages are text and voice; unsupported owner messages get short supported-input guidance
+- unauthorized users are ignored
+- bot uses `BACKEND_TIMEOUT_SECONDS` for Java HttpClient connect timeout and backend request timeouts
+- failure polling acknowledges backend notifications after Telegram delivery; repeated backend-down polling logs must stay concise
+- `BackendClient` keeps failure-notification parsing compatible with both raw arrays and `{ "notifications": [...] }`
+- acknowledgement `notificationId` is URL-encoded as a path segment
+- never print, commit, or document real Telegram tokens or bot shared tokens
+
 ## Spring Boot 4 critical fact
 
 `spring.data.mongodb.uri` is error-level deprecated since Spring Boot 4.0.0 and completely ignored at runtime.
@@ -71,3 +84,10 @@ Getting this wrong causes a silent fallback to `localhost:27017`, making the con
 - date filter params: `createdFrom` and `createdTo` (NOT `dateFrom`/`dateTo`)
 - sort format: `createdAt-asc`, `createdAt-desc`, `title-asc`, `title-desc`, `category-asc`, `category-desc`
 - failure notification ID: `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll
+
+## Validation shortcuts
+
+- backend: `cd backend && ./gradlew test`
+- telegram bot: `cd telegram-bot && ./gradlew clean test`
+- frontend: `cd frontend && npm run build`
+- there is no root `./gradlew`; use subproject wrappers for backend and telegram bot

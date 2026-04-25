@@ -56,6 +56,21 @@ Avoid:
 - single-user auth uses backend-managed session cookies and password-hash config
 - **MongoDB is active in production** — `spring.mongodb.uri` is the correct Spring Boot 4 property; `spring.data.mongodb.uri` is error-level deprecated and completely ignored at runtime
 
+## Current Telegram bot reality
+
+- Kotlin/JVM long-polling adapter under `telegram-bot/`; it is not Python and not a webhook service
+- thin transport only: no DB writes, no Whisper calls, no AI/category/review/item lifecycle logic, no local retry state
+- supported owner inputs: text messages and voice notes; one Telegram message becomes one backend item
+- `/start` and `/help` are handled locally and are never ingested
+- unsupported owner messages receive: `Supported inputs: text messages and voice notes. Commands: /start, /help.`
+- unauthorized users are ignored without replies
+- backend paths are configurable but default to the unified ingest and failure-notification endpoints in `docs/ai/api-surface.md`
+- `BACKEND_TIMEOUT_SECONDS` controls Java HttpClient connect timeout and per-request timeout; default is 10 seconds
+- failure notification polling supports raw JSON arrays and `{ "notifications": [...] }` wrappers for compatibility
+- failure notification acknowledgement IDs are URL-encoded as path segments before sending `/delivered`
+- backend-down polling logs first consecutive failure with exception, repeated failures concisely, and recovery once
+- never put real Telegram bot tokens or bot ingest tokens in docs, examples, commits, or command output
+
 ## Spring Boot 4 critical facts
 
 - Property: `spring.mongodb.uri` (NOT `spring.data.mongodb.uri` — that was Spring Boot 3; in Boot 4 it is error-level deprecated and silently ignored)
@@ -91,3 +106,10 @@ Avoid:
 - state guard tests use `assertFailsWith<IllegalArgumentException>`
 - run: `cd backend && ./gradlew test`
 - frontend: `cd frontend && npm run build`
+- telegram bot: `cd telegram-bot && ./gradlew clean test`
+- root-level Gradle wrapper is not currently present; use subproject wrappers (`backend/gradlew`, `telegram-bot/gradlew`)
+
+## Framework entrypoint warning notes
+
+- Spring `@ExceptionHandler` methods may appear unused to IDE static analysis; they are framework-called entrypoints
+- Constructor/helper warning fixes should be minimal; do not rewrite backend business logic to satisfy an IDE warning

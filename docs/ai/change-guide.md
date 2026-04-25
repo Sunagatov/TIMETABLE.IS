@@ -64,9 +64,26 @@ Also review:
 Also review:
 - `docs/requirements/04_FUNCTIONAL_REQUIREMENTS.md`
 - `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
+- `docs/requirements/09_CLIENT_AND_API_BOUNDARIES.md`
 - `telegram-bot/AGENTS.md`
+- `telegram-bot/README.md`
 - `docs/ai/api-surface.md` (capture endpoints section)
 - Failure notification payload format — `notificationId` is re-derived each poll; ack is one-shot
+
+Keep these bot facts stable:
+- thin adapter only; no backend business logic, no DB writes, no transcription/Whisper/AI calls, no category/review/item lifecycle logic, no retry state
+- `/start` and `/help` are local commands and must not be ingested
+- unsupported owner messages receive supported-input guidance; unauthorized users receive no reply
+- `BACKEND_TIMEOUT_SECONDS` applies to connect timeout and each backend request timeout
+- failure notification parsing accepts raw arrays and `{ "notifications": [...] }`
+- acknowledgement IDs are URL-encoded path segments
+- backend-down polling logs first failure with exception, repeated failures concisely, and recovery once
+- do not print or document real Telegram tokens or bot shared tokens
+
+Bot validation:
+- `cd telegram-bot && ./gradlew clean test`
+- `cd telegram-bot && ./gradlew installDist` when startup/distribution behavior changed
+- from repo root, use `./telegram-bot/gradlew -p telegram-bot clean test` because there is no root Gradle wrapper
 
 ## If you change stack/tooling versions
 
@@ -101,3 +118,8 @@ Stop and check Vault first.
 - Use `directExecutor()` to make `ItemProcessingService` synchronous
 - Use `testProperties()` for consistent config
 - Assert state guards throw `IllegalArgumentException` using `assertFailsWith`
+
+## If an IDE reports framework entrypoints as unused
+
+- Spring `@ExceptionHandler` methods are called by the framework and may need narrow `@Suppress("unused")` rather than deletion.
+- Prefer the smallest warning fix. Do not change backend business behavior just to silence static analysis.

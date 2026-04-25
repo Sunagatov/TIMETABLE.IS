@@ -88,7 +88,12 @@ For current backend foundation work, the most common requirement files are:
 ### Telegram bot
 - Kotlin thin adapter, long polling
 - owner user ID validation both bot-side (Long) and backend-side (String)
+- handles `/start` and `/help` locally; commands never create backend items
+- forwards only supported owner text/voice inputs to backend unified ingest
+- replies to the authorized owner with supported-input guidance for unsupported inputs; unauthorized users are ignored
 - failure notification polling + delivery acknowledgement
+- backend HTTP timeout is configured by `BACKEND_TIMEOUT_SECONDS` (default 10)
+- backend-down failure polling logs first failure with exception, repeated failures concisely, and recovery once
 
 ## Rules for all AI agents
 
@@ -105,10 +110,11 @@ For current backend foundation work, the most common requirement files are:
   - `docs/ai/api-surface.md`
   - `docs/ai/repo-map.md`
   - `docs/ai/invariants.md`
-  - `backend/AGENTS.md` and `frontend/AGENTS.md`
+  - scoped `AGENTS.md` files (`backend/`, `frontend/`, `telegram-bot/`)
 - Preserve these stable V1 contracts unless the requirements change:
   - unified Telegram ingest at `POST /api/capture/telegram/ingest`
   - bot-facing failure notification polling and delivery acknowledgement
+  - Telegram bot remains a thin transport adapter; no transcription, AI/category/review, DB writes, or local retry state
   - review-first workflow with separate Needs Review, Failures, and approved areas
   - direct `PATCH /api/items/{itemId}` for approved items only
   - reviewable edits through `POST /api/review/{itemId}/edit-and-approve`

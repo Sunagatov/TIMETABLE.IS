@@ -41,6 +41,8 @@ Current behavior:
 - voice items persist traceability metadata; transcription is **live** (self-hosted whisper); success path: RECEIVED → AI_PROCESSED_UNREVIEWED; failure path: → TRANSCRIPTION_FAILED after retries
 - bot-facing failure notifications exposed for polling and delivery acknowledgement
 - capture endpoints authenticated with `X-Memora-Bot-Token`
+- Telegram bot commands (`/start`, `/help`) are handled locally by the bot and must not call this endpoint
+- unsupported Telegram message types are not ingested; the authorized owner receives supported-input guidance from the bot
 
 Current bot-facing failure notification endpoints:
 - `GET /api/capture/telegram/failure-notifications`
@@ -53,6 +55,11 @@ Current failure notification payload:
 - `failedStage`
 - `summary`
 - `retryContext` — format `"transcriptionRetries=N/MAX, aiRetries=N/MAX"`
+
+Telegram bot compatibility notes:
+- `GET /failure-notifications` parsing currently accepts both a raw JSON array and an object wrapper with a `notifications` array.
+- `notificationId` can contain characters such as `:` and must be URL-encoded by the bot before formatting it into the acknowledgement path.
+- failure delivery state remains backend-owned; the bot only logs polling failure streaks to avoid repeated stack-trace spam.
 
 ## Review
 

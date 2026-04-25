@@ -24,8 +24,11 @@ Current status:
 Current status:
 - owner validation and message acceptance are present
 - unified text and voice ingest contract exists
+- Telegram bot local command handling exists for `/start` and `/help`; commands do not create items
+- unsupported owner messages receive supported-input guidance; unauthorized users are ignored
 - bot-facing failure notification polling and delivery acknowledgement exist
-- full async orchestration remains later work
+- backend timeout config and non-spammy repeated polling failure logs exist
+- full async orchestration remains backend-owned work; do not move it into the bot
 
 ## Phase 3 — processing pipeline
 - raw input persistence

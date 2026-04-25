@@ -28,7 +28,8 @@ It is not yet the full target V1 implementation.
 - frontend category sidebar with collapsible 3-level tree and category management UI (create, rename, delete)
 - frontend item detail panel with AI output vs human-facing value comparison and all review actions
 - Kotlin telegram bot starter
-- Telegram bot handles `/start` and `/help` locally, ignores unauthorized users, forwards only supported owner text/voice inputs, and polls backend failure notifications with non-spammy repeated-failure logging
+- Telegram bot handles `/start` and `/help` locally, ignores unauthorized users, forwards only supported owner text/voice inputs, replies to the owner for unsupported inputs, and polls backend failure notifications with non-spammy repeated-failure logging
+- Telegram bot backend calls use `BACKEND_TIMEOUT_SECONDS`; failure-notification acknowledgements URL-encode notification IDs and parsing accepts raw arrays plus `{ "notifications": [...] }`
 - stable stack versions
 
 ## What is live in production
@@ -62,7 +63,7 @@ It is not yet the full target V1 implementation.
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
 - single-user Telegram ingest is gated by configured owner Telegram user ID
-- Telegram bot currently uses Telegram long polling, not webhook delivery
+- Telegram bot currently uses Telegram long polling, not webhook delivery; it remains a thin adapter and must not contain transcription, AI, category/review, persistence, lifecycle, or retry-state logic
 - all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `subsubcategory`, `createdFrom`, `createdTo`, `sort`
 - review endpoints now include category-proposal approval/rejection and AI output regeneration actions
 

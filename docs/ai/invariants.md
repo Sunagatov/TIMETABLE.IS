@@ -35,6 +35,8 @@
 - voice items must preserve Telegram traceability metadata sufficient for operator recovery
 - voice retry in V1 is intentionally bounded by the lack of Memora-owned audio storage
 - Telegram ingest uses a unified text-or-voice request shape with nested voice payload
+- Telegram bot commands are local-only and must not create backend items
+- unsupported Telegram owner messages are transport feedback only and must not create backend items
 - bot-facing failure notifications are acknowledged after delivery; re-delivery uses new notificationId when item updatedAt changes
 
 ## State transition guards — all enforced in backend
@@ -77,4 +79,5 @@
 
 - backend must stay client-agnostic
 - Telegram must not own business logic
+- Telegram bot must not write to DB, call transcription/Whisper/AI, own category/review/item lifecycle behavior, or keep retry state
 - production/deployment truth lives in Vault, not Memora source docs

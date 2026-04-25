@@ -48,8 +48,11 @@ Owns production/deployment/runtime truth.
 
 ### Telegram bot
 - Kotlin thin adapter, Telegram long polling
-- forwards text/voice messages to backend ingest endpoint
+- validates owner locally, handles `/start` and `/help` locally, ignores unauthorized users
+- forwards only supported owner text/voice messages to backend ingest endpoint
+- replies to the owner with supported-input guidance for unsupported messages
 - polls backend for failure notifications, delivers to chat, acknowledges
+- owns transport concerns only; backend owns item lifecycle, category/review logic, retry semantics, transcription, AI, and persistence
 
 ### Whisper transcription service (external, Vault-owned)
 - `whisper-worker` container (`fedirz/faster-whisper-server:latest-cpu`)
@@ -61,6 +64,7 @@ Owns production/deployment/runtime truth.
 
 - backend must stay client-agnostic
 - Telegram must stay thin
+- one Telegram message maps to one backend item, except local bot commands never create items
 - review-first trust model must remain visible everywhere
 - original AI output and latest human-approved values must remain separately visible
 - category model must stay exactly 3 levels in V1

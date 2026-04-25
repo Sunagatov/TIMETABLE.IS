@@ -60,6 +60,15 @@ cd frontend && npm run build
 | `BACKEND_FAILURE_NOTIFICATIONS_PATH` | default: `/api/capture/telegram/failure-notifications` |
 | `BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE` | default: `/api/capture/telegram/failure-notifications/%s/delivered` |
 | `FAILURE_POLL_INTERVAL_SECONDS` | default: `5` |
+| `BACKEND_TIMEOUT_SECONDS` | default: `10`; minimum `1`; used for Java HttpClient connect timeout and each backend request timeout |
+
+Bot env validation:
+- `TELEGRAM_BOT_TOKEN` must be present and not an obvious placeholder.
+- `BACKEND_BASE_URL` defaults to `http://localhost:8080`, trims trailing slash, and must be a valid `http` or `https` URI.
+- `BACKEND_BOT_INGEST_TOKEN` must be present and non-blank.
+- `OWNER_TELEGRAM_USER_ID` must parse as a positive Long.
+- `FAILURE_POLL_INTERVAL_SECONDS` and `BACKEND_TIMEOUT_SECONDS` must be at least 1.
+- Do not put real Telegram tokens or shared bot tokens in docs, examples, commits, or command output.
 
 ## Production/deployment truth lives in Vault
 

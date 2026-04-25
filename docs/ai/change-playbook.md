@@ -15,7 +15,18 @@ Read:
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/item/*`
 - `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/*`
 - `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/backend/BackendClient.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/MemoraLongPollingBot.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/command/StartCommandHandler.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/config/BotSettings.kt`
 - `docs/ai/api-surface.md` (capture section)
+
+Checks:
+- commands `/start` and `/help` remain local-only and are not ingested
+- one non-command Telegram text/voice owner message becomes one backend item
+- unsupported owner inputs get supported-input guidance; unauthorized users are ignored
+- bot stays a thin adapter: no DB, no transcription/Whisper/AI, no category/review/lifecycle logic
+- `BACKEND_TIMEOUT_SECONDS` remains wired to Java HttpClient connect timeout and request timeout
+- bot tests cover settings parsing/validation, text/voice mapping, command non-ingest, backend token/path requests, and failure-notification parsing
 
 ## If changing review behavior or status transitions
 Read:
@@ -61,6 +72,10 @@ Read:
 - `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/TelegramIngestRequest.kt`
 
 Note: `notificationId` is `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll, not stored.
+Bot notes:
+- keep response parsing compatible with raw arrays and `{ "notifications": [...] }`
+- URL-encode `notificationId` before placing it in the acknowledgement path
+- avoid polling log spam: first consecutive failure can include the exception, repeats should be concise, recovery should be logged once
 
 ## If changing voice transcription integration
 
