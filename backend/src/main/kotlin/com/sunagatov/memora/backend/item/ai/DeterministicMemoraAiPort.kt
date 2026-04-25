@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(prefix = "memora", name = ["ai-mode"], havingValue = "deterministic", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "memora.ai", name = ["mode"], havingValue = "deterministic", matchIfMissing = true)
 class DeterministicMemoraAiPort : MemoraAiPort {
 
     override fun generateTextDraft(input: AiTextInput): AiTextDraft {

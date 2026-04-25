@@ -19,14 +19,14 @@ class AiWiringContextTests {
     private val contextRunner = ApplicationContextRunner()
         .withUserConfiguration(AiWiringTestConfig::class.java)
         .withPropertyValues(
-            "memora.allowed-origin=http://localhost:5173",
-            "memora.app-password-hash=\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
-            "memora.session-days=30",
-            "memora.bot-ingest-token=bot-token",
-            "memora.default-category-path=Default/General",
-            "memora.owner-telegram-user-id=owner-1",
-            "memora.transcription-auto-retry-attempts=3",
-            "memora.ai-auto-retry-attempts=2"
+            "memora.http.allowed-origin=http://localhost:5173",
+            "memora.auth.app-password-hash=\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
+            "memora.auth.session-days=30",
+            "memora.capture.bot-ingest-token=bot-token",
+            "memora.category.default-path=Default/General",
+            "memora.capture.owner-telegram-user-id=owner-1",
+            "memora.processing.transcription-auto-retry-attempts=3",
+            "memora.processing.ai-auto-retry-attempts=2"
         )
 
     @Test
@@ -46,11 +46,11 @@ class AiWiringContextTests {
     fun `openai mode wires LangChain4j port`() {
         contextRunner
             .withPropertyValues(
-                "memora.ai-mode=openai",
-                "memora.ai-api-key=test-key",
-                "memora.ai-api-base-url=https://api.openai.com",
-                "memora.ai-model=gpt-4o-mini",
-                "memora.ai-fallback-to-deterministic=false"
+                "memora.ai.mode=openai",
+                "memora.ai.api-key=test-key",
+                "memora.ai.api-base-url=https://api.openai.com",
+                "memora.ai.model=gpt-4o-mini",
+                "memora.ai.fallback-to-deterministic=false"
             )
             .run { context ->
                 assertEquals(1, context.getBeansOfType(MemoraAiPort::class.java).size)

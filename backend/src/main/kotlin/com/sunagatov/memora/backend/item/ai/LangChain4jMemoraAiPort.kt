@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(prefix = "memora", name = ["ai-mode"], havingValue = "openai")
+@ConditionalOnProperty(prefix = "memora.ai", name = ["mode"], havingValue = "openai")
 internal class LangChain4jMemoraAiPort(
     private val properties: MemoraProperties,
     private val aiService: MemoraStructuredAiService

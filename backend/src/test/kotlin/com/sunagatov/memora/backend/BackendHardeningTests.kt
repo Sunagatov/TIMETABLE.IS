@@ -168,20 +168,34 @@ class BackendHardeningTests {
         validateProductionConfig: Boolean = false
     ): MemoraProperties =
         MemoraProperties(
-            allowedOrigin = "http://localhost:5173",
-            appPassword = appPassword,
-            appPasswordHash = appPasswordHash,
-            sessionDays = 30,
-            botIngestToken = botIngestToken,
-            defaultCategoryPath = "Default/General",
-            ownerTelegramUserId = "owner-1",
-            transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2,
-            aiMode = aiMode,
-            aiApiKey = aiApiKey,
-            aiApiBaseUrl = aiApiBaseUrl,
-            aiModel = aiModel,
-            aiFallbackToDeterministic = aiFallbackToDeterministic,
-            validateProductionConfig = validateProductionConfig
+            http = MemoraProperties.Http(
+                allowedOrigin = "http://localhost:5173"
+            ),
+            auth = MemoraProperties.Auth(
+                appPassword = appPassword,
+                appPasswordHash = appPasswordHash,
+                sessionDays = 30
+            ),
+            capture = MemoraProperties.Capture(
+                botIngestToken = botIngestToken,
+                ownerTelegramUserId = "owner-1"
+            ),
+            category = MemoraProperties.Category(
+                defaultPath = "Default/General"
+            ),
+            processing = MemoraProperties.Processing(
+                transcriptionAutoRetryAttempts = 3,
+                aiAutoRetryAttempts = 2
+            ),
+            ai = MemoraProperties.Ai(
+                mode = aiMode,
+                apiKey = aiApiKey,
+                apiBaseUrl = aiApiBaseUrl,
+                model = aiModel,
+                fallbackToDeterministic = aiFallbackToDeterministic
+            ),
+            validation = MemoraProperties.Validation(
+                productionConfig = validateProductionConfig
+            )
         )
 }

@@ -286,19 +286,31 @@ class AiAdapterTests {
         aiFallbackToDeterministic: Boolean = true
     ): MemoraProperties =
         MemoraProperties(
-            allowedOrigin = "http://localhost:5173",
-            appPassword = null,
-            appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
-            sessionDays = 30,
-            botIngestToken = "bot-token",
-            defaultCategoryPath = "Default/General",
-            ownerTelegramUserId = "owner-1",
-            transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2,
-            aiMode = "openai",
-            aiApiKey = "ai-key",
-            aiApiBaseUrl = "http://localhost:8081",
-            aiModel = "gpt-4o-mini",
-            aiFallbackToDeterministic = aiFallbackToDeterministic
+            http = MemoraProperties.Http(
+                allowedOrigin = "http://localhost:5173"
+            ),
+            auth = MemoraProperties.Auth(
+                appPassword = null,
+                appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
+                sessionDays = 30
+            ),
+            capture = MemoraProperties.Capture(
+                botIngestToken = "bot-token",
+                ownerTelegramUserId = "owner-1"
+            ),
+            category = MemoraProperties.Category(
+                defaultPath = "Default/General"
+            ),
+            processing = MemoraProperties.Processing(
+                transcriptionAutoRetryAttempts = 3,
+                aiAutoRetryAttempts = 2
+            ),
+            ai = MemoraProperties.Ai(
+                mode = "openai",
+                apiKey = "ai-key",
+                apiBaseUrl = "http://localhost:8081",
+                model = "gpt-4o-mini",
+                fallbackToDeterministic = aiFallbackToDeterministic
+            )
         )
 }

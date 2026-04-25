@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@ConditionalOnProperty(prefix = "memora", name = ["ai-mode"], havingValue = "openai")
+@ConditionalOnProperty(prefix = "memora.ai", name = ["mode"], havingValue = "openai")
 class LangChain4jAiConfig {
 
     @Bean

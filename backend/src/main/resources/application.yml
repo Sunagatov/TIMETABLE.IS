@@ -16,29 +16,38 @@ management:
 memora:
   storage:
     mode: ${MEMORA_STORAGE_MODE:mongo}
-  allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}
-  app-password: ${BACKEND_APP_PASSWORD:}
-  app-password-hash: ${BACKEND_APP_PASSWORD_HASH:$2y$10$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza}
-  session-days: ${BACKEND_SESSION_DAYS:30}
-  cookie-secure: ${BACKEND_COOKIE_SECURE:true}
-  bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}
-  owner-telegram-user-id: ${MEMORA_OWNER_TELEGRAM_USER_ID:}
-  default-category-path: ${DEFAULT_CATEGORY_PATH:Default/General}
-  transcription-auto-retry-attempts: ${MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS:3}
-  ai-auto-retry-attempts: ${MEMORA_AI_AUTO_RETRY_ATTEMPTS:2}
-  telegram-bot-token: ${MEMORA_TELEGRAM_BOT_TOKEN:}
-  telegram-api-base-url: ${MEMORA_TELEGRAM_API_BASE_URL:https://api.telegram.org}
-  transcription-api-key: ${MEMORA_TRANSCRIPTION_API_KEY:}
-  transcription-api-base-url: ${MEMORA_TRANSCRIPTION_API_BASE_URL:https://api.openai.com}
-  transcription-model: ${MEMORA_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
-  transcription-language: ${MEMORA_TRANSCRIPTION_LANGUAGE:}
-  transcription-timeout-seconds: ${MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS:120}
-  transcription-max-audio-bytes: ${MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES:26214400}
-  transcription-max-duration-seconds: ${MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS:600}
-  ai-mode: ${MEMORA_AI_MODE:deterministic}
-  ai-api-key: ${MEMORA_AI_API_KEY:}
-  ai-api-base-url: ${MEMORA_AI_API_BASE_URL:https://api.openai.com}
-  ai-model: ${MEMORA_AI_MODEL:gpt-4o-mini}
-  ai-timeout-seconds: ${MEMORA_AI_TIMEOUT_SECONDS:60}
-  ai-fallback-to-deterministic: ${MEMORA_AI_FALLBACK_TO_DETERMINISTIC:true}
-  validate-production-config: ${MEMORA_VALIDATE_PRODUCTION_CONFIG:false}
+  http:
+    allowed-origin: ${BACKEND_ALLOWED_ORIGIN:http://localhost:5173}
+  auth:
+    app-password: ${BACKEND_APP_PASSWORD:}
+    app-password-hash: ${BACKEND_APP_PASSWORD_HASH:$2y$10$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza}
+    session-days: ${BACKEND_SESSION_DAYS:30}
+    cookie-secure: ${BACKEND_COOKIE_SECURE:true}
+  capture:
+    bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}
+    owner-telegram-user-id: ${MEMORA_OWNER_TELEGRAM_USER_ID:}
+  category:
+    default-path: ${DEFAULT_CATEGORY_PATH:Default/General}
+  processing:
+    transcription-auto-retry-attempts: ${MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS:3}
+    ai-auto-retry-attempts: ${MEMORA_AI_AUTO_RETRY_ATTEMPTS:2}
+  telegram:
+    bot-token: ${MEMORA_TELEGRAM_BOT_TOKEN:}
+    api-base-url: ${MEMORA_TELEGRAM_API_BASE_URL:https://api.telegram.org}
+  transcription:
+    api-key: ${MEMORA_TRANSCRIPTION_API_KEY:}
+    api-base-url: ${MEMORA_TRANSCRIPTION_API_BASE_URL:https://api.openai.com}
+    model: ${MEMORA_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
+    language: ${MEMORA_TRANSCRIPTION_LANGUAGE:}
+    timeout-seconds: ${MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS:120}
+    max-audio-bytes: ${MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES:26214400}
+    max-duration-seconds: ${MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS:600}
+  ai:
+    mode: ${MEMORA_AI_MODE:deterministic}
+    api-key: ${MEMORA_AI_API_KEY:}
+    api-base-url: ${MEMORA_AI_API_BASE_URL:https://api.openai.com}
+    model: ${MEMORA_AI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${MEMORA_AI_TIMEOUT_SECONDS:60}
+    fallback-to-deterministic: ${MEMORA_AI_FALLBACK_TO_DETERMINISTIC:true}
+  validation:
+    production-config: ${MEMORA_VALIDATE_PRODUCTION_CONFIG:false}

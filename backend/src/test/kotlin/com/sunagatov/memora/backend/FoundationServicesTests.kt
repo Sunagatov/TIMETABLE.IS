@@ -1160,15 +1160,25 @@ class FoundationServicesTests {
         ownerTelegramUserId: String = "owner-1"
     ): MemoraProperties =
         MemoraProperties(
-            allowedOrigin = "http://localhost:5173",
-            appPassword = null,
-            appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
-            sessionDays = 30,
-            botIngestToken = "bot-token",
-            defaultCategoryPath = "Default/General",
-            ownerTelegramUserId = ownerTelegramUserId,
-            transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2,
-            cookieSecure = cookieSecure
+            http = MemoraProperties.Http(
+                allowedOrigin = "http://localhost:5173"
+            ),
+            auth = MemoraProperties.Auth(
+                appPassword = null,
+                appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
+                sessionDays = 30,
+                cookieSecure = cookieSecure
+            ),
+            capture = MemoraProperties.Capture(
+                botIngestToken = "bot-token",
+                ownerTelegramUserId = ownerTelegramUserId
+            ),
+            category = MemoraProperties.Category(
+                defaultPath = "Default/General"
+            ),
+            processing = MemoraProperties.Processing(
+                transcriptionAutoRetryAttempts = 3,
+                aiAutoRetryAttempts = 2
+            )
         )
 }

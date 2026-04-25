@@ -91,14 +91,24 @@ class AuthSecurityTests {
         botIngestToken: String = "bot-token"
     ): MemoraProperties =
         MemoraProperties(
-            allowedOrigin = "http://localhost:5173",
-            appPassword = appPassword,
-            appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
-            sessionDays = 30,
-            botIngestToken = botIngestToken,
-            defaultCategoryPath = "Default/General",
-            ownerTelegramUserId = "owner-1",
-            transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2
+            http = MemoraProperties.Http(
+                allowedOrigin = "http://localhost:5173"
+            ),
+            auth = MemoraProperties.Auth(
+                appPassword = appPassword,
+                appPasswordHash = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
+                sessionDays = 30
+            ),
+            capture = MemoraProperties.Capture(
+                botIngestToken = botIngestToken,
+                ownerTelegramUserId = "owner-1"
+            ),
+            category = MemoraProperties.Category(
+                defaultPath = "Default/General"
+            ),
+            processing = MemoraProperties.Processing(
+                transcriptionAutoRetryAttempts = 3,
+                aiAutoRetryAttempts = 2
+            )
         )
 }
