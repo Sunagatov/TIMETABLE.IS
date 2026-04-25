@@ -18,7 +18,7 @@ backend-owned state transitions and business rules.
   mode via `MEMORA_AI_MODE=openai`
 - review workflow for Needs Review, Failures, Approved, retry, approve,
   edit-and-approve, reject, trash, and AI regeneration actions
-- 3-level category CRUD with rename cascade and non-empty delete protection
+- 2-level category CRUD with rename cascade and non-empty delete protection
 
 ## Run Locally
 
@@ -51,7 +51,7 @@ Core:
 - `BACKEND_COOKIE_SECURE` default `true`
 - `BACKEND_BOT_INGEST_TOKEN`
 - `MEMORA_OWNER_TELEGRAM_USER_ID` required for Telegram ingest; blank config rejects ingest
-- `DEFAULT_CATEGORY_PATH` default `Default/General/Inbox`
+- `DEFAULT_CATEGORY_PATH` default `Default/General` (legacy 3-part config tolerated with the third part ignored)
 
 Transcription:
 
