@@ -13,10 +13,12 @@ data class CategoryPath(
         fun fromConfig(value: String): CategoryPath {
             val parts = value.split("/")
                 .map { it.trim() }
-                .filter { it.isNotEmpty() }
 
             require(parts.size == 2 || parts.size == 3) {
-                "Default category path must contain 2 levels separated by '/'"
+                "Default category path must contain exactly 2 levels or legacy 3 levels separated by '/'"
+            }
+            require(parts.all { it.isNotEmpty() }) {
+                "Default category path must not contain blank segments"
             }
 
             return CategoryPath(

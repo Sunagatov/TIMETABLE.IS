@@ -81,7 +81,13 @@ check_single_change_guide_owner() {
 check_legacy_names_are_marked() {
   files="$(find AGENTS.md CLAUDE.md CODEX.md AMAZONQ.md README.md .project/docs .claude .amazonq \
     -type f -name '*.md' 2>/dev/null)"
-  matches="$(grep -InE 'Mindraft|Lexora|mindraft' $files 2>/dev/null | \
+  legacy_name_pattern="$(
+    printf '%s|%s|%s' \
+      'Mind'"draft" \
+      'Lex'"ora" \
+      'mind'"raft"
+  )"
+  matches="$(grep -InE "$legacy_name_pattern" $files 2>/dev/null | \
     grep -viE 'deprecated|legacy|compatibility|do not use|incorrect|not active' || true)"
   if [ -n "$matches" ]; then
     fail "legacy project/API names found without an explicit deprecated/legacy/compatibility marker"

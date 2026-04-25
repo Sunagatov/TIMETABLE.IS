@@ -140,12 +140,21 @@ class OpenAiCompatibleMemoraAiPort(
         )
         val existing = input.existingCategoryPaths.firstOrNull { it == parsed }
 
-        if (isExisting && existing != null) {
+        if (existing != null) {
             return AiCategoryDraft(
                 aiCategoryPath = existing,
                 proposedCategoryPath = null,
                 proposedCategoryStatus = ProposedCategoryStatus.NONE,
                 currentCategoryPath = existing
+            )
+        }
+
+        if (isExisting) {
+            return AiCategoryDraft(
+                aiCategoryPath = input.defaultCategoryPath,
+                proposedCategoryPath = null,
+                proposedCategoryStatus = ProposedCategoryStatus.NONE,
+                currentCategoryPath = input.defaultCategoryPath
             )
         }
 

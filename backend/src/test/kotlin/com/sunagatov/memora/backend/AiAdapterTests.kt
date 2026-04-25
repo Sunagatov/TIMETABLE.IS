@@ -10,6 +10,7 @@ import com.sunagatov.memora.backend.item.model.ItemType
 import java.net.InetSocketAddress
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class AiAdapterTests {
 
@@ -39,6 +40,46 @@ class AiAdapterTests {
             assertEquals("Model-knowledge placeholder answer: What is Kotlin?", draft.answerDraft.answer)
         }
     }
+
+    @Test
+    fun `openai compatible adapter prefers backend existing category over false ai boolean`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val existingPath = CategoryPath("Work", "Backend")
+
+        withServer { server ->
+            server.createContext("/v1/chat/completions") { exchange ->
+                exchange.respond(
+                    200,
+                    """
+                    {
+                      "choices": [
+                        {
+                          "message": {
+                            "content": "{\"title\":\"Backend note\",\"cleanedText\":\"Backend note\",\"type\":\"IDEA\",\"priority\":\"NOT_APPLICABLE\",\"categoryPath\":{\"category\":\"Work\",\"subcategory\":\"Backend\"},\"categoryPathIsExisting\":false,\"answer\":null}"
+                          }
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                )
+            }
+
+            val draft = adapter(server).generateAllDraft(
+                AiTextInput(
+                    rawText = "Backend note",
+                    existingCategoryPaths = listOf(defaultPath, existingPath),
+                    defaultCategoryPath = defaultPath
+                )
+            )
+
+            assertEquals(existingPath, draft.categoryDraft.aiCategoryPath)
+            assertNull(draft.categoryDraft.proposedCategoryPath)
+            assertEquals(existingPath, draft.categoryDraft.currentCategoryPath)
+        }
+    }
+
+    private fun adapter(server: HttpServer): OpenAiCompatibleMemoraAiPort =
+        OpenAiCompatibleMemoraAiPort(testProperties(aiApiBaseUrl = server.baseUrl()))
 
     private fun withServer(block: (HttpServer) -> Unit) {
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
