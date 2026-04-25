@@ -2,6 +2,7 @@ package com.sunagatov.memora.backend.item.application
 
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.config.MemoraProperties
+import com.sunagatov.memora.backend.item.ai.AiAnswerDraft
 import com.sunagatov.memora.backend.item.ai.AiTextInput
 import com.sunagatov.memora.backend.item.ai.MemoraAiPort
 import com.sunagatov.memora.backend.item.model.AnswerStatus
@@ -14,11 +15,10 @@ import com.sunagatov.memora.backend.item.store.ItemStore
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import java.time.Instant
 import java.util.concurrent.ExecutorService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ItemProcessingService @Autowired constructor(
+class ItemProcessingService(
     private val itemStore: ItemStore,
     private val categoryService: CategoryService,
     private val aiPort: MemoraAiPort,
@@ -36,19 +36,70 @@ class ItemProcessingService @Autowired constructor(
         enqueue(itemId)
     }
 
-    fun regenerateCleanedText(itemId: String): MemoraItem = regenerateText(itemId)
+    fun regenerateCleanedText(itemId: String): MemoraItem {
+        val item = requireRegeneratableItem(itemId)
+        val draft = aiPort.generateTextDraft(buildAiInput(sourceTextFor(item)))
+        return itemStore.save(
+            item.copy(
+                title = draft.title,
+                cleanedText = draft.cleanedText,
+                updatedAt = Instant.now()
+            )
+        )
+    }
 
-    fun regenerateAnswer(itemId: String): MemoraItem = regenerateAnswerInternal(itemId)
+    fun regenerateAnswer(itemId: String): MemoraItem {
+        val item = requireRegeneratableItem(itemId)
+        require(item.type == ItemType.QUESTION) { "Only QUESTION items can regenerate an answer" }
+        val draft = aiPort.generateAnswerDraft(item.cleanedText)
+        return itemStore.save(
+            item.copy(
+                answer = draft.answer,
+                answerStatus = draft.answerStatus,
+                answerFailureStage = draft.toFailureStage(),
+                answerFailureReason = draft.failureReason,
+                updatedAt = Instant.now()
+            )
+        )
+    }
 
-    fun regenerateCategoryProposal(itemId: String): MemoraItem = regenerateCategoryInternal(itemId)
+    fun regenerateCategoryProposal(itemId: String): MemoraItem {
+        val item = requireRegeneratableItem(itemId)
+        val draft = aiPort.generateCategoryDraft(buildAiInput(sourceTextFor(item)))
+        return itemStore.save(
+            item.copy(
+                categoryPath = draft.currentCategoryPath,
+                proposedCategoryPath = draft.proposedCategoryPath,
+                proposedCategoryStatus = draft.proposedCategoryStatus,
+                updatedAt = Instant.now()
+            )
+        )
+    }
 
-    fun regenerateAll(itemId: String): MemoraItem = regenerateAllInternal(itemId)
+    fun regenerateAll(itemId: String): MemoraItem {
+        val item = requireRegeneratableItem(itemId)
+        val draft = aiPort.generateAllDraft(buildAiInput(sourceTextFor(item)))
+        return itemStore.save(
+            item.copy(
+                title = draft.textDraft.title,
+                cleanedText = draft.textDraft.cleanedText,
+                type = draft.textDraft.type,
+                categoryPath = draft.categoryDraft.currentCategoryPath,
+                priority = draft.textDraft.priority,
+                answer = draft.answerDraft.answer,
+                answerStatus = draft.answerDraft.answerStatus,
+                answerFailureStage = draft.answerDraft.toFailureStage(),
+                answerFailureReason = draft.answerDraft.failureReason,
+                proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
+                proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
+                updatedAt = Instant.now()
+            )
+        )
+    }
 
     private fun process(itemId: String) {
         val item = itemStore.findById(itemId) ?: return
-        if (item.status != ItemStatus.RECEIVED) {
-            return
-        }
+        if (item.status != ItemStatus.RECEIVED) return
 
         when (item.sourceType) {
             SourceType.TELEGRAM_TEXT -> processText(item)
@@ -60,18 +111,18 @@ class ItemProcessingService @Autowired constructor(
         val rawInputText = item.rawInputText?.takeIf { it.isNotBlank() }
             ?: return failAsAiProcessing(item, "Accepted text item is missing raw input text")
 
-        val aiOutcome = retryRunner.run(properties.aiAutoRetryAttempts) {
+        val outcome = retryRunner.run(properties.aiAutoRetryAttempts) {
             createAiProcessedItem(item = item, sourceText = rawInputText, rawTranscript = null)
         }
 
-        if (aiOutcome.success) {
-            itemStore.save(aiOutcome.value!!)
+        if (outcome.success) {
+            itemStore.save(outcome.value!!)
             return
         }
 
         failAsAiProcessing(
             item = item,
-            reason = "AI processing failed after ${aiOutcome.attempts} attempt(s)${aiOutcome.lastErrorMessageSuffix()}"
+            reason = "AI processing failed after ${outcome.attempts} attempt(s)${outcome.lastErrorMessageSuffix()}"
         )
     }
 
@@ -85,15 +136,7 @@ class ItemProcessingService @Autowired constructor(
                 item.copy(
                     status = ItemStatus.TRANSCRIPTION_FAILED,
                     failureStage = FailureStage.TRANSCRIPTION,
-                    failureReason = buildString {
-                        append("Voice transcription failed after ")
-                        append(transcriptionOutcome.attempts)
-                        append(" attempt(s)")
-                        transcriptionOutcome.lastErrorMessage?.let {
-                            append(": ")
-                            append(it)
-                        }
-                    },
+                    failureReason = "Voice transcription failed after ${transcriptionOutcome.attempts} attempt(s)${transcriptionOutcome.lastErrorMessageSuffix()}",
                     updatedAt = Instant.now()
                 )
             )
@@ -111,11 +154,7 @@ class ItemProcessingService @Autowired constructor(
         )
 
         val aiOutcome = retryRunner.run(properties.aiAutoRetryAttempts) {
-            createAiProcessedItem(
-                item = transcribedItem,
-                sourceText = rawTranscript,
-                rawTranscript = rawTranscript
-            )
+            createAiProcessedItem(item = transcribedItem, sourceText = rawTranscript, rawTranscript = rawTranscript)
         }
 
         if (aiOutcome.success) {
@@ -134,13 +173,7 @@ class ItemProcessingService @Autowired constructor(
         sourceText: String,
         rawTranscript: String?
     ): MemoraItem {
-        val draft = aiPort.generateAllDraft(
-            AiTextInput(
-                rawText = sourceText,
-                existingCategoryPaths = categoryService.list().map { it.path },
-                defaultCategoryPath = categoryService.defaultPath()
-            )
-        )
+        val draft = aiPort.generateAllDraft(buildAiInput(sourceText))
         val now = Instant.now()
 
         return item.copy(
@@ -160,102 +193,12 @@ class ItemProcessingService @Autowired constructor(
             priority = draft.textDraft.priority,
             answer = draft.answerDraft.answer,
             answerStatus = draft.answerDraft.answerStatus,
-            answerFailureStage = if (draft.answerDraft.answerStatus == AnswerStatus.FAILED) {
-                FailureStage.AI_PROCESSING
-            } else {
-                null
-            },
+            answerFailureStage = draft.answerDraft.toFailureStage(),
             answerFailureReason = draft.answerDraft.failureReason,
             status = ItemStatus.AI_PROCESSED_UNREVIEWED,
             failureStage = null,
             failureReason = null,
             updatedAt = now
-        )
-    }
-
-    private fun regenerateText(itemId: String): MemoraItem {
-        val item = requireRegeneratableItem(itemId)
-        val sourceText = sourceTextFor(item)
-        val draft = aiPort.generateTextDraft(
-            AiTextInput(
-                rawText = sourceText,
-                existingCategoryPaths = categoryService.list().map { it.path },
-                defaultCategoryPath = categoryService.defaultPath()
-            )
-        )
-
-        return itemStore.save(
-            item.copy(
-                title = draft.title,
-                cleanedText = draft.cleanedText,
-                updatedAt = Instant.now()
-            )
-        )
-    }
-
-    private fun regenerateAnswerInternal(itemId: String): MemoraItem {
-        val item = requireRegeneratableItem(itemId)
-        require(item.type == ItemType.QUESTION) { "Only QUESTION items can regenerate an answer" }
-
-        val draft = aiPort.generateAnswerDraft(item.cleanedText)
-        val now = Instant.now()
-
-        return itemStore.save(
-            item.copy(
-                answer = draft.answer,
-                answerStatus = draft.answerStatus,
-                answerFailureStage = if (draft.answerStatus == AnswerStatus.FAILED) FailureStage.AI_PROCESSING else null,
-                answerFailureReason = draft.failureReason,
-                updatedAt = now
-            )
-        )
-    }
-
-    private fun regenerateCategoryInternal(itemId: String): MemoraItem {
-        val item = requireRegeneratableItem(itemId)
-        val draft = aiPort.generateCategoryDraft(
-            AiTextInput(
-                rawText = sourceTextFor(item),
-                existingCategoryPaths = categoryService.list().map { it.path },
-                defaultCategoryPath = categoryService.defaultPath()
-            )
-        )
-
-        return itemStore.save(
-            item.copy(
-                categoryPath = draft.currentCategoryPath,
-                proposedCategoryPath = draft.proposedCategoryPath,
-                proposedCategoryStatus = draft.proposedCategoryStatus,
-                updatedAt = Instant.now()
-            )
-        )
-    }
-
-    private fun regenerateAllInternal(itemId: String): MemoraItem {
-        val item = requireRegeneratableItem(itemId)
-        val draft = aiPort.generateAllDraft(
-            AiTextInput(
-                rawText = sourceTextFor(item),
-                existingCategoryPaths = categoryService.list().map { it.path },
-                defaultCategoryPath = categoryService.defaultPath()
-            )
-        )
-
-        return itemStore.save(
-            item.copy(
-                title = draft.textDraft.title,
-                cleanedText = draft.textDraft.cleanedText,
-                type = draft.textDraft.type,
-                categoryPath = draft.categoryDraft.currentCategoryPath,
-                priority = draft.textDraft.priority,
-                answer = draft.answerDraft.answer,
-                answerStatus = draft.answerDraft.answerStatus,
-                answerFailureStage = if (draft.answerDraft.answerStatus == AnswerStatus.FAILED) FailureStage.AI_PROCESSING else null,
-                answerFailureReason = draft.answerDraft.failureReason,
-                proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
-                proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
-                updatedAt = Instant.now()
-            )
         )
     }
 
@@ -280,4 +223,12 @@ class ItemProcessingService @Autowired constructor(
             ?: item.rawTranscript?.takeIf { it.isNotBlank() }
             ?: item.cleanedText
 
+    private fun buildAiInput(text: String): AiTextInput = AiTextInput(
+        rawText = text,
+        existingCategoryPaths = categoryService.list().map { it.path },
+        defaultCategoryPath = categoryService.defaultPath()
+    )
+
+    private fun AiAnswerDraft.toFailureStage(): FailureStage? =
+        if (answerStatus == AnswerStatus.FAILED) FailureStage.AI_PROCESSING else null
 }
