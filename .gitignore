@@ -9,6 +9,7 @@ Thumbs.db
 node_modules/
 dist/
 coverage/
+*.tsbuildinfo
 .gradle/
 build/
 out/
