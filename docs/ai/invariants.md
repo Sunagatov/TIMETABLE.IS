@@ -69,9 +69,9 @@
 - no semantic search in V1
 - no view-count sorting in V1
 - no web-search-backed question answers in V1 (model knowledge only)
-- no real AI integration yet in current bootstrap backend (stubs only)
-- no Memora-owned transcription implementation yet in current bootstrap backend
-- no Mongo persistence yet in current bootstrap backend
+- no real AI integration yet (categorization/answer generation use stubs only)
+- voice transcription is **live** via self-hosted Whisper (`whisper-worker`) — Memora backend calls `http://whisper-worker:8000/v1/audio/transcriptions`; deployment owned by Vault (`apps/whisper/`)
+- MongoDB persistence is **active** in production
 
 ## Boundary invariants
 

@@ -72,7 +72,7 @@ For current backend foundation work, the most common requirement files are:
 - failure notifications: polled by bot, acknowledged after delivery, re-derivable after retry
 - filter params for all list endpoints: keyword, type, priority, status, category, subcategory, subsubcategory, `createdFrom`, `createdTo`, sort
 - sort format: `field-direction` (createdAt-desc, title-asc, category-desc, etc.)
-- in-memory stores only; Mongo persistence is a later phase
+- MongoDB persistence is active in production; in-memory stores are test-only
 
 ### Frontend
 - review-first 3-column workspace: sidebar / item list / item detail

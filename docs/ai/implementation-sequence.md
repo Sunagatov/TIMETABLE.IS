@@ -10,8 +10,9 @@ This file helps AI agents and humans avoid working in the wrong order.
 - auth/session baseline
 
 Current status:
-- done as a bootstrap backend foundation
-- current implementation is still in-memory and intentionally simple
+- done
+- MongoDB persistence is active in production (Spring Boot 4: use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)
+- in-memory stores are test-only
 
 ## Phase 2 — Telegram ingestion path
 - owner validation
@@ -32,6 +33,12 @@ Current status:
 - cleaned text generation
 - type/category/priority inference
 - failure handling
+
+Current status (transcription sub-path):
+- voice transcription is **live** in production — `faster-whisper-server` (`whisper-worker`) on `whisper-network`
+- backend `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
+- runtime config: `MEMORA_TRANSCRIPTION_API_BASE_URL=http://whisper-worker:8000`, `MEMORA_TRANSCRIPTION_MODEL=Systran/faster-whisper-base`
+- AI processing (categorization, answer generation) is still stub/placeholder
 
 ## Phase 4 — web review UI
 - login

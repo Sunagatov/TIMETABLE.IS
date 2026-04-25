@@ -34,20 +34,27 @@ Compact guidance for Codex CLI.
 
 ## Current backend reality
 
-- current backend packages: `auth`, `capture`, `category`, `common`, `config`, `health`, `item`, `review`
+- current backend packages: `auth`, `capture`, `category`, `common`, `config`, `health`, `item`, `review`, `transcription`
 - `MemoraItem` preserves original AI output and latest human-facing state separately
 - category paths are exact 3-level leaf paths, not arbitrary-depth trees; rename cascades to items; `aiCategoryPath` is NOT updated
 - approved items stay approved after human edits in V1 (direct PATCH → `HUMAN_EDITED_APPROVED`)
 - unified Telegram ingest uses `POST /api/capture/telegram/ingest` with text or nested voice payload
 - Telegram bot currently uses long polling; bot failure notifications are an explicit backend contract delivered by backend polling and delivery acknowledgement
 - direct item patch is approved-only; reviewable edits use `edit-and-approve`
-- voice ingest is accepted and persisted, but full transcription remains future work
+- **voice transcription is live in production** via self-hosted `whisper-worker`; backend calls `http://whisper-worker:8000/v1/audio/transcriptions`; success path → AI_PROCESSED_UNREVIEWED
+- **MongoDB is active in production** — not in-memory; in-memory stores are test-only
 - filter params for list endpoints: keyword, type, priority, status, category, subcategory, subsubcategory, `createdFrom`, `createdTo`, sort
 - sort format: `field-direction` e.g. `createdAt-desc`, `title-asc`
 - state guards enforced by backend services (not Spring Security):
   - approve/reject/edit-and-approve: only `AI_PROCESSED_UNREVIEWED`
   - retry: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
   - PATCH: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
+
+## Spring Boot 4 critical fact
+
+`spring.data.mongodb.uri` is error-level deprecated since Spring Boot 4.0.0 and completely ignored at runtime.
+Use `spring.mongodb.uri` (in `application.yml`) or `SPRING_MONGODB_URI` env var.
+Getting this wrong causes a silent fallback to `localhost:27017`, making the container crash-loop with MongoDB connection errors.
 
 ## Current frontend reality
 

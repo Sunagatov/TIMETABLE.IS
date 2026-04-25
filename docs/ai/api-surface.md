@@ -38,7 +38,7 @@ Current behavior:
 - text items processed asynchronously into Needs Review (`AI_PROCESSED_UNREVIEWED`)
 - QUESTION items may carry answer output plus answer status/failure metadata
 - category inference may produce a pending-review proposal path separate from the current category path
-- voice items persist traceability metadata and currently always end in `TRANSCRIPTION_FAILED`
+- voice items persist traceability metadata; transcription is **live** (self-hosted whisper); success path: RECEIVED → AI_PROCESSED_UNREVIEWED; failure path: → TRANSCRIPTION_FAILED after retries
 - bot-facing failure notifications exposed for polling and delivery acknowledgement
 - capture endpoints authenticated with `X-Memora-Bot-Token`
 

@@ -29,10 +29,15 @@ It is not yet the full target V1 implementation.
 - Kotlin telegram bot starter
 - stable stack versions
 
+## What is live in production
+
+- MongoDB persistence is **active** — backend connects to a Mongo sidecar via `spring.mongodb.uri` (Spring Boot 4 property name; `spring.data.mongodb.uri` is error-level deprecated and ignored)
+- Voice transcription is **active** — self-hosted `faster-whisper-server` (`whisper-worker`) runs under `whisper-network` in Vault; backend connects via `MEMORA_TRANSCRIPTION_API_BASE_URL=http://whisper-worker:8000`
+- Deployment/runtime is owned by Vault (`apps/memora/`, `apps/whisper/`)
+
 ## What is still intentionally starter-level
 
-- Mongo persistence is not implemented yet
-- AI integration is not implemented yet (deterministic placeholder AI port is used)
+- AI integration (categorization, answer generation) is not implemented yet — deterministic placeholder AI port is used
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter

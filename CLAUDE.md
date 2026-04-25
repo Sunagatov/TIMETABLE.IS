@@ -45,14 +45,23 @@ Avoid:
 
 ## Current backend reality
 
-- backend foundation now includes `auth`, `capture`, `category`, `item`, `review`, `health`
+- backend foundation packages: `auth`, `capture`, `category`, `common`, `config`, `health`, `item`, `review`, `transcription`
 - backend item model separates original AI output from latest human-facing values
 - category path is exactly 3 levels in V1; rename cascades to items; aiCategoryPath is not updated
 - Telegram ingest is unified at `POST /api/capture/telegram/ingest` with exactly one of text or nested voice payload
 - Telegram bot currently uses long polling, and bot-facing failure notifications are polled from the backend and acknowledged after delivery
-- voice ingest persists Telegram traceability metadata and lands in visible retryable failure state until transcription exists
+- **voice transcription is live in production** — backed by self-hosted `whisper-worker` (`fedirz/faster-whisper-server`) on `whisper-network`; backend posts to `http://whisper-worker:8000/v1/audio/transcriptions`
+- voice success path: RECEIVED → transcription → AI processing → AI_PROCESSED_UNREVIEWED; failure path → TRANSCRIPTION_FAILED
 - approved items stay approved after direct human edits; reviewable edits go through `edit-and-approve`
 - single-user auth uses backend-managed session cookies and password-hash config
+- **MongoDB is active in production** — `spring.mongodb.uri` is the correct Spring Boot 4 property; `spring.data.mongodb.uri` is error-level deprecated and completely ignored at runtime
+
+## Spring Boot 4 critical facts
+
+- Property: `spring.mongodb.uri` (NOT `spring.data.mongodb.uri` — that was Spring Boot 3; in Boot 4 it is error-level deprecated and silently ignored)
+- Env var to override MongoDB URI: `SPRING_MONGODB_URI` (maps to `spring.mongodb.uri`)
+- In `application.yml`, the URI is read via: `spring.mongodb.uri: ${MONGODB_URI:mongodb://localhost:27017/memora}`
+- If you set `SPRING_DATA_MONGODB_URI` or use `-Dspring.data.mongodb.uri`, the backend will silently connect to `localhost:27017` and crash in a container environment
 
 ## Current frontend reality
 

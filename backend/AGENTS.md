@@ -7,10 +7,10 @@ Backend is Memora's source of truth.
 ## Tech stack
 
 - Kotlin
-- Spring Boot
+- Spring Boot 4 (note: `spring.data.mongodb.uri` is error-level deprecated; use `spring.mongodb.uri`)
 - Jackson (JSON)
 - bcrypt (password hashing)
-- In-memory stores (Mongo persistence is a later phase)
+- MongoDB (via Spring Data MongoDB 5; in-memory stores are used only in tests)
 
 ## Responsibilities
 
@@ -35,6 +35,7 @@ Current areas:
 - `health`
 - `item`
 - `review`
+- `transcription` — voice transcription pipeline: `VoiceTranscriptionService` (interface), `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
 
 Do not drift back into a broad global technical-layer structure.
 
@@ -49,7 +50,11 @@ AI_PROCESSED_UNREVIEWED
   ↓ reject                → REJECTED
 
 RECEIVED
-  ↓ (voice processing, always fails in bootstrap)
+  ↓ (voice transcription + AI succeeds)
+AI_PROCESSED_UNREVIEWED
+
+RECEIVED
+  ↓ (voice transcription fails after retries)
 TRANSCRIPTION_FAILED
 
 AI_PROCESSING_FAILED     (text processing fails after retries)
@@ -123,7 +128,12 @@ All three list endpoints share the same query param model:
 - `DEFAULT_CATEGORY_PATH` (format: `Level1/Level2/Level3`, default: `Default/General/Inbox`)
 - `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` (default: 3)
 - `MEMORA_AI_AUTO_RETRY_ATTEMPTS` (default: 2)
-- `MONGODB_URI` (default: `mongodb://localhost:27017/memora`)
+- `MONGODB_URI` (default: `mongodb://localhost:27017/memora`) — resolves via `${MONGODB_URI}` placeholder in `spring.mongodb.uri`; env var `SPRING_MONGODB_URI` also maps to `spring.mongodb.uri`
+- `MEMORA_TRANSCRIPTION_API_BASE_URL` (default: `https://api.openai.com`; prod: `http://whisper-worker:8000`)
+- `MEMORA_TRANSCRIPTION_API_KEY` (no default; prod: `placeholder` — whisper does not validate this)
+- `MEMORA_TRANSCRIPTION_MODEL` (default: `gpt-4o-mini-transcribe`; prod: `Systran/faster-whisper-base`)
+- `MEMORA_TRANSCRIPTION_LANGUAGE` (optional ISO-639-1 language hint)
+- `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` (default: 120)
 
 ## Rules
 
@@ -131,14 +141,14 @@ All three list endpoints share the same query param model:
 - prefer explicit services/use cases over framework-driven magic
 - keep controllers thin
 - keep status transitions explicit
-- keep bootstrap code runnable
+- keep code runnable
 - do not move deployment/runtime concerns here
 - keep category paths exactly 3 levels in V1
 - preserve original AI output separately from latest human-facing item values
 - keep direct `PATCH /api/items/{itemId}` approved-only
 - use `edit-and-approve` for reviewable edits
 - keep unified Telegram ingest at one backend endpoint with nested voice payload
-- use in-memory stores until a task explicitly upgrades persistence
+- MongoDB is the production store; in-memory stores are test-only
 
 ## Testing patterns
 

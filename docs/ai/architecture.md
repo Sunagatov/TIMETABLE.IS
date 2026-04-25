@@ -24,9 +24,9 @@ Owns production/deployment/runtime truth.
 ## Confirmed source modules
 
 ### Backend
-- Kotlin + Spring Boot
+- Kotlin + Spring Boot 4
 - source of truth and business logic owner
-- explicit application services + in-memory stores (Mongo persistence is a later phase)
+- explicit application services + MongoDB persistence (in-memory stores are test-only)
 - session-based auth with bcrypt password hash
 - bot-facing endpoints protected by `X-Memora-Bot-Token`
 - current backend feature areas:
@@ -49,6 +49,12 @@ Owns production/deployment/runtime truth.
 - Kotlin thin adapter, Telegram long polling
 - forwards text/voice messages to backend ingest endpoint
 - polls backend for failure notifications, delivers to chat, acknowledges
+
+### Whisper transcription service (external, Vault-owned)
+- `whisper-worker` container (`fedirz/faster-whisper-server:latest-cpu`)
+- OpenAI-API-compatible: `POST /v1/audio/transcriptions`
+- reachable from backend via Docker network `whisper-network` at `http://whisper-worker:8000`
+- deployment: `Vault/apps/whisper/`; not Memora source code
 
 ## Architectural priorities
 

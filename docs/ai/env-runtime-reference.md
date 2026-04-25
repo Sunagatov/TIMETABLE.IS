@@ -20,8 +20,13 @@ Spring Boot config via `application.yml` with env var overrides:
 | `DEFAULT_CATEGORY_PATH` | `memora.default-category-path` | `Default/General/Inbox` | format: `L1/L2/L3` |
 | `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` | `memora.transcription-auto-retry-attempts` | `3` | voice transcription retries |
 | `MEMORA_AI_AUTO_RETRY_ATTEMPTS` | `memora.ai-auto-retry-attempts` | `2` | AI processing retries |
-| `MONGODB_URI` | `spring.data.mongodb.uri` | `mongodb://localhost:27017/memora` | Mongo connection |
+| `MONGODB_URI` | resolved via `${MONGODB_URI}` in `spring.mongodb.uri` | `mongodb://localhost:27017/memora` | Mongo connection — **Spring Boot 4**: `spring.data.mongodb.uri` is error-level deprecated and ignored; use `spring.mongodb.uri` or `SPRING_MONGODB_URI` env var |
 | `BACKEND_PORT` | `server.port` | `8080` | |
+| `MEMORA_TRANSCRIPTION_API_BASE_URL` | `memora.transcription-api-base-url` | `https://api.openai.com` | Prod: `http://whisper-worker:8000` (self-hosted) |
+| `MEMORA_TRANSCRIPTION_API_KEY` | `memora.transcription-api-key` | — | Prod: `placeholder`; whisper does not validate |
+| `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription-model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
+| `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription-language` | — | Optional ISO-639-1 language hint |
+| `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription-timeout-seconds` | `120` | HTTP timeout for transcription calls |
 
 ## Backend validation commands
 
