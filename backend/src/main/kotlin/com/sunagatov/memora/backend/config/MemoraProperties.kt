@@ -54,6 +54,7 @@ data class MemoraProperties(
         val apiBaseUrl: String = "https://api.openai.com",
         val model: String = "gpt-4o-mini-transcribe",
         val language: String = "",
+        val prompt: String = "",
         val timeoutSeconds: Long = 120,
         val maxAudioBytes: Long = 25L * 1024L * 1024L,
         val maxDurationSeconds: Int = 600
@@ -119,6 +120,9 @@ data class MemoraProperties(
 
     val transcriptionLanguage: String
         get() = transcription.language
+
+    val transcriptionPrompt: String
+        get() = transcription.prompt
 
     val transcriptionTimeoutSeconds: Long
         get() = transcription.timeoutSeconds

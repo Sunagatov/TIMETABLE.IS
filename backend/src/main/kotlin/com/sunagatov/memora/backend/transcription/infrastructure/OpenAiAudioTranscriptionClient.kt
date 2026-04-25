@@ -66,6 +66,9 @@ class OpenAiAudioTranscriptionClient(
         properties.transcriptionLanguage
             .takeIf { it.isNotBlank() }
             ?.let { appendField(buffer, boundary, "language", it) }
+        properties.transcriptionPrompt
+            .takeIf { it.isNotBlank() }
+            ?.let { appendField(buffer, boundary, "prompt", it) }
         appendField(buffer, boundary, "response_format", "text")
         appendFile(buffer, boundary, audio)
         buffer.write("--$boundary--\r\n".toByteArray(StandardCharsets.UTF_8))

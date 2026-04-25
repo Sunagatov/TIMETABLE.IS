@@ -39,6 +39,7 @@ memora:
     api-base-url: ${MEMORA_TRANSCRIPTION_API_BASE_URL:https://api.openai.com}
     model: ${MEMORA_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
     language: ${MEMORA_TRANSCRIPTION_LANGUAGE:}
+    prompt: ${MEMORA_TRANSCRIPTION_PROMPT:}
     timeout-seconds: ${MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS:120}
     max-audio-bytes: ${MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES:26214400}
     max-duration-seconds: ${MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS:600}

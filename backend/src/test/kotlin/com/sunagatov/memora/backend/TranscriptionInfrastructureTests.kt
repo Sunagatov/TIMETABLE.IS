@@ -10,9 +10,11 @@ import com.sunagatov.memora.backend.transcription.infrastructure.PreparedTranscr
 import com.sunagatov.memora.backend.transcription.infrastructure.TelegramVoiceDownloader
 import com.sunagatov.memora.backend.transcription.infrastructure.TranscriptionAudioPreparer
 import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
 class TranscriptionInfrastructureTests {
@@ -52,6 +54,39 @@ class TranscriptionInfrastructureTests {
 
             assertEquals("Transcription API failed with status 500", exception.message)
             assertTrue(!exception.message.orEmpty().contains("sensitive"))
+        }
+    }
+
+    @Test
+    fun `transcription client includes optional language and prompt fields`() {
+        withServer { server ->
+            val bodyRef = AtomicReference("")
+            server.createContext("/v1/audio/transcriptions") { exchange ->
+                bodyRef.set(String(exchange.requestBody.readAllBytes(), Charsets.UTF_8))
+                exchange.respond(200, "transcript ok")
+            }
+
+            val client = OpenAiAudioTranscriptionClient(
+                testProperties(
+                    transcriptionApiBaseUrl = server.baseUrl(),
+                    transcriptionLanguage = "ru",
+                    transcriptionPrompt = "Memora, Zufar, Kotlin"
+                )
+            )
+
+            val transcript = client.transcribe(
+                PreparedTranscriptionAudio(
+                    bytes = "audio".toByteArray(),
+                    fileName = "voice.wav",
+                    contentType = "audio/wav"
+                )
+            )
+
+            assertEquals("transcript ok", transcript)
+            assertContains(bodyRef.get(), "name=\"language\"")
+            assertContains(bodyRef.get(), "\r\nru\r\n")
+            assertContains(bodyRef.get(), "name=\"prompt\"")
+            assertContains(bodyRef.get(), "Memora, Zufar, Kotlin")
         }
     }
 
@@ -181,7 +216,9 @@ class TranscriptionInfrastructureTests {
 
     private fun testProperties(
         telegramApiBaseUrl: String = "https://api.telegram.org",
-        transcriptionApiBaseUrl: String = "https://api.openai.com"
+        transcriptionApiBaseUrl: String = "https://api.openai.com",
+        transcriptionLanguage: String = "",
+        transcriptionPrompt: String = ""
     ): MemoraProperties =
         MemoraProperties(
             http = MemoraProperties.Http(
@@ -210,6 +247,8 @@ class TranscriptionInfrastructureTests {
             transcription = MemoraProperties.Transcription(
                 apiKey = "transcription-key",
                 apiBaseUrl = transcriptionApiBaseUrl,
+                language = transcriptionLanguage,
+                prompt = transcriptionPrompt,
                 timeoutSeconds = 2
             )
         )

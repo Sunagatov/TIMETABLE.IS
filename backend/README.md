@@ -83,6 +83,7 @@ Transcription:
 - `MEMORA_TRANSCRIPTION_API_BASE_URL` default `https://api.openai.com`
 - `MEMORA_TRANSCRIPTION_MODEL` default `gpt-4o-mini-transcribe`
 - `MEMORA_TRANSCRIPTION_LANGUAGE` optional
+- `MEMORA_TRANSCRIPTION_PROMPT` optional domain hint for names/terms such as `Memora`
 - `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` default `120`
 - `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` default `26214400`
 - `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` default `600`
