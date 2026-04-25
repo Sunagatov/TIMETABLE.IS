@@ -36,7 +36,7 @@ class OpenAiAudioTranscriptionClient(
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
-                "Transcription API failed with status ${response.statusCode()}: ${response.body()}"
+                "Transcription API failed with status ${response.statusCode()}"
             )
         }
 
@@ -46,13 +46,17 @@ class OpenAiAudioTranscriptionClient(
     fun parseTranscript(responseBody: String): String {
         val trimmed = responseBody.trim()
         if (!trimmed.startsWith("{")) {
-            return trimmed
+            return trimmed.takeIf { it.isNotBlank() }
+                ?: throw IllegalStateException("Transcription provider returned a blank transcript")
         }
 
-        return runCatching {
+        val transcript = runCatching {
             val root: JsonNode = mapper.readTree(trimmed)
             root.path("text").asText("").trim()
         }.getOrDefault(trimmed)
+
+        return transcript.takeIf { it.isNotBlank() }
+            ?: throw IllegalStateException("Transcription provider returned a blank transcript")
     }
 
     private fun buildBody(boundary: String, audio: PreparedTranscriptionAudio): ByteArray {

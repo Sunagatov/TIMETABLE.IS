@@ -54,7 +54,8 @@ Current failure notification payload:
 - `memoraId`
 - `failedStage`
 - `summary`
-- `retryContext` — format `"transcriptionRetries=N/MAX, aiRetries=N/MAX"`
+- `retryContext` — separates manual retries from configured automatic attempts:
+  `"manualTranscriptionRetries=N, manualAiRetries=N, autoTranscriptionAttempts=N, autoAiAttempts=N"`
 
 Telegram bot compatibility notes:
 - `GET /failure-notifications` parsing currently accepts both a raw JSON array and an object wrapper with a `notifications` array.

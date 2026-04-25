@@ -9,6 +9,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import org.springframework.stereotype.Component
 
 data class DownloadedTelegramVoice(
@@ -42,7 +43,10 @@ class TelegramVoiceDownloader(
     private val properties: MemoraProperties
 ) {
 
-    private val httpClient = HttpClient.newHttpClient()
+    private val timeout = Duration.ofSeconds(properties.transcriptionTimeoutSeconds)
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(timeout)
+        .build()
     private val mapper = jacksonObjectMapper()
 
     fun download(trace: TelegramVoiceTrace): DownloadedTelegramVoice {
@@ -52,7 +56,8 @@ class TelegramVoiceDownloader(
         val filePath = resolveFilePath(fileId)
         val response = httpClient.send(
             HttpRequest.newBuilder()
-                .uri(URI.create("${baseUrl()}/file/bot${properties.telegramBotToken}/$filePath"))
+                .uri(URI.create("${baseUrl()}/file/bot${properties.telegramBotToken}/${encodeFilePath(filePath)}"))
+                .timeout(timeout)
                 .GET()
                 .build(),
             HttpResponse.BodyHandlers.ofByteArray()
@@ -76,6 +81,7 @@ class TelegramVoiceDownloader(
         val response = httpClient.send(
             HttpRequest.newBuilder()
                 .uri(URI.create("${baseUrl()}/bot${properties.telegramBotToken}/getFile?file_id=$encodedFileId"))
+                .timeout(timeout)
                 .GET()
                 .build(),
             HttpResponse.BodyHandlers.ofString()
@@ -83,18 +89,28 @@ class TelegramVoiceDownloader(
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
-                "Telegram getFile failed with status ${response.statusCode()}: ${response.body()}"
+                "Telegram getFile failed with status ${response.statusCode()}"
             )
         }
 
         val root = mapper.readTree(response.body())
         if (!root.path("ok").asBoolean(false)) {
-            throw IllegalStateException("Telegram getFile returned ok=false: ${response.body()}")
+            throw IllegalStateException("Telegram getFile returned ok=false")
         }
 
-        return root.path("result").path("file_path").asText().takeIf { it.isNotBlank() }
+        val filePath = root.path("result").path("file_path").asText().takeIf { it.isNotBlank() }
             ?: throw IllegalStateException("Telegram getFile response did not contain file_path")
+        require(!filePath.startsWith("/") && !filePath.contains("..")) {
+            "Telegram getFile returned an unsafe file_path"
+        }
+        return filePath
     }
 
     private fun baseUrl(): String = properties.telegramApiBaseUrl.trimEnd('/')
+
+    private fun encodeFilePath(filePath: String): String =
+        filePath.split("/")
+            .joinToString("/") { segment ->
+                URLEncoder.encode(segment, StandardCharsets.UTF_8).replace("+", "%20")
+            }
 }

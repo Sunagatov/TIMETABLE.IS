@@ -56,11 +56,12 @@ class TranscriptionAudioPreparer {
         val tempDirectory = Files.createTempDirectory("memora-transcription-")
         val inputPath = tempDirectory.resolve("input.$extension")
         val outputPath = tempDirectory.resolve("converted.wav")
+        var process: Process? = null
 
         return try {
             Files.write(inputPath, downloadedVoice.bytes)
 
-            val process = ProcessBuilder(
+            process = ProcessBuilder(
                 "ffmpeg",
                 "-y",
                 "-i",
@@ -71,7 +72,12 @@ class TranscriptionAudioPreparer {
                 .start()
 
             val output = process.inputStream.bufferedReader().use { it.readText() }
-            val exitCode = process.waitFor()
+            val exitCode = try {
+                process.waitFor()
+            } catch (exception: InterruptedException) {
+                process.destroyForcibly()
+                throw exception
+            }
 
             if (exitCode != 0 || Files.notExists(outputPath)) {
                 throw IllegalStateException(
@@ -85,6 +91,10 @@ class TranscriptionAudioPreparer {
                 fileName = "voice.wav",
                 contentType = "audio/wav"
             )
+        } catch (exception: InterruptedException) {
+            process?.destroyForcibly()
+            Thread.currentThread().interrupt()
+            throw IllegalStateException("ffmpeg audio conversion was interrupted", exception)
         } catch (exception: IOException) {
             throw IllegalStateException(
                 "ffmpeg is required for unsupported Telegram voice formats such as .$extension",

@@ -109,7 +109,8 @@ All three list endpoints share the same query param model:
 
 - `notificationId` format: `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll
 - Only items with `telegramTrace.telegramChatId` produce notifications
-- `retryContext` format: `"transcriptionRetries=N/MAX, aiRetries=N/MAX"`
+- `retryContext` separates manual retry counts from configured automatic attempts:
+  `"manualTranscriptionRetries=N, manualAiRetries=N, autoTranscriptionAttempts=N, autoAiAttempts=N"`
 - Once acknowledged via `/delivered`, `notificationStore.isDelivered()` suppresses re-delivery
 - If item is retried and fails again, `updatedAt` changes → new `notificationId` → re-deliverable
 
@@ -117,12 +118,14 @@ All three list endpoints share the same query param model:
 
 - Session auth filter: rejects all `/api/**` except `/api/health`, `/api/auth/**`, `/api/capture/telegram/**`
 - Bot auth filter: requires `X-Memora-Bot-Token` header for all `/api/capture/telegram/**`
+- Bot auth filter rejects blank configured tokens instead of accepting blank headers
 - Spring Security config uses `anyRequest().permitAll()` — actual enforcement is in custom filters
 
 ## Config keys (application.yml / env vars)
 
 - `BACKEND_ALLOWED_ORIGIN` (default: `http://localhost:5173`)
 - `BACKEND_APP_PASSWORD_HASH` (bcrypt hash of app password)
+- `BACKEND_APP_PASSWORD` (optional local plaintext override; rejected by production validation)
 - `BACKEND_SESSION_DAYS` (default: 30)
 - `BACKEND_COOKIE_SECURE` (default: `true`; set `false` only for local HTTP dev)
 - `BACKEND_BOT_INGEST_TOKEN`

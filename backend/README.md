@@ -45,7 +45,8 @@ Core:
 - `MONGODB_URI` default `mongodb://localhost:27017/memora`
 - `BACKEND_ALLOWED_ORIGIN` default `http://localhost:5173`
 - `BACKEND_APP_PASSWORD_HASH` bcrypt hash for web login
-- `BACKEND_APP_PASSWORD` optional local plaintext password override
+- `BACKEND_APP_PASSWORD` optional local plaintext password override; unsafe for
+  production and rejected when production validation is enabled
 - `BACKEND_SESSION_DAYS` default `30`
 - `BACKEND_COOKIE_SECURE` default `true`
 - `BACKEND_BOT_INGEST_TOKEN`
@@ -77,5 +78,5 @@ AI:
 Production safety:
 
 - `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` or active profile `prod`/`production`
-  fail fast on placeholder bot token, default app password hash, or missing owner
-  Telegram user ID.
+  fail fast on placeholder bot token, default app password hash, plaintext app
+  password override, or missing owner Telegram user ID.

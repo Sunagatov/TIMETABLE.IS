@@ -52,8 +52,8 @@ class OpenAiCompatibleMemoraAiPort(
             "OpenAI-compatible AI requires MEMORA_AI_API_KEY"
         }
 
-        val content = callChatCompletions(buildPrompt(input, includeCategory))
         return try {
+            val content = callChatCompletions(buildPrompt(input, includeCategory))
             parseDraft(content, input, includeCategory)
         } catch (exception: Exception) {
             if (!properties.aiFallbackToDeterministic) {

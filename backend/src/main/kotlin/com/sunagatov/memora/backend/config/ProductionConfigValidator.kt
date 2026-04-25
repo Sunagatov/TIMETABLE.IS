@@ -23,6 +23,9 @@ class ProductionConfigValidator(
             if (properties.appPasswordHash.isBlank() || properties.appPasswordHash == DEFAULT_APP_PASSWORD_HASH) {
                 add("BACKEND_APP_PASSWORD_HASH must be set to a non-placeholder bcrypt hash")
             }
+            if (!properties.appPassword.isNullOrBlank()) {
+                add("BACKEND_APP_PASSWORD plaintext override is local/dev-only and must not be set")
+            }
             if (properties.ownerTelegramUserId.isBlank()) {
                 add("MEMORA_OWNER_TELEGRAM_USER_ID must be set")
             }

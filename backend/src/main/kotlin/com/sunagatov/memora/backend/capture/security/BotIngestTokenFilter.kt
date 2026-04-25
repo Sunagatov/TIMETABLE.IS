@@ -25,8 +25,16 @@ class BotIngestTokenFilter(
         filterChain: FilterChain
     ) {
         val token = request.getHeader("X-Memora-Bot-Token")
+        val configuredToken = properties.botIngestToken.takeIf { it.isNotBlank() }
 
-        if (token != properties.botIngestToken) {
+        if (configuredToken == null) {
+            response.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+            response.contentType = "application/json"
+            response.writer.write(mapper.writeValueAsString(ApiErrorResponse("Bot ingest token is not configured")))
+            return
+        }
+
+        if (token != configuredToken) {
             response.status = HttpServletResponse.SC_UNAUTHORIZED
             response.contentType = "application/json"
             response.writer.write(mapper.writeValueAsString(ApiErrorResponse("Invalid bot ingest token")))

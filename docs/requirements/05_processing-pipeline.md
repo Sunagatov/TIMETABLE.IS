@@ -10,16 +10,15 @@
 6. item routed into review queue
 7. human review decides whether the item becomes approved knowledge
 
-## Current starter reality
+## Current V1 reality
 
-The current runnable starter implements:
+The current runnable backend implements:
 
 - accepted text ingest
-- accepted voice metadata ingest
+- accepted voice metadata ingest with backend-owned Telegram download and transcription
 - stable item id generation
-- backend-owned in-process async processing for accepted text items
+- backend-owned in-process async processing for accepted text and voice items
 - lightweight normalization/inference starter logic
-- voice items that cannot be transcribed yet end in visible retryable failure after bounded retries
+- voice transcription through an OpenAI-compatible transcription endpoint, with visible retryable failure after bounded automatic attempts
 - review/failure/approved query endpoints
-
-The full transcription and AI integration slices are intentionally still future implementation tasks.
+- deterministic text AI by default, with optional OpenAI-compatible text AI mode

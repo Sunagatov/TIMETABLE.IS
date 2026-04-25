@@ -413,7 +413,10 @@ class FoundationServicesTests {
         val notifications = notificationService.listPending()
         assertEquals(1, notifications.size)
         assertEquals(failed.id, notifications.single().memoraId)
-        assertEquals("transcriptionRetries=0/3, aiRetries=0/2", notifications.single().retryContext)
+        assertEquals(
+            "manualTranscriptionRetries=0, manualAiRetries=0, autoTranscriptionAttempts=3, autoAiAttempts=2",
+            notifications.single().retryContext
+        )
 
         notificationService.markDelivered(notifications.single().notificationId)
 
@@ -633,7 +636,10 @@ class FoundationServicesTests {
 
         val firstPoll = notificationService.listPending()
         assertEquals(1, firstPoll.size)
-        assertEquals("transcriptionRetries=0/3, aiRetries=0/2", firstPoll.single().retryContext)
+        assertEquals(
+            "manualTranscriptionRetries=0, manualAiRetries=0, autoTranscriptionAttempts=3, autoAiAttempts=2",
+            firstPoll.single().retryContext
+        )
 
         // Retry — re-processes and re-fails — retryCountTranscription becomes 1
         reviewService.retry(ingested.id)
@@ -652,7 +658,10 @@ class FoundationServicesTests {
         )
         val secondPoll = freshNotificationService.listPending()
         assertEquals(1, secondPoll.size)
-        assertEquals("transcriptionRetries=1/3, aiRetries=0/2", secondPoll.single().retryContext)
+        assertEquals(
+            "manualTranscriptionRetries=1, manualAiRetries=0, autoTranscriptionAttempts=3, autoAiAttempts=2",
+            secondPoll.single().retryContext
+        )
     }
 
     // T9: query filters by category path level

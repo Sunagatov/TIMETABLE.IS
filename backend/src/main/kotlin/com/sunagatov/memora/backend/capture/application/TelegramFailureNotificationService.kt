@@ -28,8 +28,10 @@ class TelegramFailureNotificationService(
         val telegramChatId = item.telegramTrace?.telegramChatId ?: return null
         val notificationId = "${item.id}:${item.updatedAt.epochSecond}"
         val retryContext = buildList {
-            add("transcriptionRetries=${item.retryCountTranscription}/${properties.transcriptionAutoRetryAttempts}")
-            add("aiRetries=${item.retryCountAi}/${properties.aiAutoRetryAttempts}")
+            add("manualTranscriptionRetries=${item.retryCountTranscription}")
+            add("manualAiRetries=${item.retryCountAi}")
+            add("autoTranscriptionAttempts=${properties.transcriptionAutoRetryAttempts}")
+            add("autoAiAttempts=${properties.aiAutoRetryAttempts}")
         }.joinToString(", ")
 
         return TelegramFailureNotificationResponse(
