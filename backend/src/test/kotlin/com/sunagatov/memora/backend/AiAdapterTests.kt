@@ -4,10 +4,12 @@ import com.sunagatov.memora.backend.category.model.CategoryPath
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.item.ai.AiTextInput
 import com.sunagatov.memora.backend.item.ai.LangChain4jCategoryPathResponse
+import com.sunagatov.memora.backend.item.ai.LangChain4jCategoryDraftResponse
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPort
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiPrompts
 import com.sunagatov.memora.backend.item.ai.LangChain4jQuestionAnswerResponse
 import com.sunagatov.memora.backend.item.ai.LangChain4jMemoraAiResponse
+import com.sunagatov.memora.backend.item.ai.LangChain4jTextDraftResponse
 import com.sunagatov.memora.backend.item.ai.MemoraStructuredAiService
 import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.ItemType
@@ -214,6 +216,63 @@ class AiAdapterTests {
     }
 
     @Test
+    fun `text regeneration uses text-only structured response`() {
+        val adapter = adapter(
+            generateDraft = {
+                throw IllegalStateException("full draft should not be called")
+            },
+            generateTextDraft = {
+                LangChain4jTextDraftResponse(
+                    title = "Polished note",
+                    cleanedText = "Polished note in fluent English.",
+                    type = "THOUGHT",
+                    priority = "NOT_APPLICABLE"
+                )
+            }
+        )
+
+        val draft = adapter.generateTextDraft(
+            AiTextInput(
+                rawText = "rough note",
+                existingCategoryPaths = listOf(CategoryPath("Default", "General")),
+                defaultCategoryPath = CategoryPath("Default", "General")
+            )
+        )
+
+        assertEquals("Polished note", draft.title)
+        assertEquals("Polished note in fluent English.", draft.cleanedText)
+        assertEquals(ItemType.THOUGHT, draft.type)
+    }
+
+    @Test
+    fun `category regeneration uses category-only structured response`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val existingPath = CategoryPath("Work", "Backend")
+        val adapter = adapter(
+            generateDraft = {
+                throw IllegalStateException("full draft should not be called")
+            },
+            generateCategoryDraft = {
+                LangChain4jCategoryDraftResponse(
+                    categoryPath = LangChain4jCategoryPathResponse("Work", "Backend")
+                )
+            }
+        )
+
+        val draft = adapter.generateCategoryDraft(
+            AiTextInput(
+                rawText = "backend note",
+                existingCategoryPaths = listOf(defaultPath, existingPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals(existingPath, draft.currentCategoryPath)
+        assertNull(draft.proposedCategoryPath)
+        assertEquals(ProposedCategoryStatus.NONE, draft.proposedCategoryStatus)
+    }
+
+    @Test
     fun `adapter falls back to deterministic output when LangChain4j call fails and fallback is enabled`() {
         val defaultPath = CategoryPath("Default", "General")
         val adapter = adapter(
@@ -266,6 +325,19 @@ class AiAdapterTests {
 
     private fun adapter(
         properties: MemoraProperties = testProperties(),
+        generateTextDraft: (String) -> LangChain4jTextDraftResponse = {
+            LangChain4jTextDraftResponse(
+                title = "Generated title",
+                cleanedText = "Generated cleaned text",
+                type = "THOUGHT",
+                priority = "NOT_APPLICABLE"
+            )
+        },
+        generateCategoryDraft: (String) -> LangChain4jCategoryDraftResponse = {
+            LangChain4jCategoryDraftResponse(
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General")
+            )
+        },
         generateQuestionAnswer: (String) -> LangChain4jQuestionAnswerResponse = {
             LangChain4jQuestionAnswerResponse(answer = "Generated answer")
         },
@@ -276,6 +348,12 @@ class AiAdapterTests {
             aiService = object : MemoraStructuredAiService {
                 override fun generateDraft(prompt: String): LangChain4jMemoraAiResponse =
                     generateDraft.invoke(prompt)
+
+                override fun generateTextDraft(prompt: String): LangChain4jTextDraftResponse =
+                    generateTextDraft.invoke(prompt)
+
+                override fun generateCategoryDraft(prompt: String): LangChain4jCategoryDraftResponse =
+                    generateCategoryDraft.invoke(prompt)
 
                 override fun generateQuestionAnswer(prompt: String): LangChain4jQuestionAnswerResponse =
                     generateQuestionAnswer.invoke(prompt)

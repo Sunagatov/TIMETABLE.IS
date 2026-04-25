@@ -12,31 +12,31 @@ Spring Boot config via `application.yml` with env var overrides:
 
 | Env var | application.yml key | Default | Notes |
 |---------|-------------------|---------|-------|
-| `BACKEND_ALLOWED_ORIGIN` | `memora.allowed-origin` | `http://localhost:5173` | CORS origin |
-| `BACKEND_APP_PASSWORD_HASH` | `memora.app-password-hash` | bcrypt hash | bcrypt hash of app password |
-| `BACKEND_SESSION_DAYS` | `memora.session-days` | `30` | session lifetime |
-| `BACKEND_BOT_INGEST_TOKEN` | `memora.bot-ingest-token` | `change-me` | `X-Memora-Bot-Token` value |
-| `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request; blank config rejects ingest |
-| `DEFAULT_CATEGORY_PATH` | `memora.default-category-path` | `Default/General` | format: `L1/L2` (legacy `L1/L2/L3` tolerated with level 3 ignored) |
-| `MEMORA_TELEGRAM_BOT_TOKEN` | `memora.telegram-bot-token` | — | Required for voice download from Telegram; validated non-blank in transcription service |
-| `MEMORA_TELEGRAM_API_BASE_URL` | `memora.telegram-api-base-url` | `https://api.telegram.org` | Telegram API base |
+| `BACKEND_ALLOWED_ORIGIN` | `memora.http.allowed-origin` | `http://localhost:5173` | CORS origin |
+| `BACKEND_APP_PASSWORD_HASH` | `memora.auth.app-password-hash` | bcrypt hash | bcrypt hash of app password |
+| `BACKEND_SESSION_DAYS` | `memora.auth.session-days` | `30` | session lifetime |
+| `BACKEND_BOT_INGEST_TOKEN` | `memora.capture.bot-ingest-token` | `change-me` | `X-Memora-Bot-Token` value |
+| `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.capture.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request; blank config rejects ingest |
+| `DEFAULT_CATEGORY_PATH` | `memora.category.default-path` | `Default/General` | format: `L1/L2` (legacy `L1/L2/L3` tolerated with level 3 ignored) |
+| `MEMORA_TELEGRAM_BOT_TOKEN` | `memora.telegram.bot-token` | — | Required for voice download from Telegram; validated non-blank in transcription service |
+| `MEMORA_TELEGRAM_API_BASE_URL` | `memora.telegram.api-base-url` | `https://api.telegram.org` | Telegram API base |
 | `MEMORA_STORAGE_MODE` | `memora.storage.mode` | `mongo` | Storage backend; `mongo` is default, `in-memory` is for tests/local only |
-| `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` | `memora.transcription-auto-retry-attempts` | `3` | voice transcription retries |
-| `MEMORA_AI_AUTO_RETRY_ATTEMPTS` | `memora.ai-auto-retry-attempts` | `2` | AI processing retries |
+| `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` | `memora.processing.transcription-auto-retry-attempts` | `3` | voice transcription retries |
+| `MEMORA_AI_AUTO_RETRY_ATTEMPTS` | `memora.processing.ai-auto-retry-attempts` | `2` | AI processing retries |
 | `MONGODB_URI` | resolved via `${MONGODB_URI}` in `spring.mongodb.uri` | `mongodb://localhost:27017/memora` | Mongo connection — **Spring Boot 4**: `spring.data.mongodb.uri` is error-level deprecated and ignored; use `spring.mongodb.uri` or `SPRING_MONGODB_URI` env var |
 | `BACKEND_PORT` | `server.port` | `8080` | |
-| `MEMORA_TRANSCRIPTION_API_BASE_URL` | `memora.transcription-api-base-url` | `https://api.openai.com` | Prod: `http://whisper-worker:8000` (self-hosted) |
-| `MEMORA_TRANSCRIPTION_API_KEY` | `memora.transcription-api-key` | — | Prod: `placeholder`; whisper does not validate |
-| `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription-model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
-| `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription-language` | — | Optional ISO-639-1 language hint |
-| `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription-timeout-seconds` | `120` | HTTP timeout for transcription calls |
-| `MEMORA_AI_MODE` | `memora.ai-mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only; `openai` mode is implemented through LangChain4j in the backend |
-| `MEMORA_AI_API_KEY` | `memora.ai-api-key` | — | Required when `MEMORA_AI_MODE=openai`; production validation requires non-blank |
-| `MEMORA_AI_API_BASE_URL` | `memora.ai-api-base-url` | `https://api.openai.com` | Required and validated non-blank when production validation is enabled |
-| `MEMORA_AI_MODEL` | `memora.ai-model` | `gpt-4o-mini` | Required and validated non-blank when production validation is enabled |
-| `MEMORA_AI_TIMEOUT_SECONDS` | `memora.ai-timeout-seconds` | `60` | HTTP timeout for AI text calls |
-| `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` | `memora.ai-fallback-to-deterministic` | `true` | Local/dev-only escape hatch; production validation requires `false` |
-| `MEMORA_VALIDATE_PRODUCTION_CONFIG` | `memora.validate-production-config` | `false` | Set `true` in production-like runtime to fail fast on unsafe AI/auth/bot config |
+| `MEMORA_TRANSCRIPTION_API_BASE_URL` | `memora.transcription.api-base-url` | `https://api.openai.com` | Prod: `http://whisper-worker:8000` (self-hosted) |
+| `MEMORA_TRANSCRIPTION_API_KEY` | `memora.transcription.api-key` | — | Prod: `placeholder`; whisper does not validate |
+| `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription.model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
+| `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription.language` | — | Optional ISO-639-1 language hint |
+| `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription.timeout-seconds` | `120` | HTTP timeout for transcription calls |
+| `MEMORA_AI_MODE` | `memora.ai.mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only; `openai` mode is implemented through LangChain4j in the backend |
+| `MEMORA_AI_API_KEY` | `memora.ai.api-key` | — | Required when `MEMORA_AI_MODE=openai`; production validation requires non-blank |
+| `MEMORA_AI_API_BASE_URL` | `memora.ai.api-base-url` | `https://api.openai.com` | Required and validated non-blank when production validation is enabled |
+| `MEMORA_AI_MODEL` | `memora.ai.model` | `gpt-4o-mini` | Required and validated non-blank when production validation is enabled |
+| `MEMORA_AI_TIMEOUT_SECONDS` | `memora.ai.timeout-seconds` | `60` | HTTP timeout for AI text calls |
+| `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` | `memora.ai.fallback-to-deterministic` | `true` | Local/dev-only escape hatch; production validation requires `false` |
+| `MEMORA_VALIDATE_PRODUCTION_CONFIG` | `memora.validation.production-config` | `false` | Set `true` in production-like runtime to fail fast on unsafe AI/auth/bot config |
 
 Production-like AI safety:
 - real V1 product behavior requires `MEMORA_AI_MODE=openai`
@@ -46,6 +46,7 @@ Production-like AI safety:
 - missing or broken real AI must become visible startup/configuration failure, not fake success
 - the same validator also activates for Spring `prod` / `production` profiles
 - text polishing/classification uses LangChain4j with Memora-owned env keys; Whisper transcription remains separate and is not handled by LangChain4j
+- backend wires LangChain4j manually from Memora properties; it does not rely on Spring Boot starter auto-config or LangChain4j-specific env names
 
 ## Backend validation commands
 
