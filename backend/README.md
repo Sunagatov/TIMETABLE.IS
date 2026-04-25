@@ -24,7 +24,18 @@ backend-owned state transitions and business rules.
 ## Run Locally
 
 ```bash
+cd ../Vault/apps/memora/backend
+task local:run
+```
+
+If you run Gradle directly from the source repo, load `backend/.env.local` first so
+local auth and cookie settings are applied:
+
+```bash
 cd backend
+set -a
+source .env.local
+set +a
 ./gradlew bootRun
 ```
 
@@ -37,7 +48,7 @@ cd backend
 ./gradlew build
 ```
 
-For local browser testing over HTTP, set `BACKEND_COOKIE_SECURE=false`.
+For local browser testing over HTTP, keep `BACKEND_COOKIE_SECURE=false`.
 
 ## Required Runtime Configuration
 
