@@ -2,20 +2,17 @@ package com.sunagatov.memora.backend.item.application
 
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.config.MemoraProperties
-import com.sunagatov.memora.backend.item.ai.AiAnswerDraft
 import com.sunagatov.memora.backend.item.ai.AiTextInput
 import com.sunagatov.memora.backend.item.ai.MemoraAiPort
-import com.sunagatov.memora.backend.item.model.AnswerStatus
-import com.sunagatov.memora.backend.item.model.FailureStage
 import com.sunagatov.memora.backend.item.model.ItemStatus
 import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.SourceType
 import com.sunagatov.memora.backend.item.store.ItemStore
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
+import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.concurrent.ExecutorService
-import org.springframework.stereotype.Service
 
 @Service
 class ItemProcessingService(
@@ -39,62 +36,26 @@ class ItemProcessingService(
     fun regenerateCleanedText(itemId: String): MemoraItem {
         val item = requireRegeneratableItem(itemId)
         val draft = aiPort.generateTextDraft(buildAiInput(sourceTextFor(item)))
-        return itemStore.save(
-            item.copy(
-                title = draft.title,
-                cleanedText = draft.cleanedText,
-                updatedAt = Instant.now()
-            )
-        )
+        return itemStore.save(ItemProcessingMutations.applyRegeneratedText(item, draft, Instant.now()))
     }
 
     fun regenerateAnswer(itemId: String): MemoraItem {
         val item = requireRegeneratableItem(itemId)
         require(item.type == ItemType.QUESTION) { "Only QUESTION items can regenerate an answer" }
         val draft = aiPort.generateAnswerDraft(item.cleanedText)
-        return itemStore.save(
-            item.copy(
-                answer = draft.answer,
-                answerStatus = draft.answerStatus,
-                answerFailureStage = draft.toFailureStage(),
-                answerFailureReason = draft.failureReason,
-                updatedAt = Instant.now()
-            )
-        )
+        return itemStore.save(ItemProcessingMutations.applyRegeneratedAnswer(item, draft, Instant.now()))
     }
 
     fun regenerateCategoryProposal(itemId: String): MemoraItem {
         val item = requireRegeneratableItem(itemId)
         val draft = aiPort.generateCategoryDraft(buildAiInput(sourceTextFor(item)))
-        return itemStore.save(
-            item.copy(
-                categoryPath = draft.currentCategoryPath,
-                proposedCategoryPath = draft.proposedCategoryPath,
-                proposedCategoryStatus = draft.proposedCategoryStatus,
-                updatedAt = Instant.now()
-            )
-        )
+        return itemStore.save(ItemProcessingMutations.applyRegeneratedCategory(item, draft, Instant.now()))
     }
 
     fun regenerateAll(itemId: String): MemoraItem {
         val item = requireRegeneratableItem(itemId)
         val draft = aiPort.generateAllDraft(buildAiInput(sourceTextFor(item)))
-        return itemStore.save(
-            item.copy(
-                title = draft.textDraft.title,
-                cleanedText = draft.textDraft.cleanedText,
-                type = draft.textDraft.type,
-                categoryPath = draft.categoryDraft.currentCategoryPath,
-                priority = draft.textDraft.priority,
-                answer = draft.answerDraft.answer,
-                answerStatus = draft.answerDraft.answerStatus,
-                answerFailureStage = draft.answerDraft.toFailureStage(),
-                answerFailureReason = draft.answerDraft.failureReason,
-                proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
-                proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
-                updatedAt = Instant.now()
-            )
-        )
+        return itemStore.save(ItemProcessingMutations.applyRegeneratedAll(item, draft, Instant.now()))
     }
 
     private fun process(itemId: String) {
@@ -133,11 +94,10 @@ class ItemProcessingService(
 
         if (!transcriptionOutcome.success) {
             itemStore.save(
-                item.copy(
-                    status = ItemStatus.TRANSCRIPTION_FAILED,
-                    failureStage = FailureStage.TRANSCRIPTION,
-                    failureReason = "Voice transcription failed after ${transcriptionOutcome.attempts} attempt(s)${transcriptionOutcome.lastErrorMessageSuffix()}",
-                    updatedAt = Instant.now()
+                ItemProcessingMutations.applyTranscriptionFailure(
+                    item = item,
+                    reason = "Voice transcription failed after ${transcriptionOutcome.attempts} attempt(s)${transcriptionOutcome.lastErrorMessageSuffix()}",
+                    now = Instant.now()
                 )
             )
             return
@@ -145,12 +105,7 @@ class ItemProcessingService(
 
         val rawTranscript = transcriptionOutcome.value!!
         val transcribedItem = itemStore.save(
-            item.copy(
-                rawTranscript = rawTranscript,
-                failureStage = null,
-                failureReason = null,
-                updatedAt = Instant.now()
-            )
+            ItemProcessingMutations.applySuccessfulTranscription(item, rawTranscript, Instant.now())
         )
 
         val aiOutcome = retryRunner.run(properties.aiAutoRetryAttempts) {
@@ -174,42 +129,12 @@ class ItemProcessingService(
         rawTranscript: String?
     ): MemoraItem {
         val draft = aiPort.generateAllDraft(buildAiInput(sourceText))
-        val now = Instant.now()
-
-        return item.copy(
-            rawTranscript = rawTranscript,
-            aiTitle = draft.textDraft.title,
-            aiCleanedText = draft.textDraft.cleanedText,
-            aiType = draft.textDraft.type,
-            aiCategoryPath = draft.categoryDraft.aiCategoryPath,
-            proposedCategoryPath = draft.categoryDraft.proposedCategoryPath,
-            proposedCategoryStatus = draft.categoryDraft.proposedCategoryStatus,
-            aiPriority = draft.textDraft.priority,
-            aiAnswer = draft.answerDraft.answer,
-            title = draft.textDraft.title,
-            cleanedText = draft.textDraft.cleanedText,
-            type = draft.textDraft.type,
-            categoryPath = draft.categoryDraft.currentCategoryPath,
-            priority = draft.textDraft.priority,
-            answer = draft.answerDraft.answer,
-            answerStatus = draft.answerDraft.answerStatus,
-            answerFailureStage = draft.answerDraft.toFailureStage(),
-            answerFailureReason = draft.answerDraft.failureReason,
-            status = ItemStatus.AI_PROCESSED_UNREVIEWED,
-            failureStage = null,
-            failureReason = null,
-            updatedAt = now
-        )
+        return ItemProcessingMutations.applyAiProcessedDraft(item, draft, rawTranscript, Instant.now())
     }
 
     private fun failAsAiProcessing(item: MemoraItem, reason: String) {
         itemStore.save(
-            item.copy(
-                status = ItemStatus.AI_PROCESSING_FAILED,
-                failureStage = FailureStage.AI_PROCESSING,
-                failureReason = reason,
-                updatedAt = Instant.now()
-            )
+            ItemProcessingMutations.applyAiProcessingFailure(item, reason, Instant.now())
         )
     }
 
@@ -228,7 +153,4 @@ class ItemProcessingService(
         existingCategoryPaths = categoryService.list().map { it.path },
         defaultCategoryPath = categoryService.defaultPath()
     )
-
-    private fun AiAnswerDraft.toFailureStage(): FailureStage? =
-        if (answerStatus == AnswerStatus.FAILED) FailureStage.AI_PROCESSING else null
 }
