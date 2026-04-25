@@ -13,6 +13,7 @@ Compact guidance for Codex CLI.
 - Stay within V1 scope unless the user explicitly expands it.
 - Prefer current uppercase requirement files when both uppercase and legacy lowercase variants exist.
 - Keep `docs/ai/current-bootstrap-state.md` and `docs/ai/api-surface.md` in sync with concrete contract changes.
+- Keep `.claude/request-routing.md` and `.claude/generated/*.md` in sync when source layout or routing shortcuts change.
 
 ## Preferred workflow
 

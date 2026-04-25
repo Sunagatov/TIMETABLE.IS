@@ -21,17 +21,29 @@ Owns:
 
 Owns:
 
-- current app shell and shared API client
-- future Needs Review / Failures / approved item UI
+- authenticated app shell and shared API client
+- backend-backed Needs Review / Failures / Approved workspace
+- 3-level category tree and category management UI
+- filter/sort query construction using backend param names
 
 ## telegram-bot/
 
 Owns:
 
-- Telegram update handling
-- sender validation
-- forwarding accepted input to backend
-- ack and failure messages
+- Telegram long-poll update handling
+- owner sender validation
+- local `/start` and `/help` command replies
+- forwarding supported owner text/voice inputs to backend unified ingest
+- unsupported owner input guidance
+- backend failure notification polling, Telegram delivery, and acknowledgement
+- backend timeout and concise backend-down polling logs
+
+Does not own:
+
+- DB writes
+- transcription or Whisper calls
+- AI/category/review/item lifecycle logic
+- retry state
 
 ## Not owned here
 

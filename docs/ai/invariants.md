@@ -71,7 +71,7 @@
 - no semantic search in V1
 - no view-count sorting in V1
 - no web-search-backed question answers in V1 (model knowledge only)
-- no real AI integration yet (categorization/answer generation use stubs only)
+- real text AI is optional and off by default; deterministic AI remains the default unless `MEMORA_AI_MODE=openai` is configured
 - voice transcription is **live** via self-hosted Whisper (`whisper-worker`) — Memora backend calls `http://whisper-worker:8000/v1/audio/transcriptions`; deployment owned by Vault (`apps/whisper/`)
 - MongoDB persistence is **active** in production
 

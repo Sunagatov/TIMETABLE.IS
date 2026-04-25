@@ -41,7 +41,7 @@ Current status (transcription sub-path):
 - voice transcription is **live** in production — `faster-whisper-server` (`whisper-worker`) on `whisper-network`
 - backend `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
 - runtime config: `MEMORA_TRANSCRIPTION_API_BASE_URL=http://whisper-worker:8000`, `MEMORA_TRANSCRIPTION_MODEL=Systran/faster-whisper-base`
-- AI processing (categorization, answer generation) is still stub/placeholder
+- AI processing defaults to deterministic behavior; optional OpenAI-compatible text AI is selected by `MEMORA_AI_MODE=openai`
 
 ## Phase 4 — web review UI
 - login

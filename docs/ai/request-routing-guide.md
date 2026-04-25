@@ -21,6 +21,8 @@ Read:
 3. `docs/ai/api-surface.md` (capture section) if touching backend contract
 4. exact bot files
 
+Do not read backend/frontend internals unless changing a contract. The bot is a Kotlin thin adapter under `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/`.
+
 ## Filter/search/sort task (any layer)
 Read:
 1. `docs/ai/api-surface.md` (search/filter/sort table)
@@ -60,6 +62,14 @@ Read:
 2. `backend/src/test/kotlin/.../FoundationServicesTests.kt`
 
 Use `directExecutor()` for synchronous processing. Use `testProperties()` for consistent config.
+
+## Test question (telegram bot)
+Read:
+1. `telegram-bot/AGENTS.md`
+2. `telegram-bot/src/test/kotlin/com/sunagatov/memora/telegrambot/`
+3. exact bot source file under test
+
+Use JUnit 5. Avoid Telegram network calls. Validate with `cd telegram-bot && ./gradlew clean test`.
 
 ## Voice transcription task
 Read:

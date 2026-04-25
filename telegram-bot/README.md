@@ -79,6 +79,8 @@ All backend calls include `X-Memora-Bot-Token`.
 
 Failure polling is stateful only for logging: the first consecutive backend-down failure logs the exception, repeats log concise warnings, and recovery is logged once. Delivery state remains backend-owned.
 
+Failure notification parsing accepts both backend response shapes currently supported by the bot: a raw JSON array and an object wrapper with a `notifications` array. Delivery acknowledgement URL-encodes `notificationId` before inserting it into the acknowledgement path.
+
 ## Local Commands
 
 Run locally:
@@ -101,3 +103,13 @@ Build Docker image:
 cd telegram-bot
 docker build -t memora-telegrambot-local .
 ```
+
+## Manual Smoke Test
+
+With the backend and bot running:
+- send `/start` and `/help`; each should return help text and create no backend item
+- send text; bot should reply `Accepted. Processing asynchronously. Memora ID: <id>`
+- send a voice note; bot should reply with the same accepted format
+- send an unsupported owner message; bot should return supported-input guidance
+- stop the backend; bot should keep running and avoid repeated full stack traces while polling
+- restart the backend; bot should log polling recovery

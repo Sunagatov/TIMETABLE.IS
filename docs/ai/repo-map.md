@@ -6,6 +6,8 @@
 - `CLAUDE.md` — Claude CLI guidance
 - `CODEX.md` — Codex CLI guidance
 - `.env.example` — local config template
+- `.claude/request-routing.md` — Claude CLI routing shortcut
+- `.claude/generated/*.md` — generated/compact Claude routing, entrypoint, surface, and validation notes; keep them accurate when source layout changes
 
 ## Backend
 - `backend/AGENTS.md` ← read this before any backend task
@@ -61,9 +63,11 @@
   - `backend/BackendClient.kt` — HTTP client for backend ingest and notification endpoints
   - `ingest/TelegramUpdateMapper.kt` — Telegram Update → ingest request
   - `ingest/TelegramIngestRequest.kt` — request/response DTOs incl. TelegramFailureNotification
-  - `command/StartCommandHandler.kt`
+  - `command/StartCommandHandler.kt` — `/start` and `/help` response text
   - `config/BotSettings.kt` — config from environment
   - `TelegramBotApplication.kt`
+- `telegram-bot/src/test/kotlin/com/sunagatov/memora/telegrambot/`
+  - focused JUnit 5 tests for settings validation, update mapping, command non-ingest, backend requests, and failure notification parsing
 
 ## Docs
 - `docs/requirements/README.md` ← read order for requirements
@@ -87,3 +91,7 @@
 - `docs/ai/token-budget-rules.md` ← reading discipline
 - `docs/ai/env-runtime-reference.md` ← config keys; production truth is in Vault
 - `docs/ai/vault-boundary.md` ← deployment boundary rule
+
+## Validation wrappers
+- backend and telegram bot each own their Gradle wrapper (`backend/gradlew`, `telegram-bot/gradlew`)
+- there is no root `./gradlew` at the repo root

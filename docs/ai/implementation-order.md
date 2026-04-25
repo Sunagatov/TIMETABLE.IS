@@ -71,4 +71,4 @@ Current adapter status:
 
 - transcription integration
 - AI cleanup/classification integration
-- replace stub heuristics in `ItemProcessingService`
+- continue improving backend-owned AI cleanup/classification without moving that logic into Telegram

@@ -18,9 +18,13 @@ Read these first before opening wider code areas.
 
 ## Telegram bot entrypoints
 
-- `telegram-bot/pyproject.toml`
-- `telegram-bot/src/memora_bot/config.py`
-- `telegram-bot/src/memora_bot/main.py`
+- `telegram-bot/build.gradle.kts`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/TelegramBotApplication.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/config/BotSettings.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/MemoraLongPollingBot.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/backend/BackendClient.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/TelegramUpdateMapper.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/command/StartCommandHandler.kt`
 
 ## Root agent entrypoints
 

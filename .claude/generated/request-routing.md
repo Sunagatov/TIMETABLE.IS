@@ -35,9 +35,11 @@ Read:
 
 1. `telegram-bot/AGENTS.md`
 2. exact relevant requirement file(s)
-3. exact bot source files under `telegram-bot/src/memora_bot/`
+3. `docs/ai/api-surface.md` capture section if backend contracts matter
+4. exact Kotlin bot source files under `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/`
 
 Skip backend/frontend internals unless the contract is changing.
+Do not add DB, transcription/Whisper, AI/category/review/lifecycle logic, or retry state to the bot.
 
 ## If the task is product/behavior clarification
 
@@ -62,7 +64,8 @@ Read:
 1. `AGENTS.md`
 2. `docs/ai/README.md`
 3. `docs/ai/current-bootstrap-state.md`
-4. exact stale md files only
+4. `docs/ai/repo-map.md`
+5. exact stale md files only
 
 ## If the task is deployment/runtime/prod-related
 

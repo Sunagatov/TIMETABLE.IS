@@ -74,7 +74,7 @@ For current backend foundation work, the most common requirement files are:
 - sort format: `field-direction` (createdAt-desc, title-asc, category-desc, etc.)
 - MongoDB persistence is active in production; in-memory stores are test-only
 - voice transcription is **live** — `transcription/` package handles download → audio prep → OpenAI-compatible HTTP call to `http://whisper-worker:8000`
-- AI categorization/answer generation: still stub/placeholder
+- AI categorization/answer generation: deterministic by default; optional OpenAI-compatible text AI adapter when `MEMORA_AI_MODE=openai`
 - Spring Boot 4: MongoDB property is `spring.mongodb.uri` (not `spring.data.mongodb.uri` — deprecated at error level, completely ignored)
 
 ### Frontend

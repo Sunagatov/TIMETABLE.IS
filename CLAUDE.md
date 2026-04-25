@@ -13,6 +13,7 @@ Compact guidance for Claude CLI.
 - Do not widen scope silently.
 - Prefer current uppercase requirement files when both uppercase and legacy lowercase variants exist.
 - Keep the current contract snapshot in `docs/ai/current-bootstrap-state.md` and `docs/ai/api-surface.md` aligned with code changes.
+- When agent-routing facts change, keep `.claude/request-routing.md` and `.claude/generated/*.md` aligned too.
 
 ## Implementation bias
 

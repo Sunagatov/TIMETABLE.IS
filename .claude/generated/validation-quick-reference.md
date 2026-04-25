@@ -16,15 +16,19 @@ Prefer one of:
 Prefer one of:
 
 - targeted frontend test
-- `npm run build`
+- `cd frontend && npm run build`
+- `cd frontend && npm run test:run`
 - route/page-focused validation
 
 ## Telegram bot-only change
 
 Prefer one of:
 
-- import/startup check
-- narrow bot-side behavior check
+- `cd telegram-bot && ./gradlew clean test`
+- `cd telegram-bot && ./gradlew installDist`
+- from repo root: `./telegram-bot/gradlew -p telegram-bot clean test`
+
+Note: there is no root `./gradlew`; backend and telegram bot own their wrappers.
 
 ## Cross-cutting change
 

@@ -80,6 +80,8 @@ Both must match the same actual user ID — they use compatible types on their r
 3. For each notification: send message to Telegram, then acknowledge via `/delivered`
 4. `notificationId` format: `"${item.id}:${item.updatedAt.epochSecond}"` — not persisted, re-derived each poll
 5. Acknowledgement is one-shot (stored in backend's in-memory FailureNotificationStore)
+6. Acknowledgement path must URL-encode `notificationId` as a path segment
+7. Response parsing accepts both a raw JSON array and an object wrapper with `notifications`
 
 ## Failure notification message format
 
@@ -103,3 +105,18 @@ Retry context: <retryContext>  ← only if present
 - `BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE` (default: `/api/capture/telegram/failure-notifications/%s/delivered`)
 - `FAILURE_POLL_INTERVAL_SECONDS` (default: `5`)
 - `BACKEND_TIMEOUT_SECONDS` (default: `10`)
+
+## Focused validation
+
+```bash
+cd telegram-bot && ./gradlew clean test
+cd telegram-bot && ./gradlew installDist
+```
+
+From repo root:
+
+```bash
+./telegram-bot/gradlew -p telegram-bot clean test
+```
+
+There is no root Gradle wrapper in the Memora repo.

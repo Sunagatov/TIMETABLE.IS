@@ -19,6 +19,7 @@ Read:
 - `AGENTS.md`
 - `backend/AGENTS.md`
 - `docs/ai/current-bootstrap-state.md` if contract/bootstrap status matters
+- `docs/ai/api-surface.md` before changing endpoint, DTO, filter, or state contracts
 - exact backend feature folder only
 
 ### Frontend work
@@ -34,7 +35,16 @@ Read:
 - `docs/ai/README.md`
 - `docs/ai/current-bootstrap-state.md`
 - `docs/ai/repo-map.md`
+- `docs/ai/request-routing-guide.md`
 - exact stale doc files only
+
+### Telegram bot work
+Read:
+- `telegram-bot/AGENTS.md`
+- `docs/ai/api-surface.md` capture section if backend contracts matter
+- exact Kotlin files under `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/`
+
+Do not look for Python bot files. The bot is Kotlin long polling and must stay a thin transport adapter.
 
 ### API question
 Read:

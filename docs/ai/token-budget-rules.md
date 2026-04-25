@@ -62,6 +62,18 @@ Do not change this behavior — it preserves original AI output history.
 ### `notificationId` format
 Failure notification IDs are `"${item.id}:${item.updatedAt.epochSecond}"`.
 They are re-derived each poll, not persisted. If an item is retried and fails again with a new `updatedAt`, a new `notificationId` is generated — allowing re-delivery.
+Bot acknowledgement paths must URL-encode the notification ID as a path segment before formatting it into `/delivered`.
+
+### Telegram bot thin-adapter boundary
+The bot handles transport only:
+- local commands: `/start`, `/help`
+- supported owner inputs: text and voice
+- unsupported owner input guidance
+- backend ingest and failure notification polling/ack
+
+Do not add DB access, transcription/Whisper calls, AI/category/review/item lifecycle logic, or retry state to the bot.
+Failure notification parsing intentionally accepts both raw arrays and `{ "notifications": [...] }`.
+Backend-down polling logs should not emit full stack traces every interval.
 
 ### Frontend "ALL" sentinel
 Filter state uses `"ALL"` as the "no filter selected" sentinel for select dropdowns.
