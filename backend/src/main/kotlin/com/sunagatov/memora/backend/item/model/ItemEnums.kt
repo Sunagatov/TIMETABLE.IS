@@ -16,7 +16,7 @@ enum class ItemType {
 enum class ItemStatus {
     RECEIVED,
     TRANSCRIPTION_FAILED,
-    @Suppress("unused") TRANSCRIBED, // defined; populated when transcription is implemented
+    @Suppress("unused") TRANSCRIBED, // reserved transitional status; current pipeline stores transcript then proceeds directly to AI_PROCESSED_UNREVIEWED
     AI_PROCESSING_FAILED,
     AI_PROCESSED_UNREVIEWED,
     HUMAN_APPROVED,

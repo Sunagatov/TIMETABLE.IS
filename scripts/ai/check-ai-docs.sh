@@ -52,6 +52,36 @@ check_no_pattern() {
   fi
 }
 
+check_no_root_patch_artifacts() {
+  matches="$(find . -maxdepth 1 \
+    \( -name '*.zip' \
+    -o -name 'install_*_patch.sh' \
+    -o -name 'apply_*_patch.sh' \
+    -o -name '.patch-backup' \
+    -o -name 'patch-backup' \
+    -o -name '*_patch.zip' \
+    -o -name '*-patch.zip' \) \
+    -print 2>/dev/null)"
+  if [ -n "$matches" ]; then
+    fail "root-level patch/archive artifacts found"
+    printf '%s\n' "$matches"
+  else
+    pass "no root-level patch/archive artifacts"
+  fi
+}
+
+check_single_change_guide_owner() {
+  if [ -f "docs/ai/change-guide.md" ] && [ -f "docs/ai/change-playbook.md" ]; then
+    fail "duplicate active AI change checklist docs found: docs/ai/change-guide.md and docs/ai/change-playbook.md"
+  elif [ -f "docs/ai/change-guide.md" ]; then
+    pass "single AI change checklist owner: docs/ai/change-guide.md"
+  elif [ -f "docs/ai/change-playbook.md" ]; then
+    pass "single AI change checklist owner: docs/ai/change-playbook.md"
+  else
+    fail "no active AI change checklist doc found"
+  fi
+}
+
 check_legacy_names_are_marked() {
   files="$(find AGENTS.md CLAUDE.md CODEX.md AMAZONQ.md README.md docs .claude .amazonq \
     -type f -name '*.md' 2>/dev/null)"
@@ -83,6 +113,10 @@ check_absent_path ".claude/generated"
 check_absent_path "legacy_docs"
 check_absent_path "old_docs"
 check_absent_path "copied_docs"
+check_absent_path ".patch-backup"
+check_absent_path "patch-backup"
+
+check_no_root_patch_artifacts
 
 check_max_lines "AGENTS.md" 120
 check_max_lines "CLAUDE.md" 80
@@ -93,6 +127,7 @@ check_max_lines ".amazonq/rules/00-entrypoint.md" 40
 
 check_legacy_names_are_marked
 check_active_object_storage_claims
+check_single_change_guide_owner
 
 check_no_pattern \
   "README has no obsolete starter-state claims" \
@@ -101,8 +136,13 @@ check_no_pattern \
 
 check_no_pattern \
   "active docs have no obsolete transcription/AI/bot persistence claims" \
-  'voice transcription is not implemented|transcription slice is not implemented|full voice transcription pipeline implementation|AI categorization.*stub|AI categorization is stub only|telegram bot stores directly to DB' \
+  'voice transcription is not implemented|transcription slice is not implemented|transcription is not implemented|full voice transcription pipeline implementation|AI categorization.*stub|AI categorization is stub only|telegram bot stores directly to DB|in-memory FailureNotificationStore|populated when transcription is implemented|memora-voice-transcription-patch|install_memora_voice_transcription_patch' \
   AGENTS.md CLAUDE.md CODEX.md AMAZONQ.md README.md docs .claude .amazonq
+
+check_no_pattern \
+  "source comments have no obsolete transcription implementation claims" \
+  'populated when transcription is implemented' \
+  backend/src/main/kotlin telegram-bot/src/main/kotlin
 
 check_no_pattern \
   "adapter docs do not duplicate detailed endpoint/state summaries" \

@@ -1,6 +1,6 @@
 # Implementation Order
 
-This is a short index. Prefer `current-bootstrap-state.md` and `implementation-sequence.md` for the real current picture.
+This is a short index. Prefer `current-state.md` and `implementation-sequence.md` for the real current picture.
 
 ## Recommended order
 

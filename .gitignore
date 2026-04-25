@@ -15,4 +15,11 @@ out/
 logs/
 tmp/
 temp/
+.patch-backup/
+patch-backup/
+*.patch.zip
+*-patch.zip
+*_patch.zip
+install_*_patch.sh
+apply_*_patch.sh
 /telegram-bot/.kotlin/sessions/*

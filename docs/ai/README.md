@@ -6,7 +6,7 @@ Root and tool-specific files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`
 
 ## Canonical Files
 
-- `current-bootstrap-state.md` — current implementation reality, including what is live and what remains starter-level.
+- `current-state.md` — current implementation reality, including what is live and what remains starter-level.
 - `api-surface.md` — backend endpoints, request/response contracts, filter params, sort format, and state guards.
 - `invariants.md` — durable product, model, state, category, query, and boundary rules.
 - `repo-map.md` — current repository structure and where to start for each module.
@@ -15,8 +15,9 @@ Root and tool-specific files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`
 - `env-runtime-reference.md` — source-repo config keys and runtime boundary notes.
 - `vault-boundary.md` — production/deployment ownership boundary.
 - `architecture.md` — project architecture and responsibility split.
+- `change-guide.md` — change-impact checklist: if you change X, also update/check Y.
 
-Other files in this directory may be useful for sequencing or change checklists, but the files above own the active agent facts.
+Other files in this directory may be useful for sequencing, but the files above own the active agent facts.
 
 ## Adapter Duplication Policy
 
@@ -42,6 +43,10 @@ Do not read archive or stale docs as active context unless the user explicitly a
 
 When behavior, API contracts, invariants, repo structure, or routing changes:
 - update the owning canonical file in `docs/ai/*`
+- use `api-surface.md` for endpoint/API contract truth
+- use `invariants.md` for non-negotiable behavior
+- use `current-state.md` for current implementation reality
+- use `change-guide.md` for change-impact checklists
 - update scoped `AGENTS.md` files if module-specific rules changed
 - keep root/tool adapters thin
 - run `bash scripts/ai/check-ai-docs.sh`

@@ -42,7 +42,7 @@ Primary runtime areas:
 ## Current State
 
 Detailed current implementation state lives in:
-- `docs/ai/current-bootstrap-state.md`
+- `docs/ai/current-state.md`
 - `docs/ai/api-surface.md`
 - `docs/ai/invariants.md`
 - `docs/ai/repo-map.md`

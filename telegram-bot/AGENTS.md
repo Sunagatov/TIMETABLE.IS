@@ -82,9 +82,10 @@ Both must match the same actual user ID — they use compatible types on their r
 2. `BackendClient.fetchFailureNotifications()` fetches pending list
 3. For each notification: send message to Telegram, then acknowledge via `/delivered`
 4. `notificationId` format: `"${item.id}:${item.updatedAt.epochSecond}"` — not persisted, re-derived each poll
-5. Acknowledgement is one-shot (stored in backend's in-memory FailureNotificationStore)
+5. Delivery acknowledgement state is backend-owned; Mongo-backed storage is the normal/prod default, while the in-memory store is only used with `MEMORA_STORAGE_MODE=in-memory` for tests/local
 6. Acknowledgement path must URL-encode `notificationId` as a path segment
 7. Response parsing accepts both a raw JSON array and an object wrapper with `notifications`
+8. The bot must not keep delivery or retry state locally
 
 ## Failure notification message format
 

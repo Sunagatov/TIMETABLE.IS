@@ -1,10 +1,18 @@
 # Change Guide
 
+This is the canonical "if you change X, also update/check Y" checklist for active AI-agent maintenance.
+
+Ownership boundaries:
+- `docs/ai/api-surface.md` owns endpoint/API contract truth.
+- `docs/ai/invariants.md` owns non-negotiable behavior.
+- `docs/ai/current-state.md` owns current implementation reality.
+- this file owns change-impact checklists.
+
 ## If you change backend API
 
 Also review:
 - `docs/ai/api-surface.md`
-- `docs/ai/current-bootstrap-state.md`
+- `docs/ai/current-state.md`
 - frontend API client usage (`frontend/src/features/review/api/reviewApi.ts`)
 - telegram-bot backend forwarder (`telegram-bot/src/main/kotlin/.../backend/BackendClient.kt`)
 - relevant requirements docs
@@ -21,7 +29,7 @@ Also review:
 - `backend/src/main/kotlin/.../item/application/ItemService.kt`
 - frontend status handling in `ItemDetailPanel.tsx` (action buttons per view)
 - bot failure messaging (which statuses trigger failure notifications)
-- `docs/ai/current-bootstrap-state.md`
+- `docs/ai/current-state.md`
 - `FoundationServicesTests.kt` — update state-guard tests
 
 ## If you change filter/query params
@@ -55,7 +63,9 @@ Also review:
 
 Also review:
 - `docs/requirements/07_SECURITY_AND_ACCESS.md`
+- `backend/AGENTS.md`
 - `backend/src/main/resources/application.yml`
+- backend auth package (`backend/src/main/kotlin/com/sunagatov/memora/backend/auth/`)
 - `docs/ai/env-runtime-reference.md`
 - `docs/ai/api-surface.md` if a contract is renamed
 
@@ -84,6 +94,25 @@ Bot validation:
 - `cd telegram-bot && ./gradlew clean test`
 - `cd telegram-bot && ./gradlew installDist` when startup/distribution behavior changed
 - from repo root, use `./telegram-bot/gradlew -p telegram-bot clean test` because there is no root Gradle wrapper
+
+## If you change failure notifications
+
+Also review:
+- `docs/requirements/08_FAILURE_HANDLING_AND_RETRY.md`
+- `backend/AGENTS.md` (failure notification contract section)
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/application/TelegramFailureNotificationService.kt`
+- backend failure notification store implementations under `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/store/`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/MemoraLongPollingBot.kt`
+- `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/ingest/TelegramIngestRequest.kt`
+
+Keep these facts stable:
+- `notificationId` is `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll, not stored as a source field on the item.
+- delivery acknowledgement state is backend-owned.
+- Mongo-backed failure-notification delivery storage is the normal/prod default.
+- in-memory failure-notification delivery storage exists only with `MEMORA_STORAGE_MODE=in-memory`, mainly for tests/local.
+- the bot must not keep delivery or retry state locally.
+- the bot acknowledges only after successful Telegram send.
+- the bot URL-encodes `notificationId` before placing it in the acknowledgement path.
 
 ## If you change stack/tooling versions
 

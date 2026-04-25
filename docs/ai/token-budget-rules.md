@@ -7,7 +7,7 @@ Repository context is expensive. Start from routing, then read only the smallest
 Use:
 - `AGENTS.md` as the bootloader.
 - `docs/ai/request-routing-guide.md` to choose minimal context.
-- `docs/ai/current-bootstrap-state.md` for current implementation reality.
+- `docs/ai/current-state.md` for current implementation reality.
 - `docs/ai/api-surface.md` for endpoint, DTO, filter, sort, and state-guard contracts.
 - `docs/ai/invariants.md` for non-negotiable behavior.
 - scoped `AGENTS.md` files for module-specific rules.

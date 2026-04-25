@@ -4,7 +4,7 @@
 Read:
 1. `backend/AGENTS.md` — state guards, filter params, sort format, category rules, test patterns
 2. exact relevant requirement file(s)
-3. `docs/ai/current-bootstrap-state.md` if foundation/bootstrap shape matters
+3. `docs/ai/current-state.md` if current implementation shape matters
 4. `docs/ai/api-surface.md` when changing endpoints, DTOs, or filter params
 5. exact backend files
 
@@ -45,7 +45,7 @@ Read:
 ## Backend foundation / contract question
 Read:
 1. `backend/AGENTS.md`
-2. `docs/ai/current-bootstrap-state.md`
+2. `docs/ai/current-state.md`
 3. `docs/ai/api-surface.md`
 4. exact backend files only after that
 
@@ -88,7 +88,7 @@ Read Vault docs first:
 Start narrow:
 1. `AGENTS.md`
 2. `docs/ai/repo-map.md`
-3. `docs/ai/current-bootstrap-state.md`
+3. `docs/ai/current-state.md`
 4. `docs/ai/api-surface.md`
 5. one scoped file
 6. exact code only after that

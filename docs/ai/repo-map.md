@@ -55,13 +55,14 @@
 
 - `docs/requirements/` — product requirements and V1 behavior contracts.
 - `docs/ai/` — canonical detailed AI-agent knowledge base.
-- `docs/ai/current-bootstrap-state.md` — current implementation reality.
+- `docs/ai/current-state.md` — current implementation reality.
 - `docs/ai/api-surface.md` — endpoint contracts, query params, sort, state guards.
 - `docs/ai/invariants.md` — durable behavior rules.
 - `docs/ai/request-routing-guide.md` — choose minimal context for each task.
 - `docs/ai/token-budget-rules.md` — reading discipline and archive/stale-doc rules.
 - `docs/ai/env-runtime-reference.md` — source-level config reference; production truth remains Vault.
 - `docs/ai/vault-boundary.md` — deployment/runtime boundary.
+- `docs/ai/change-guide.md` — change-impact checklist: if you change X, also update/check Y.
 
 ## Scripts
 

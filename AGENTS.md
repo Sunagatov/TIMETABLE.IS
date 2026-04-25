@@ -36,7 +36,7 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 ## Minimal Read Order
 
 1. `docs/ai/request-routing-guide.md` — choose the smallest context for the task.
-2. `docs/ai/current-bootstrap-state.md` — current implementation reality.
+2. `docs/ai/current-state.md` — current implementation reality.
 3. `docs/ai/api-surface.md` — endpoint contracts, filters, sort, state guards.
 4. `docs/ai/invariants.md` — non-negotiable behavior.
 5. The smallest exact requirement file(s) under `docs/requirements/`.
