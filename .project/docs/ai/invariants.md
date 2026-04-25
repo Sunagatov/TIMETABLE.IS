@@ -44,6 +44,7 @@
 - `approve`: only `AI_PROCESSED_UNREVIEWED`
 - `reject`: only `AI_PROCESSED_UNREVIEWED`
 - `edit-and-approve`: only `AI_PROCESSED_UNREVIEWED`
+- category proposal approve/reject: only `AI_PROCESSED_UNREVIEWED`
 - `retry`: only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED`
 - direct `PATCH /api/items/{itemId}`: only `HUMAN_APPROVED` or `HUMAN_EDITED_APPROVED`
 - `DELETE /api/review/{itemId}/trash`: any status

@@ -174,7 +174,6 @@ All three list endpoints share the same query param model:
 - `directExecutor()` runs `ItemProcessingService` synchronously — enables state assertions immediately after `ingest()`
 - `testProperties()` helper provides valid bcrypt hash and sane defaults
 - `MemoraBackendApplicationTests` — Spring context load test only
-- Current test count: 31 in `FoundationServicesTests` + 1 context load = 32 total
 - **Note on voice tests**: `voice ingest → TRANSCRIPTION_FAILED` is still correct in tests — no real whisper endpoint in test context. In production, transcription succeeds. Do not change this test expectation.
 
 Tests that must remain green:

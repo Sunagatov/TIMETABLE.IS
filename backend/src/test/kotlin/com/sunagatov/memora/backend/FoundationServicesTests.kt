@@ -905,6 +905,34 @@ class FoundationServicesTests {
     }
 
     @Test
+    fun `category proposal actions are review-only`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+        val itemService = ItemService(itemStore, categoryService, ItemQueryService())
+        val reviewService = createReviewService(itemStore, itemService, processingService, categoryService)
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-cat-proposal-guard",
+                text = "finance project idea"
+            )
+        )
+
+        reviewService.approve(item.id)
+
+        assertFailsWith<IllegalArgumentException> {
+            reviewService.approveCategoryProposal(item.id)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            reviewService.rejectCategoryProposal(item.id)
+        }
+    }
+
+    @Test
     fun `regenerate all ai output updates current values and preserves original ai output`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)

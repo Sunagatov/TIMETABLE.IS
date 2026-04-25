@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      MEMORA_STORAGE_MODE: in-memory
+      MEMORA_OWNER_TELEGRAM_USER_ID: "123456789"
+      BACKEND_BOT_INGEST_TOKEN: ci-bot-token
+      BACKEND_APP_PASSWORD: ci-local-password
+      BACKEND_COOKIE_SECURE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+      - name: Compile backend
+        run: ./gradlew compileKotlin
+      - name: Test backend
+        run: ./gradlew test
+
+  telegram-bot:
+    name: Telegram Bot
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: telegram-bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+      - name: Test telegram bot
+        run: ./gradlew clean test
+      - name: Build telegram bot distribution
+        run: ./gradlew installDist
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build frontend
+        run: npm run build
+      - name: Test frontend
+        run: npm run test:run
+
+  docs:
+    name: AI Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check AI docs
+        run: bash scripts/ai/check-ai-docs.sh

@@ -54,6 +54,9 @@ class ReviewService(
 
     fun approveCategoryProposal(itemId: String): MemoraItem {
         val item = requireItem(itemId)
+        require(item.status in ItemStatus.reviewableStatuses()) {
+            "Only reviewable items can approve category proposals"
+        }
         val proposedCategoryPath = item.proposedCategoryPath
             ?: throw IllegalArgumentException("Item does not have a proposed category path")
 
@@ -69,6 +72,9 @@ class ReviewService(
 
     fun rejectCategoryProposal(itemId: String): MemoraItem {
         val item = requireItem(itemId)
+        require(item.status in ItemStatus.reviewableStatuses()) {
+            "Only reviewable items can reject category proposals"
+        }
         require(item.proposedCategoryPath != null) { "Item does not have a proposed category path" }
         return itemStore.save(
             item.copy(

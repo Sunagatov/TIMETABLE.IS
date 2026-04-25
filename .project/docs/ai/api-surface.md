@@ -84,11 +84,13 @@ Current backend endpoints:
 
 State guards:
 - `approve`, `reject`, `edit-and-approve` — only `AI_PROCESSED_UNREVIEWED` items
+- `category-proposal/approve`, `category-proposal/reject` — only `AI_PROCESSED_UNREVIEWED` items with a proposal
 - `retry` — only `TRANSCRIPTION_FAILED` or `AI_PROCESSING_FAILED` items
 - `trash` — any status
 
 Current behavior:
 - `edit-and-approve` is the review-safe edit path for reviewable items
+- category proposal approval/rejection is a Needs Review action, not an approved-item edit shortcut
 - retry requeues failed items back through the same backend-owned processing path
 - regeneration actions update the current working values while preserving the original `ai*` snapshot fields
 - answer regeneration is explicit and separate from the core review/failure retry path

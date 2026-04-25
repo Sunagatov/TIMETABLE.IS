@@ -138,13 +138,15 @@ export function ItemDetailPanel({
           <AiOutputComparison item={item} isQuestion={isQuestion} />
           <OriginalCaptureSection item={item} />
           <TelegramTraceSection item={item} />
-          <CategoryProposalCard
-            item={item}
-            busy={busy}
-            busyAction={busyAction}
-            onApproveCategoryProposal={onApproveCategoryProposal}
-            onRejectCategoryProposal={onRejectCategoryProposal}
-          />
+          {view === "needs-review" && (
+            <CategoryProposalCard
+              item={item}
+              busy={busy}
+              busyAction={busyAction}
+              onApproveCategoryProposal={onApproveCategoryProposal}
+              onRejectCategoryProposal={onRejectCategoryProposal}
+            />
+          )}
           {editOpen && (
             <ItemEditForm
               view={view}
