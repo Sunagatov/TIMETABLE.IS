@@ -35,7 +35,8 @@ class TelegramUpdateMapper {
                 fileId = voice.fileId,
                 fileUniqueId = voice.fileUniqueId,
                 durationSeconds = voice.duration,
-                mimeType = voice.mimeType
+                mimeType = voice.mimeType,
+                fileSizeBytes = voice.fileSize
             )
         )
     }

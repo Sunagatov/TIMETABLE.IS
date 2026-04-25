@@ -15,7 +15,7 @@ class TelegramUpdateMapperTest {
     private val mapper = TelegramUpdateMapper()
 
     @Test
-    fun `maps text messages`() {
+    fun `maps owner text message fields correctly`() {
         val request = mapper.toTextIngestRequest(updateWithMessage(text = "remember this"))
 
         assertNotNull(request)
@@ -27,7 +27,12 @@ class TelegramUpdateMapperTest {
     }
 
     @Test
-    fun `maps voice messages`() {
+    fun `ignores blank text`() {
+        assertNull(mapper.toTextIngestRequest(updateWithMessage(text = "   ")))
+    }
+
+    @Test
+    fun `maps voice message fields correctly`() {
         val request = mapper.toVoiceIngestRequest(updateWithMessage(voice = voice()))
 
         assertNotNull(request)
@@ -39,19 +44,36 @@ class TelegramUpdateMapperTest {
         assertEquals("file-unique-id", request.voice?.fileUniqueId)
         assertEquals(7, request.voice?.durationSeconds)
         assertEquals("audio/ogg", request.voice?.mimeType)
+        assertEquals(12345L, request.voice?.fileSizeBytes)
     }
 
     @Test
-    fun `ignores blank text`() {
-        assertNull(mapper.toTextIngestRequest(updateWithMessage(text = "   ")))
+    fun `returns null when text message fields are missing`() {
+        assertNull(mapper.toTextIngestRequest(Update()))
+        assertNull(mapper.toTextIngestRequest(updateWithMessage(text = "hello", from = null)))
+        assertNull(mapper.toTextIngestRequest(updateWithMessage(text = "hello", chat = null)))
+        assertNull(mapper.toTextIngestRequest(updateWithMessage(text = null)))
     }
 
-    private fun updateWithMessage(text: String? = null, voice: Voice? = null): Update {
+    @Test
+    fun `returns null when voice message fields are missing`() {
+        assertNull(mapper.toVoiceIngestRequest(Update()))
+        assertNull(mapper.toVoiceIngestRequest(updateWithMessage(voice = voice(), from = null)))
+        assertNull(mapper.toVoiceIngestRequest(updateWithMessage(voice = voice(), chat = null)))
+        assertNull(mapper.toVoiceIngestRequest(updateWithMessage(voice = null)))
+    }
+
+    private fun updateWithMessage(
+        text: String? = null,
+        voice: Voice? = null,
+        from: User? = User.builder().id(123L).firstName("Owner").isBot(false).build(),
+        chat: Chat? = Chat.builder().id(456L).type("private").build()
+    ): Update {
         val update = Update()
         update.message = Message.builder()
             .messageId(789)
-            .from(User.builder().id(123L).firstName("Owner").isBot(false).build())
-            .chat(Chat.builder().id(456L).type("private").build())
+            .from(from)
+            .chat(chat)
             .text(text)
             .voice(voice)
             .build()
@@ -64,5 +86,6 @@ class TelegramUpdateMapperTest {
             fileUniqueId = "file-unique-id"
             duration = 7
             mimeType = "audio/ogg"
+            fileSize = 12345L
         }
 }

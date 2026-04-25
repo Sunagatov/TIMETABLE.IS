@@ -4,7 +4,8 @@ data class TelegramVoicePayload(
     val fileId: String,
     val fileUniqueId: String,
     val durationSeconds: Int? = null,
-    val mimeType: String? = null
+    val mimeType: String? = null,
+    val fileSizeBytes: Long? = null
 )
 
 data class TelegramIngestRequest(

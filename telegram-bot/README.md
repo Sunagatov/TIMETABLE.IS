@@ -1,6 +1,7 @@
 # Telegram Bot
 
 Telegram bot is the thin Memora transport adapter for Telegram long polling.
+It is a long polling bot, not a webhook service.
 
 ## Boundary
 
@@ -66,6 +67,11 @@ Optional:
 | `BACKEND_TIMEOUT_SECONDS` | `10` | Backend connect/request timeout, minimum 1 second. |
 
 Do not put real Telegram tokens in docs, examples, or committed files.
+Use `telegram-bot/.env.local` for local values. Start from `.env.local.example`.
+
+Do not run a local bot and the production bot with the same
+`TELEGRAM_BOT_TOKEN` at the same time. Use a separate development bot token, or
+stop production before running long polling locally.
 
 ## Backend Dependency
 
@@ -89,6 +95,9 @@ Run locally:
 cd telegram-bot
 ./gradlew run
 ```
+
+The local process reads environment variables from the shell. If using Vault's
+`local:run` task, it prefers source `telegram-bot/.env.local` when present.
 
 Run tests:
 

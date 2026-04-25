@@ -27,6 +27,9 @@ Telegram bot is a thin Memora transport adapter.
 - keep backend timeout config in `BACKEND_TIMEOUT_SECONDS`
 - avoid backend-down polling log spam: first failure may include the exception, repeats should be concise, recovery should be logged
 - never commit, print, or document real Telegram tokens or shared bot tokens
+- prefer `telegram-bot/.env.local` for local runs, starting from `.env.local.example`
+- do not run local and production long polling with the same `TELEGRAM_BOT_TOKEN` at the same time
+- use a separate development bot token or stop production before local long polling
 
 ## Current areas
 
@@ -49,7 +52,7 @@ All capture endpoints require `X-Memora-Bot-Token` header.
 - `telegramUserId`: `from.id.toString()` (Long → String)
 - `telegramChatId`: `message.chatId.toString()` (Long → String)
 - `telegramMessageId`: `message.messageId.toString()` (Int → String)
-- voice: nested `TelegramVoicePayload` with `fileId`, `fileUniqueId`, optional `durationSeconds`, `mimeType`
+- voice: nested `TelegramVoicePayload` with `fileId`, `fileUniqueId`, optional `durationSeconds`, `mimeType`, `fileSizeBytes`
 - response: `TelegramAcceptedResponse` with `memoraId`
 
 ## Command handling
@@ -105,6 +108,10 @@ Retry context: <retryContext>  ← only if present
 - `BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE` (default: `/api/capture/telegram/failure-notifications/%s/delivered`)
 - `FAILURE_POLL_INTERVAL_SECONDS` (default: `5`)
 - `BACKEND_TIMEOUT_SECONDS` (default: `10`)
+
+Required env vars are `TELEGRAM_BOT_TOKEN`, `BACKEND_BOT_INGEST_TOKEN`, and
+`OWNER_TELEGRAM_USER_ID`. Optional env vars are `BACKEND_BASE_URL`, the backend
+path overrides, `FAILURE_POLL_INTERVAL_SECONDS`, and `BACKEND_TIMEOUT_SECONDS`.
 
 ## Focused validation
 

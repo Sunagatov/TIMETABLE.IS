@@ -85,28 +85,64 @@ class MemoraLongPollingBot(
 
     fun deliverFailureNotifications() {
         try {
-            backendClient.fetchFailureNotifications().forEach { notification ->
-                sendFailureNotification(notification)
-                backendClient.acknowledgeFailureNotification(notification.notificationId)
-            }
-            if (consecutiveFailurePollingFailures > 0) {
-                logger.info(
-                    "Backend failure notification polling recovered after {} consecutive failure(s)",
-                    consecutiveFailurePollingFailures
-                )
-                consecutiveFailurePollingFailures = 0
-            }
+            fetchPendingFailureNotifications().forEach(::deliverSingleFailureNotification)
+            handleFailurePollingRecovery()
         } catch (exception: Exception) {
-            consecutiveFailurePollingFailures += 1
-            if (consecutiveFailurePollingFailures == 1) {
-                logger.error("Failed to deliver backend failure notifications", exception)
-            } else {
-                logger.warn(
-                    "Backend failure notification polling still failing; consecutiveFailures={}, reason={}",
-                    consecutiveFailurePollingFailures,
-                    exception.message ?: "unknown"
-                )
-            }
+            handleFailurePollingFailure(exception)
+        }
+    }
+
+    private fun fetchPendingFailureNotifications(): List<TelegramFailureNotification> =
+        backendClient.fetchFailureNotifications()
+
+    private fun deliverSingleFailureNotification(notification: TelegramFailureNotification) {
+        try {
+            sendFailureNotification(notification)
+        } catch (exception: Exception) {
+            logger.error(
+                "Failed to send failure notification id={} to Telegram chat={}",
+                notification.notificationId,
+                notification.telegramChatId,
+                exception
+            )
+            return
+        }
+
+        acknowledgeFailureNotification(notification)
+    }
+
+    private fun acknowledgeFailureNotification(notification: TelegramFailureNotification) {
+        try {
+            backendClient.acknowledgeFailureNotification(notification.notificationId)
+        } catch (exception: Exception) {
+            logger.error(
+                "Failed to acknowledge delivered failure notification id={}",
+                notification.notificationId,
+                exception
+            )
+        }
+    }
+
+    private fun handleFailurePollingFailure(exception: Exception) {
+        consecutiveFailurePollingFailures += 1
+        if (consecutiveFailurePollingFailures == 1) {
+            logger.error("Failed to fetch backend failure notifications", exception)
+        } else {
+            logger.warn(
+                "Backend failure notification polling still failing; consecutiveFailures={}, reason={}",
+                consecutiveFailurePollingFailures,
+                exception.message ?: "unknown"
+            )
+        }
+    }
+
+    private fun handleFailurePollingRecovery() {
+        if (consecutiveFailurePollingFailures > 0) {
+            logger.info(
+                "Backend failure notification polling recovered after {} consecutive failure(s)",
+                consecutiveFailurePollingFailures
+            )
+            consecutiveFailurePollingFailures = 0
         }
     }
 
