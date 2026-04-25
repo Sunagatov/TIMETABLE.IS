@@ -36,7 +36,7 @@ Current areas:
 - `item`
 - `review`
 - `transcription` — voice transcription pipeline: `VoiceTranscriptionService` (interface), `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
-- `item/ai` — deterministic AI adapter by default; optional OpenAI-compatible adapter when `MEMORA_AI_MODE=openai`
+- `item/ai` — deterministic AI adapter for local/dev/test fallback; OpenAI-compatible adapter when `MEMORA_AI_MODE=openai` for real V1 polishing
 
 Do not drift back into a broad global technical-layer structure.
 
@@ -142,13 +142,13 @@ All three list endpoints share the same query param model:
 - `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` (default: 120)
 - `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` (default: 26214400)
 - `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` (default: 600)
-- `MEMORA_AI_MODE` (default: `deterministic`; `openai` enables `OpenAiCompatibleMemoraAiPort`)
+- `MEMORA_AI_MODE` (default: `deterministic`; `openai` is required for real V1 AI polishing and enables `OpenAiCompatibleMemoraAiPort`)
 - `MEMORA_AI_API_KEY` (required only in `openai` AI mode)
 - `MEMORA_AI_API_BASE_URL` (default: `https://api.openai.com`)
 - `MEMORA_AI_MODEL` (default: `gpt-4o-mini`)
 - `MEMORA_AI_TIMEOUT_SECONDS` (default: 60)
-- `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` (default: true)
-- `MEMORA_VALIDATE_PRODUCTION_CONFIG` (default: false; also active for `prod`/`production` Spring profiles)
+- `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` (default: true; local/dev-only escape hatch)
+- `MEMORA_VALIDATE_PRODUCTION_CONFIG` (default: false; also active for `prod`/`production` Spring profiles and rejects unsafe AI fallback/config)
 
 ## Rules
 

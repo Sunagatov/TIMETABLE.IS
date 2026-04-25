@@ -35,7 +35,16 @@ class BackendHardeningTests {
     @Test
     fun `production config rejects plaintext password override`() {
         val validator = ProductionConfigValidator(
-            properties = testProperties(appPassword = "local-only-password", appPasswordHash = "non-default-hash"),
+            properties = testProperties(
+                appPassword = "local-only-password",
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "openai",
+                aiApiKey = "ai-key",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = false
+            ),
             environment = MockEnvironment().apply { setActiveProfiles("prod") }
         )
 
@@ -46,10 +55,117 @@ class BackendHardeningTests {
         assertContains(exception.message!!, "BACKEND_APP_PASSWORD plaintext override")
     }
 
+    @Test
+    fun `production config passes with safe openai settings`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "openai",
+                aiApiKey = "ai-key",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = false
+            ),
+            environment = MockEnvironment()
+        )
+
+        validator.run(DefaultApplicationArguments())
+    }
+
+    @Test
+    fun `production config rejects deterministic ai mode`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "deterministic",
+                aiApiKey = "ai-key",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = false
+            ),
+            environment = MockEnvironment()
+        )
+
+        val exception = assertFailsWith<IllegalStateException> {
+            validator.run(DefaultApplicationArguments())
+        }
+
+        assertContains(exception.message!!, "MEMORA_AI_MODE must be set to openai")
+    }
+
+    @Test
+    fun `production config rejects blank ai api key`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "openai",
+                aiApiKey = "",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = false
+            ),
+            environment = MockEnvironment()
+        )
+
+        val exception = assertFailsWith<IllegalStateException> {
+            validator.run(DefaultApplicationArguments())
+        }
+
+        assertContains(exception.message!!, "MEMORA_AI_API_KEY must be set")
+    }
+
+    @Test
+    fun `production config rejects deterministic fallback`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "openai",
+                aiApiKey = "ai-key",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = true
+            ),
+            environment = MockEnvironment()
+        )
+
+        val exception = assertFailsWith<IllegalStateException> {
+            validator.run(DefaultApplicationArguments())
+        }
+
+        assertContains(exception.message!!, "MEMORA_AI_FALLBACK_TO_DETERMINISTIC must be false")
+    }
+
+    @Test
+    fun `local deterministic mode remains allowed when production validation is off`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                validateProductionConfig = false,
+                aiMode = "deterministic",
+                aiApiKey = "",
+                aiApiBaseUrl = "",
+                aiModel = "",
+                aiFallbackToDeterministic = true
+            ),
+            environment = MockEnvironment()
+        )
+
+        validator.run(DefaultApplicationArguments())
+    }
+
     private fun testProperties(
         appPassword: String? = null,
         appPasswordHash: String = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
-        botIngestToken: String = "bot-token"
+        botIngestToken: String = "bot-token",
+        aiMode: String = "deterministic",
+        aiApiKey: String = "",
+        aiApiBaseUrl: String = "https://api.openai.com",
+        aiModel: String = "gpt-4o-mini",
+        aiFallbackToDeterministic: Boolean = true,
+        validateProductionConfig: Boolean = false
     ): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
@@ -60,6 +176,12 @@ class BackendHardeningTests {
             defaultCategoryPath = "Default/General",
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2
+            aiAutoRetryAttempts = 2,
+            aiMode = aiMode,
+            aiApiKey = aiApiKey,
+            aiApiBaseUrl = aiApiBaseUrl,
+            aiModel = aiModel,
+            aiFallbackToDeterministic = aiFallbackToDeterministic,
+            validateProductionConfig = validateProductionConfig
         )
 }

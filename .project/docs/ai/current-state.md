@@ -17,7 +17,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - backend 2-level category model and CRUD baseline
 - backend explicit item lifecycle/status model
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
-- backend deterministic AI port for local/default cleaned text, type, category proposal, answer generation, and regeneration actions; optional OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai`
+- backend deterministic AI port for local/dev/test fallback cleaned text, type, category proposal, answer generation, and regeneration actions; OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai` for real V1 polishing
 - backend Mongo-backed sessions by default; in-memory session store is test/local only with `MEMORA_STORAGE_MODE=in-memory`
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend MongoDB persistence (Spring Boot 4; use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)
@@ -45,7 +45,8 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 
 ## What is still intentionally starter-level
 
-- real text AI integration is optional and off by default — deterministic AI remains the default unless `MEMORA_AI_MODE=openai` and provider config are supplied
+- real V1 text polishing requires `MEMORA_AI_MODE=openai`; deterministic AI is a local/dev/test fallback only
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false` so missing or broken real AI becomes a visible startup/configuration failure instead of fake success
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter

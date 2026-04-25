@@ -30,6 +30,20 @@ Spring Boot config via `application.yml` with env var overrides:
 | `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription-model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
 | `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription-language` | — | Optional ISO-639-1 language hint |
 | `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription-timeout-seconds` | `120` | HTTP timeout for transcription calls |
+| `MEMORA_AI_MODE` | `memora.ai-mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only |
+| `MEMORA_AI_API_KEY` | `memora.ai-api-key` | — | Required when `MEMORA_AI_MODE=openai`; production validation requires non-blank |
+| `MEMORA_AI_API_BASE_URL` | `memora.ai-api-base-url` | `https://api.openai.com` | Required and validated non-blank when production validation is enabled |
+| `MEMORA_AI_MODEL` | `memora.ai-model` | `gpt-4o-mini` | Required and validated non-blank when production validation is enabled |
+| `MEMORA_AI_TIMEOUT_SECONDS` | `memora.ai-timeout-seconds` | `60` | HTTP timeout for AI text calls |
+| `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` | `memora.ai-fallback-to-deterministic` | `true` | Local/dev-only escape hatch; production validation requires `false` |
+| `MEMORA_VALIDATE_PRODUCTION_CONFIG` | `memora.validate-production-config` | `false` | Set `true` in production-like runtime to fail fast on unsafe AI/auth/bot config |
+
+Production-like AI safety:
+- real V1 product behavior requires `MEMORA_AI_MODE=openai`
+- production-like runtime should set `MEMORA_VALIDATE_PRODUCTION_CONFIG=true`
+- production-like runtime should set `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- when production validation is enabled, startup fails unless AI mode is `openai`, `MEMORA_AI_API_KEY` is non-blank, `MEMORA_AI_API_BASE_URL` is non-blank, `MEMORA_AI_MODEL` is non-blank, and deterministic AI fallback is disabled
+- missing or broken real AI must become visible startup/configuration failure, not fake success
 
 ## Backend validation commands
 

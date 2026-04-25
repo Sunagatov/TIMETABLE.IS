@@ -29,6 +29,21 @@ class ProductionConfigValidator(
             if (properties.ownerTelegramUserId.isBlank()) {
                 add("MEMORA_OWNER_TELEGRAM_USER_ID must be set")
             }
+            if (properties.aiMode != OPENAI_MODE) {
+                add("MEMORA_AI_MODE must be set to openai when production validation is enabled")
+            }
+            if (properties.aiApiKey.isBlank()) {
+                add("MEMORA_AI_API_KEY must be set when production validation is enabled")
+            }
+            if (properties.aiApiBaseUrl.isBlank()) {
+                add("MEMORA_AI_API_BASE_URL must be set when production validation is enabled")
+            }
+            if (properties.aiModel.isBlank()) {
+                add("MEMORA_AI_MODEL must be set when production validation is enabled")
+            }
+            if (properties.aiFallbackToDeterministic) {
+                add("MEMORA_AI_FALLBACK_TO_DETERMINISTIC must be false when production validation is enabled")
+            }
         }
 
         check(errors.isEmpty()) {
@@ -43,5 +58,6 @@ class ProductionConfigValidator(
     private companion object {
         const val DEFAULT_APP_PASSWORD_HASH =
             "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza"
+        const val OPENAI_MODE = "openai"
     }
 }

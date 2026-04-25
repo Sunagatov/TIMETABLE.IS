@@ -89,7 +89,10 @@
 - no manual web item creation in V1
 - no view-count sorting in V1
 - no web-search-backed question answers in V1 (model knowledge only)
-- real text AI is optional and off by default; deterministic AI remains the default unless `MEMORA_AI_MODE=openai` is configured
+- deterministic AI is allowed for local/dev/test fallback only
+- real V1 text polishing requires `MEMORA_AI_MODE=openai`
+- production-like runtime must enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- production-like runtime must fail fast on unsafe AI config instead of silently falling back to deterministic output
 - voice transcription is **live** via self-hosted Whisper (`whisper-worker`) — Memora backend calls `http://whisper-worker:8000/v1/audio/transcriptions`; deployment owned by Vault (`apps/whisper/`)
 - MongoDB persistence is **active** in production
 

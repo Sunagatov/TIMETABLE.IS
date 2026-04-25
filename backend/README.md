@@ -14,8 +14,9 @@ backend-owned state transitions and business rules.
 - bot-facing failure notification polling and acknowledgement endpoints
 - voice transcription through Telegram download, audio preparation, and an
   OpenAI-compatible `/v1/audio/transcriptions` API
-- deterministic AI adapter by default, with optional OpenAI-compatible text AI
-  mode via `MEMORA_AI_MODE=openai`
+- deterministic AI adapter for local/dev/test fallback by default, with
+  OpenAI-compatible text AI mode via `MEMORA_AI_MODE=openai` for real V1
+  polishing
 - review workflow for Needs Review, Failures, Approved, retry, approve,
   edit-and-approve, reject, trash, and AI regeneration actions
 - 2-level category CRUD with rename cascade and non-empty delete protection
@@ -67,16 +68,18 @@ Transcription:
 
 AI:
 
-- `MEMORA_AI_MODE` default `deterministic`; set `openai` for real adapter
+- `MEMORA_AI_MODE` default `deterministic`; set `openai` for real V1 AI polishing
 - `MEMORA_AI_API_KEY` required only for `openai` mode
 - `MEMORA_AI_API_BASE_URL` default `https://api.openai.com`
 - `MEMORA_AI_MODEL` default `gpt-4o-mini`
 - `MEMORA_AI_TIMEOUT_SECONDS` default `60`
-- `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` default `true`
+- `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` default `true`; local/dev only
 - `MEMORA_AI_AUTO_RETRY_ATTEMPTS` default `2`
 
 Production safety:
 
 - `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` or active profile `prod`/`production`
   fail fast on placeholder bot token, default app password hash, plaintext app
-  password override, or missing owner Telegram user ID.
+  password override, missing owner Telegram user ID, non-`openai` AI mode,
+  blank `MEMORA_AI_API_KEY`, blank `MEMORA_AI_API_BASE_URL`, blank
+  `MEMORA_AI_MODEL`, or enabled deterministic AI fallback.

@@ -11,6 +11,8 @@ This is a source-repo smoke checklist. Vault owns production deployment, runtime
   - `telegram-bot/.env.local.example`
 - Set `BACKEND_COOKIE_SECURE=false` for local HTTP browser testing.
 - Use placeholder-free local values for `BACKEND_BOT_INGEST_TOKEN`, `MEMORA_OWNER_TELEGRAM_USER_ID`, `OWNER_TELEGRAM_USER_ID`, and Telegram bot tokens.
+- For real local Memora AI polishing, set `MEMORA_AI_MODE=openai`; deterministic mode is only a local/dev/test fallback.
+- If you want production-like startup safety locally, also set `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`.
 - Do not run local and production long polling with the same Telegram bot token at the same time.
 
 ## Start Local Services
