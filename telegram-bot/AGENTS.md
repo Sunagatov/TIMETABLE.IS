@@ -21,6 +21,12 @@ Telegram bot is a thin Memora transport adapter.
 - follow feature/area structure similar to current organization
 - use the unified backend ingest contract and nested voice payload
 - poll backend failure notifications instead of inventing local retry state
+- handle `/start` and `/help` inside the bot; commands must not create backend items
+- for the authorized owner, reply with supported-input guidance for unsupported inputs
+- do not reply to unauthorized users
+- keep backend timeout config in `BACKEND_TIMEOUT_SECONDS`
+- avoid backend-down polling log spam: first failure may include the exception, repeats should be concise, recovery should be logged
+- never commit, print, or document real Telegram tokens or shared bot tokens
 
 ## Current areas
 
@@ -45,6 +51,21 @@ All capture endpoints require `X-Memora-Bot-Token` header.
 - `telegramMessageId`: `message.messageId.toString()` (Int → String)
 - voice: nested `TelegramVoicePayload` with `fileId`, `fileUniqueId`, optional `durationSeconds`, `mimeType`
 - response: `TelegramAcceptedResponse` with `memoraId`
+
+## Command handling
+
+- `/start` returns the help/start message
+- `/help` returns the same help/start message
+- commands are never forwarded to backend ingest
+- unknown commands from the owner receive supported-input guidance
+- unauthorized users are ignored
+
+## Unsupported message handling
+
+For the authorized owner only, unsupported message types receive:
+```
+Supported inputs: text messages and voice notes. Commands: /start, /help.
+```
 
 ## Owner validation
 
@@ -81,3 +102,4 @@ Retry context: <retryContext>  ← only if present
 - `BACKEND_FAILURE_NOTIFICATIONS_PATH` (default: `/api/capture/telegram/failure-notifications`)
 - `BACKEND_FAILURE_NOTIFICATION_ACK_PATH_TEMPLATE` (default: `/api/capture/telegram/failure-notifications/%s/delivered`)
 - `FAILURE_POLL_INTERVAL_SECONDS` (default: `5`)
+- `BACKEND_TIMEOUT_SECONDS` (default: `10`)

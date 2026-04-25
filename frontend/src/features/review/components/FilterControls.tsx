@@ -1,6 +1,12 @@
 import { useMemo } from "react";
 import type { MemoraCategory } from "../types/reviewTypes";
 
+export type CascadeFilterState = {
+  category: string;
+  subcategory: string;
+  subsubcategory: string;
+};
+
 export function FilterSelect(props: {
   label: string;
   value: string;
@@ -122,4 +128,18 @@ export function CategoryCascade(props: {
 
 export function uniqueSorted(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+}
+
+export function updateCascadeFilter<T extends CascadeFilterState>(
+  filters: T,
+  level: "category" | "subcategory" | "subsubcategory",
+  value: string
+): T {
+  if (level === "category") {
+    return { ...filters, category: value, subcategory: "", subsubcategory: "" };
+  }
+  if (level === "subcategory") {
+    return { ...filters, subcategory: value, subsubcategory: "" };
+  }
+  return { ...filters, subsubcategory: value };
 }

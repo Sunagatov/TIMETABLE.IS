@@ -7,26 +7,38 @@ import com.sunagatov.memora.telegrambot.ingest.TelegramAcceptedResponse
 import com.sunagatov.memora.telegrambot.ingest.TelegramFailureNotification
 import com.sunagatov.memora.telegrambot.ingest.TelegramIngestRequest
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
+import java.time.Duration
+
+interface BackendGateway {
+    fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse
+    fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse
+    fun fetchFailureNotifications(): List<TelegramFailureNotification>
+    fun acknowledgeFailureNotification(notificationId: String)
+}
 
 class BackendClient(
     private val settings: BotSettings
-) {
-    private val httpClient = HttpClient.newHttpClient()
+) : BackendGateway {
+    private val timeout = Duration.ofSeconds(settings.backendTimeoutSeconds)
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(timeout)
+        .build()
     private val mapper = jacksonObjectMapper()
 
-    fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse =
+    override fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse =
         post(path = settings.ingestPath, requestBody = request)
 
-    fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse =
+    override fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse =
         post(path = settings.ingestPath, requestBody = request)
 
-    fun fetchFailureNotifications(): List<TelegramFailureNotification> {
+    override fun fetchFailureNotifications(): List<TelegramFailureNotification> {
         val response = send(
-            HttpRequest.newBuilder()
-                .uri(uri(settings.failureNotificationsPath))
+            requestBuilder(settings.failureNotificationsPath)
                 .header("Accept", "application/json")
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .GET()
@@ -43,10 +55,10 @@ class BackendClient(
         }
     }
 
-    fun acknowledgeFailureNotification(notificationId: String) {
+    override fun acknowledgeFailureNotification(notificationId: String) {
+        val encodedNotificationId = encodePathSegment(notificationId)
         send(
-            HttpRequest.newBuilder()
-                .uri(uri(settings.failureNotificationAckPathTemplate.format(notificationId)))
+            requestBuilder(settings.failureNotificationAckPathTemplate.format(encodedNotificationId))
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build()
@@ -56,8 +68,7 @@ class BackendClient(
     private inline fun <reified T> post(path: String, requestBody: Any): T {
         val payload = mapper.writeValueAsString(requestBody)
         val response = send(
-            HttpRequest.newBuilder()
-                .uri(uri(path))
+            requestBuilder(path)
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("X-Memora-Bot-Token", settings.backendBotIngestToken)
@@ -86,6 +97,14 @@ class BackendClient(
     private fun uri(path: String): URI =
         URI.create("${settings.backendBaseUrl}${normalizePath(path)}")
 
+    private fun requestBuilder(path: String): HttpRequest.Builder =
+        HttpRequest.newBuilder()
+            .uri(uri(path))
+            .timeout(timeout)
+
     private fun normalizePath(path: String): String =
         if (path.startsWith("/")) path else "/$path"
+
+    private fun encodePathSegment(value: String): String =
+        URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20")
 }

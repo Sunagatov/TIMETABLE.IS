@@ -1,5 +1,24 @@
-import { CategoryCascade, DateField, ResetButton } from "./FilterControls";
-import type { FailuresFilters, MemoraCategory } from "../types/reviewTypes";
+import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
+import type { FailuresFilters, ListSort, MemoraCategory } from "../types/reviewTypes";
+
+const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
+const PRIORITY_OPTIONS = [
+  "ALL",
+  "URGENT_IMPORTANT",
+  "URGENT_NOT_IMPORTANT",
+  "NOT_URGENT_IMPORTANT",
+  "NOT_URGENT_NOT_IMPORTANT",
+  "NOT_APPLICABLE"
+];
+const STATUS_OPTIONS = ["ALL", "TRANSCRIPTION_FAILED", "AI_PROCESSING_FAILED"];
+const SORT_OPTIONS: ListSort[] = [
+  "createdAt-desc",
+  "createdAt-asc",
+  "title-asc",
+  "title-desc",
+  "category-asc",
+  "category-desc"
+];
 
 type Props = {
   filters: FailuresFilters;
@@ -25,10 +44,16 @@ export function FailuresFiltersBar({ filters, categories, onChange, onReset }: P
         subcategory={filters.subcategory}
         subsubcategory={filters.subsubcategory}
         categories={categories}
-        onCategoryChange={(v) => set({ category: v, subcategory: "", subsubcategory: "" })}
-        onSubcategoryChange={(v) => set({ subcategory: v, subsubcategory: "" })}
-        onSubsubcategoryChange={(v) => set({ subsubcategory: v })}
+        onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
+        onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
+        onSubsubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subsubcategory", v))}
       />
+      <div className="grid gap-3 md:grid-cols-4">
+        <FilterSelect label="Type" value={filters.type} options={TYPE_OPTIONS} onChange={(v) => set({ type: v })} />
+        <FilterSelect label="Priority" value={filters.priority} options={PRIORITY_OPTIONS} onChange={(v) => set({ priority: v })} />
+        <FilterSelect label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(v) => set({ status: v })} />
+        <FilterSelect label="Sort" value={filters.sort} options={SORT_OPTIONS} onChange={(v) => set({ sort: v as ListSort })} />
+      </div>
       <div className="grid gap-3 md:grid-cols-2">
         <DateField
           label="Created from"

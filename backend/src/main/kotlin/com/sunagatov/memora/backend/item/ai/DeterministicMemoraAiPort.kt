@@ -5,9 +5,11 @@ import com.sunagatov.memora.backend.item.model.AnswerStatus
 import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.Priority
 import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(prefix = "memora", name = ["ai-mode"], havingValue = "deterministic", matchIfMissing = true)
 class DeterministicMemoraAiPort : MemoraAiPort {
 
     override fun generateTextDraft(input: AiTextInput): AiTextDraft {

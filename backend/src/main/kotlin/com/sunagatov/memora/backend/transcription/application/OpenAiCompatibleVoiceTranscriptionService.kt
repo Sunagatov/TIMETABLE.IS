@@ -26,8 +26,24 @@ class OpenAiCompatibleVoiceTranscriptionService(
         val trace = item.telegramTrace
             ?: throw IllegalArgumentException("Voice item is missing Telegram trace metadata")
 
+        trace.durationSeconds?.let { durationSeconds ->
+            require(durationSeconds <= properties.transcriptionMaxDurationSeconds) {
+                "Voice transcription duration limit exceeded: ${durationSeconds}s > " +
+                    "${properties.transcriptionMaxDurationSeconds}s"
+            }
+        }
+
         val downloadedVoice = telegramVoiceDownloader.download(trace)
+        require(downloadedVoice.bytes.size <= properties.transcriptionMaxAudioBytes) {
+            "Voice transcription audio size limit exceeded: ${downloadedVoice.bytes.size} bytes > " +
+                "${properties.transcriptionMaxAudioBytes} bytes"
+        }
+
         val preparedAudio = transcriptionAudioPreparer.prepare(downloadedVoice)
+        require(preparedAudio.bytes.size <= properties.transcriptionMaxAudioBytes) {
+            "Prepared transcription audio size limit exceeded: ${preparedAudio.bytes.size} bytes > " +
+                "${properties.transcriptionMaxAudioBytes} bytes"
+        }
 
         return openAiAudioTranscriptionClient.transcribe(preparedAudio).ifBlank {
             throw IllegalStateException("Transcription provider returned a blank transcript")

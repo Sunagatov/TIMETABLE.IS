@@ -1,4 +1,4 @@
-import { CategoryCascade, DateField, FilterSelect, ResetButton } from "./FilterControls";
+import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
 import type { ApprovedFilters, ListSort, MemoraCategory } from "../types/reviewTypes";
 
 const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
@@ -48,9 +48,9 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
         subcategory={filters.subcategory}
         subsubcategory={filters.subsubcategory}
         categories={categories}
-        onCategoryChange={(v) => set({ category: v, subcategory: "", subsubcategory: "" })}
-        onSubcategoryChange={(v) => set({ subcategory: v, subsubcategory: "" })}
-        onSubsubcategoryChange={(v) => set({ subsubcategory: v })}
+        onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
+        onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
+        onSubsubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subsubcategory", v))}
       />
       <div className="grid gap-3 md:grid-cols-4">
         <FilterSelect

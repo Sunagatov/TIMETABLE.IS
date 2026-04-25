@@ -21,8 +21,15 @@ dependencies {
     implementation("org.telegram:telegrambots-client:9.2.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.0")
     implementation("org.slf4j:slf4j-simple:2.0.17")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
 }
 
 application {
     mainClass.set("com.sunagatov.memora.telegrambot.TelegramBotApplicationKt")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

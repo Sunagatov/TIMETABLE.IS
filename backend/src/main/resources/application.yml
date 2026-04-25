@@ -20,6 +20,7 @@ memora:
   app-password: ${BACKEND_APP_PASSWORD:}
   app-password-hash: ${BACKEND_APP_PASSWORD_HASH:$2y$10$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza}
   session-days: ${BACKEND_SESSION_DAYS:30}
+  cookie-secure: ${BACKEND_COOKIE_SECURE:true}
   bot-ingest-token: ${BACKEND_BOT_INGEST_TOKEN:change-me}
   owner-telegram-user-id: ${MEMORA_OWNER_TELEGRAM_USER_ID:}
   default-category-path: ${DEFAULT_CATEGORY_PATH:Default/General/Inbox}
@@ -32,3 +33,12 @@ memora:
   transcription-model: ${MEMORA_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
   transcription-language: ${MEMORA_TRANSCRIPTION_LANGUAGE:}
   transcription-timeout-seconds: ${MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS:120}
+  transcription-max-audio-bytes: ${MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES:26214400}
+  transcription-max-duration-seconds: ${MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS:600}
+  ai-mode: ${MEMORA_AI_MODE:deterministic}
+  ai-api-key: ${MEMORA_AI_API_KEY:}
+  ai-api-base-url: ${MEMORA_AI_API_BASE_URL:https://api.openai.com}
+  ai-model: ${MEMORA_AI_MODEL:gpt-4o-mini}
+  ai-timeout-seconds: ${MEMORA_AI_TIMEOUT_SECONDS:60}
+  ai-fallback-to-deterministic: ${MEMORA_AI_FALLBACK_TO_DETERMINISTIC:true}
+  validate-production-config: ${MEMORA_VALIDATE_PRODUCTION_CONFIG:false}

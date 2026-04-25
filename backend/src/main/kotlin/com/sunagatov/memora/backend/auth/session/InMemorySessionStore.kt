@@ -2,9 +2,11 @@ package com.sunagatov.memora.backend.auth.session
 
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(prefix = "memora.storage", name = ["mode"], havingValue = "in-memory")
 class InMemorySessionStore : SessionStore {
 
     private val sessions = ConcurrentHashMap<String, Long>()

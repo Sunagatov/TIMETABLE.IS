@@ -121,11 +121,15 @@ export type NeedsReviewFilters = {
 
 export type FailuresFilters = {
   keyword: string;
+  type: string;
+  priority: string;
+  status: string;
   category: string;
   subcategory: string;
   subsubcategory: string;
   createdFrom: string;
   createdTo: string;
+  sort: ListSort;
 };
 
 export type ApprovedFilters = {

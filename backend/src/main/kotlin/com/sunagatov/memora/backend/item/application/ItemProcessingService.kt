@@ -11,7 +11,6 @@ import com.sunagatov.memora.backend.item.model.ItemType
 import com.sunagatov.memora.backend.item.model.MemoraItem
 import com.sunagatov.memora.backend.item.model.SourceType
 import com.sunagatov.memora.backend.item.store.ItemStore
-import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTranscriptionService
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import java.time.Instant
 import java.util.concurrent.ExecutorService
@@ -27,21 +26,7 @@ class ItemProcessingService @Autowired constructor(
     private val properties: MemoraProperties,
     private val executor: ExecutorService
 ) {
-
-    constructor(
-        itemStore: ItemStore,
-        categoryService: CategoryService,
-        aiPort: MemoraAiPort,
-        properties: MemoraProperties,
-        executor: ExecutorService
-    ) : this(
-        itemStore = itemStore,
-        categoryService = categoryService,
-        aiPort = aiPort,
-        voiceTranscriptionService = DisabledVoiceTranscriptionService(),
-        properties = properties,
-        executor = executor
-    )
+    private val retryRunner = RetryRunner()
 
     fun enqueue(itemId: String) {
         executor.submit { process(itemId) }
@@ -75,7 +60,7 @@ class ItemProcessingService @Autowired constructor(
         val rawInputText = item.rawInputText?.takeIf { it.isNotBlank() }
             ?: return failAsAiProcessing(item, "Accepted text item is missing raw input text")
 
-        val aiOutcome = runWithRetries(properties.aiAutoRetryAttempts) {
+        val aiOutcome = retryRunner.run(properties.aiAutoRetryAttempts) {
             createAiProcessedItem(item = item, sourceText = rawInputText, rawTranscript = null)
         }
 
@@ -91,7 +76,7 @@ class ItemProcessingService @Autowired constructor(
     }
 
     private fun processVoice(item: MemoraItem) {
-        val transcriptionOutcome = runWithRetries(properties.transcriptionAutoRetryAttempts) {
+        val transcriptionOutcome = retryRunner.run(properties.transcriptionAutoRetryAttempts) {
             voiceTranscriptionService.transcribe(item)
         }
 
@@ -125,7 +110,7 @@ class ItemProcessingService @Autowired constructor(
             )
         )
 
-        val aiOutcome = runWithRetries(properties.aiAutoRetryAttempts) {
+        val aiOutcome = retryRunner.run(properties.aiAutoRetryAttempts) {
             createAiProcessedItem(
                 item = transcribedItem,
                 sourceText = rawTranscript,
@@ -295,35 +280,4 @@ class ItemProcessingService @Autowired constructor(
             ?: item.rawTranscript?.takeIf { it.isNotBlank() }
             ?: item.cleanedText
 
-    private data class RetryOutcome<T>(
-        val success: Boolean,
-        val attempts: Int,
-        val value: T? = null,
-        val lastErrorMessage: String? = null
-    )
-
-    private inline fun <T> runWithRetries(
-        maxAttempts: Int,
-        block: () -> T
-    ): RetryOutcome<T> {
-        require(maxAttempts >= 1) { "Retry attempts must be at least 1" }
-
-        var lastErrorMessage: String? = null
-        repeat(maxAttempts) { attempt ->
-            try {
-                return RetryOutcome(success = true, attempts = attempt + 1, value = block())
-            } catch (exception: RuntimeException) {
-                lastErrorMessage = exception.message
-            }
-        }
-
-        return RetryOutcome(
-            success = false,
-            attempts = maxAttempts,
-            lastErrorMessage = lastErrorMessage
-        )
-    }
-
-    private fun RetryOutcome<*>.lastErrorMessageSuffix(): String =
-        lastErrorMessage?.let { ": $it" } ?: ""
 }

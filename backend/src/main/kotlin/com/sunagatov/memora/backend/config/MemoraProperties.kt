@@ -19,5 +19,15 @@ data class MemoraProperties(
     val transcriptionApiBaseUrl: String = "https://api.openai.com",
     val transcriptionModel: String = "gpt-4o-mini-transcribe",
     val transcriptionLanguage: String = "",
-    val transcriptionTimeoutSeconds: Long = 120
+    val transcriptionTimeoutSeconds: Long = 120,
+    val transcriptionMaxAudioBytes: Long = 25L * 1024L * 1024L,
+    val transcriptionMaxDurationSeconds: Int = 600,
+    val cookieSecure: Boolean = true,
+    val aiMode: String = "deterministic",
+    val aiApiKey: String = "",
+    val aiApiBaseUrl: String = "https://api.openai.com",
+    val aiModel: String = "gpt-4o-mini",
+    val aiTimeoutSeconds: Long = 60,
+    val aiFallbackToDeterministic: Boolean = true,
+    val validateProductionConfig: Boolean = false
 )

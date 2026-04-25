@@ -17,7 +17,8 @@ It is not yet the full target V1 implementation.
 - backend 3-level category model and CRUD baseline
 - backend explicit item lifecycle/status model
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
-- backend deterministic placeholder AI port for cleaned text, type, category proposal, answer generation, and regeneration actions
+- backend deterministic AI port for local/default cleaned text, type, category proposal, answer generation, and regeneration actions; optional OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai`
+- backend Mongo-backed sessions by default; in-memory session store is test/local only with `MEMORA_STORAGE_MODE=in-memory`
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend MongoDB persistence (Spring Boot 4; use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)
 - backend voice transcription pipeline (live in production): Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`) — `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
@@ -27,6 +28,7 @@ It is not yet the full target V1 implementation.
 - frontend category sidebar with collapsible 3-level tree and category management UI (create, rename, delete)
 - frontend item detail panel with AI output vs human-facing value comparison and all review actions
 - Kotlin telegram bot starter
+- Telegram bot handles `/start` and `/help` locally, ignores unauthorized users, forwards only supported owner text/voice inputs, and polls backend failure notifications with non-spammy repeated-failure logging
 - stable stack versions
 
 ## What is live in production
@@ -37,7 +39,7 @@ It is not yet the full target V1 implementation.
 
 ## What is still intentionally starter-level
 
-- AI integration (categorization, answer generation) is not implemented yet — deterministic placeholder AI port is used
+- real text AI integration is optional and off by default — deterministic AI remains the default unless `MEMORA_AI_MODE=openai` and provider config are supplied
 - deployment/runtime is still owned by Vault, not here
 
 ## Backend foundation details that already matter
@@ -55,6 +57,7 @@ It is not yet the full target V1 implementation.
 - voice ingest persists Telegram traceability metadata, is durably accepted first; in production reaches AI_PROCESSED_UNREVIEWED on success or TRANSCRIPTION_FAILED after retries
 - backend exposes bot-facing failure notification polling + delivery acknowledgement endpoints for failed Telegram items
 - text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), answer generation or answer failure visibility, and category proposal support
+- async processing maps HTTP/IO exceptions to visible failure states instead of leaving accepted items in `RECEIVED`
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`

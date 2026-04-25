@@ -14,7 +14,7 @@ class SessionCookieFactory(
     fun create(sessionId: String): ResponseCookie =
         ResponseCookie.from(cookieName, sessionId)
             .httpOnly(true)
-            .secure(true)
+            .secure(properties.cookieSecure)
             .sameSite("Lax")
             .path("/")
             .maxAge(properties.sessionDays * 24 * 60 * 60)
@@ -23,7 +23,7 @@ class SessionCookieFactory(
     fun clear(): ResponseCookie =
         ResponseCookie.from(cookieName, "")
             .httpOnly(true)
-            .secure(true)
+            .secure(properties.cookieSecure)
             .sameSite("Lax")
             .path("/")
             .maxAge(0)

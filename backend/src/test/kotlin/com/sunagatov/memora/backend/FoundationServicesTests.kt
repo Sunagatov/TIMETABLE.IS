@@ -10,7 +10,9 @@ import com.sunagatov.memora.backend.category.api.CreateCategoryRequest
 import com.sunagatov.memora.backend.category.api.RenameCategoryRequest
 import com.sunagatov.memora.backend.category.application.CategoryService
 import com.sunagatov.memora.backend.category.store.InMemoryCategoryStore
+import com.sunagatov.memora.backend.common.api.GlobalExceptionHandler
 import com.sunagatov.memora.backend.config.MemoraProperties
+import com.sunagatov.memora.backend.auth.session.SessionCookieFactory
 import com.sunagatov.memora.backend.item.ai.AiAllDraft
 import com.sunagatov.memora.backend.item.ai.AiAnswerDraft
 import com.sunagatov.memora.backend.item.ai.AiCategoryDraft
@@ -35,12 +37,14 @@ import com.sunagatov.memora.backend.item.store.InMemoryItemStore
 import com.sunagatov.memora.backend.review.application.ReviewService
 import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTranscriptionService
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
+import com.sunagatov.memora.backend.transcription.infrastructure.OpenAiAudioTranscriptionClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import java.io.IOException
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ExecutorService
@@ -187,6 +191,98 @@ class FoundationServicesTests {
         assertTrue(stored.failureReason!!.contains("403"))
         assertEquals("f-dl-fail", stored.telegramTrace?.telegramFileId)
         assertNull(stored.rawTranscript)
+    }
+
+    @Test
+    fun `io exception during voice processing becomes visible transcription failure`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(
+            itemStore, categoryService,
+            voiceTranscriptionService = VoiceTranscriptionService { _ ->
+                throw IOException("socket closed")
+            }
+        )
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-voice-io-fail",
+                voice = TelegramVoicePayload(fileId = "f-io", fileUniqueId = "u-io")
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.TRANSCRIPTION_FAILED, stored.status)
+        assertEquals(FailureStage.TRANSCRIPTION, stored.failureStage)
+        assertTrue(stored.failureReason!!.contains("socket closed"))
+        assertEquals("f-io", stored.telegramTrace?.telegramFileId)
+    }
+
+    @Test
+    fun `io exception during text ai processing becomes visible ai failure`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val aiPort = object : MemoraAiPort {
+            override fun generateTextDraft(input: AiTextInput): AiTextDraft {
+                throw IOException("ai connection reset")
+            }
+
+            override fun generateCategoryDraft(input: AiTextInput): AiCategoryDraft {
+                throw IOException("ai connection reset")
+            }
+
+            override fun generateAnswerDraft(cleanedText: String): AiAnswerDraft {
+                throw IOException("ai connection reset")
+            }
+
+            override fun generateAllDraft(input: AiTextInput): AiAllDraft {
+                throw IOException("ai connection reset")
+            }
+        }
+        val processingService = createProcessingService(itemStore, categoryService, aiPort)
+        val captureService = TelegramCaptureService(itemStore, categoryService, processingService, testProperties())
+
+        val item = captureService.ingest(
+            TelegramIngestRequest(
+                telegramUserId = "owner-1",
+                telegramChatId = "chat-1",
+                telegramMessageId = "msg-ai-io-fail",
+                text = "remember this should fail visibly"
+            )
+        )
+
+        val stored = itemStore.findById(item.id)!!
+        assertEquals(ItemStatus.AI_PROCESSING_FAILED, stored.status)
+        assertEquals(FailureStage.AI_PROCESSING, stored.failureStage)
+        assertTrue(stored.failureReason!!.contains("ai connection reset"))
+    }
+
+    @Test
+    fun `unexpected exception handler returns safe api error`() {
+        val response = GlobalExceptionHandler().handleUnexpected(RuntimeException("secret stack detail"))
+
+        assertEquals(500, response.statusCode.value())
+        assertEquals("Unexpected backend error", response.body!!.message)
+    }
+
+    @Test
+    fun `transcription response parser accepts plain text and json text`() {
+        val client = OpenAiAudioTranscriptionClient(testProperties())
+
+        assertEquals("plain transcript", client.parseTranscript(" plain transcript "))
+        assertEquals("json transcript", client.parseTranscript("""{"text":" json transcript "}"""))
+    }
+
+    @Test
+    fun `session cookie secure flag is configurable`() {
+        val secureCookie = SessionCookieFactory(testProperties(cookieSecure = true)).create("session-1")
+        val localCookie = SessionCookieFactory(testProperties(cookieSecure = false)).create("session-1")
+
+        assertTrue(secureCookie.toString().contains("Secure"))
+        assertTrue(!localCookie.toString().contains("Secure"))
     }
 
     @Test
@@ -999,7 +1095,7 @@ class FoundationServicesTests {
             }
         }
 
-    private fun testProperties(): MemoraProperties =
+    private fun testProperties(cookieSecure: Boolean = true): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
             appPassword = null,
@@ -1009,6 +1105,7 @@ class FoundationServicesTests {
             defaultCategoryPath = "Default/General/Inbox",
             ownerTelegramUserId = "owner-1",
             transcriptionAutoRetryAttempts = 3,
-            aiAutoRetryAttempts = 2
+            aiAutoRetryAttempts = 2,
+            cookieSecure = cookieSecure
         )
 }

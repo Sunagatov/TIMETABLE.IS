@@ -1,31 +1,42 @@
 # Frontend
 
-Frontend is the Memora web review workspace.
+Memora frontend is the authenticated web review workspace for V1.
 
-## Structural style
+## Current State
 
-Frontend intentionally follows a **feature + shared** structure inspired by the user's preferred approach.
+- Password login with backend session bootstrap.
+- Review-first workspace with Needs Review as the default authenticated landing.
+- Three backend-backed list views: Needs Review, Failures, and Approved.
+- Search, filters, date range (`createdFrom`/`createdTo`), category path filters, and sort use backend query params.
+- Sidebar category tree and category management for exact 3-level paths: category / subcategory / subsubcategory.
+- Item detail shows current human-facing values beside original AI values, plus raw input/transcript and Telegram trace metadata.
+- Review actions: approve, edit and approve, reject, delete to trash, retry failures, category proposal accept/dismiss, and AI regeneration actions.
+- Approved items use the direct approved-only edit path and remain approved after save.
 
-### Features
-- `features/auth`
-- `features/review`
+## Local Commands
 
-### Shared
-- `shared/api`
-- `shared/config`
+```bash
+npm install
+npm run dev
+npm run build
+npm run test
+npm run test:run
+```
 
-### App
-- `app/`
+`npm run build` runs TypeScript and Vite production build.
+`npm run test:run` runs the focused Vitest suite.
 
-## Current bootstrap state
+## Docker
 
-This frontend is runnable and intentionally simple.
+The frontend Dockerfile builds the Vite app with `VITE_API_BASE_URL` available as a build arg and serves `dist/` with nginx.
 
-It currently includes:
-- password login screen
-- review workspace shell
-- queue switching
-- backend session bootstrap
-- starter query wiring
+Runtime/deployment wiring lives in the Vault repository, not here.
 
-It does not yet implement the full target V1 UI.
+## Boundaries
+
+- Backend is the source of truth.
+- The frontend does not implement state transitions locally.
+- All list views remain backend-backed.
+- Approved view remains approved-only by default.
+- Telegram-only capture remains the V1 input path; no manual web item creation.
+- Labels are out of scope for V1.

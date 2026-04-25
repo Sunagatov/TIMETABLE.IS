@@ -36,6 +36,7 @@ Current areas:
 - `item`
 - `review`
 - `transcription` — voice transcription pipeline: `VoiceTranscriptionService` (interface), `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
+- `item/ai` — deterministic AI adapter by default; optional OpenAI-compatible adapter when `MEMORA_AI_MODE=openai`
 
 Do not drift back into a broad global technical-layer structure.
 
@@ -123,9 +124,11 @@ All three list endpoints share the same query param model:
 - `BACKEND_ALLOWED_ORIGIN` (default: `http://localhost:5173`)
 - `BACKEND_APP_PASSWORD_HASH` (bcrypt hash of app password)
 - `BACKEND_SESSION_DAYS` (default: 30)
+- `BACKEND_COOKIE_SECURE` (default: `true`; set `false` only for local HTTP dev)
 - `BACKEND_BOT_INGEST_TOKEN`
 - `MEMORA_OWNER_TELEGRAM_USER_ID` (String, compared to `request.telegramUserId`)
 - `DEFAULT_CATEGORY_PATH` (format: `Level1/Level2/Level3`, default: `Default/General/Inbox`)
+- `MEMORA_STORAGE_MODE` (default: `mongo`; `in-memory` is for tests/local only)
 - `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` (default: 3)
 - `MEMORA_AI_AUTO_RETRY_ATTEMPTS` (default: 2)
 - `MONGODB_URI` (default: `mongodb://localhost:27017/memora`) — resolves via `${MONGODB_URI}` placeholder in `spring.mongodb.uri`; env var `SPRING_MONGODB_URI` also maps to `spring.mongodb.uri`
@@ -134,6 +137,15 @@ All three list endpoints share the same query param model:
 - `MEMORA_TRANSCRIPTION_MODEL` (default: `gpt-4o-mini-transcribe`; prod: `Systran/faster-whisper-base`)
 - `MEMORA_TRANSCRIPTION_LANGUAGE` (optional ISO-639-1 language hint)
 - `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` (default: 120)
+- `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` (default: 26214400)
+- `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` (default: 600)
+- `MEMORA_AI_MODE` (default: `deterministic`; `openai` enables `OpenAiCompatibleMemoraAiPort`)
+- `MEMORA_AI_API_KEY` (required only in `openai` AI mode)
+- `MEMORA_AI_API_BASE_URL` (default: `https://api.openai.com`)
+- `MEMORA_AI_MODEL` (default: `gpt-4o-mini`)
+- `MEMORA_AI_TIMEOUT_SECONDS` (default: 60)
+- `MEMORA_AI_FALLBACK_TO_DETERMINISTIC` (default: true)
+- `MEMORA_VALIDATE_PRODUCTION_CONFIG` (default: false; also active for `prod`/`production` Spring profiles)
 
 ## Rules
 
@@ -149,6 +161,8 @@ All three list endpoints share the same query param model:
 - use `edit-and-approve` for reviewable edits
 - keep unified Telegram ingest at one backend endpoint with nested voice payload
 - MongoDB is the production store; in-memory stores are test-only
+- Mongo-backed session storage is the default; in-memory session storage follows `MEMORA_STORAGE_MODE=in-memory`
+- async processing catches non-runtime exceptions from HTTP/IO and maps them to visible failure states; interrupted processing re-interrupts the thread
 
 ## Testing patterns
 
@@ -156,7 +170,7 @@ All three list endpoints share the same query param model:
 - `directExecutor()` runs `ItemProcessingService` synchronously — enables state assertions immediately after `ingest()`
 - `testProperties()` helper provides valid bcrypt hash and sane defaults
 - `MemoraBackendApplicationTests` — Spring context load test only
-- Current test count: 23 in `FoundationServicesTests` + 1 context load = 24 total
+- Current test count: 31 in `FoundationServicesTests` + 1 context load = 32 total
 - **Note on voice tests**: `voice ingest → TRANSCRIPTION_FAILED` is still correct in tests — no real whisper endpoint in test context. In production, transcription succeeds. Do not change this test expectation.
 
 Tests that must remain green:

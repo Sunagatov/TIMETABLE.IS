@@ -27,8 +27,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Request failed with ${response.status}`);
+    throw new Error(await parseErrorMessage(response));
   }
 
   if (response.status === 204) {
@@ -61,3 +60,29 @@ export const httpClient = {
     return request<T>(path, { method: "DELETE" });
   }
 };
+
+async function parseErrorMessage(response: Response): Promise<string> {
+  const contentType = response.headers.get("Content-Type") ?? "";
+  const text = await response.text();
+  if (contentType.toLowerCase().includes("application/json")) {
+    try {
+      const body = JSON.parse(text);
+      const message = extractJsonErrorMessage(body);
+      if (message) return message;
+    } catch {
+      return text || `Request failed with ${response.status}`;
+    }
+  }
+
+  return text || `Request failed with ${response.status}`;
+}
+
+function extractJsonErrorMessage(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  for (const key of ["message", "error"]) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return null;
+}
