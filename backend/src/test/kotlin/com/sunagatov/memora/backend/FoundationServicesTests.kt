@@ -93,7 +93,8 @@ class FoundationServicesTests {
                     fileId = "file-1",
                     fileUniqueId = "unique-1",
                     durationSeconds = 14,
-                    mimeType = "audio/ogg"
+                    mimeType = "audio/ogg",
+                    fileSizeBytes = 12345L
                 )
             )
         )
@@ -105,6 +106,7 @@ class FoundationServicesTests {
         assertEquals(FailureStage.TRANSCRIPTION, stored.failureStage)
         assertEquals("file-1", stored.telegramTrace?.telegramFileId)
         assertEquals("audio/ogg", stored.telegramTrace?.mimeType)
+        assertEquals(12345L, stored.telegramTrace?.fileSizeBytes)
     }
 
     // V1: successful transcription persists rawTranscript and advances to Needs Review
@@ -437,6 +439,32 @@ class FoundationServicesTests {
                     telegramUserId = "not-the-owner",
                     telegramChatId = "chat-1",
                     telegramMessageId = "msg-10",
+                    text = "this should be rejected"
+                )
+            )
+        }
+
+        assertEquals(0, itemStore.findAll().size)
+    }
+
+    @Test
+    fun `ingest rejects when owner telegram user id is not configured`() {
+        val itemStore = InMemoryItemStore()
+        val categoryService = createCategoryService(itemStore)
+        val processingService = createProcessingService(itemStore, categoryService)
+        val service = TelegramCaptureService(
+            itemStore,
+            categoryService,
+            processingService,
+            testProperties(ownerTelegramUserId = "")
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            service.ingest(
+                TelegramIngestRequest(
+                    telegramUserId = "owner-1",
+                    telegramChatId = "chat-1",
+                    telegramMessageId = "msg-no-owner",
                     text = "this should be rejected"
                 )
             )
@@ -1104,7 +1132,10 @@ class FoundationServicesTests {
             }
         }
 
-    private fun testProperties(cookieSecure: Boolean = true): MemoraProperties =
+    private fun testProperties(
+        cookieSecure: Boolean = true,
+        ownerTelegramUserId: String = "owner-1"
+    ): MemoraProperties =
         MemoraProperties(
             allowedOrigin = "http://localhost:5173",
             appPassword = null,
@@ -1112,7 +1143,7 @@ class FoundationServicesTests {
             sessionDays = 30,
             botIngestToken = "bot-token",
             defaultCategoryPath = "Default/General/Inbox",
-            ownerTelegramUserId = "owner-1",
+            ownerTelegramUserId = ownerTelegramUserId,
             transcriptionAutoRetryAttempts = 3,
             aiAutoRetryAttempts = 2,
             cookieSecure = cookieSecure

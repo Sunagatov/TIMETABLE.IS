@@ -10,7 +10,8 @@ data class TelegramVoiceTrace(
     val telegramFileId: String? = null,
     val telegramFileUniqueId: String? = null,
     val durationSeconds: Int? = null,
-    val mimeType: String? = null
+    val mimeType: String? = null,
+    val fileSizeBytes: Long? = null
 )
 
 data class MemoraItem(

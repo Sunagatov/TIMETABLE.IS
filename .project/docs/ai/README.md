@@ -17,6 +17,7 @@ Root and tool-specific files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`
 - `vault-boundary.md` — production/deployment ownership boundary.
 - `architecture.md` — project architecture and responsibility split.
 - `change-guide.md` — change-impact checklist: if you change X, also update/check Y.
+- `local-smoke-test.md` — source-repo V1 local smoke checklist; Vault still owns runtime/deployment truth.
 
 Other files in this directory may be useful for sequencing, but the files above own the active agent facts.
 
@@ -51,6 +52,6 @@ When behavior, API contracts, invariants, repo structure, or routing changes:
 - use `change-guide.md` for change-impact checklists
 - update scoped `AGENTS.md` files if module-specific rules changed
 - keep root/tool adapters thin
-- run `bash .project/scripts/ai/check-ai-docs.sh`
+- run `bash scripts/ai/check-ai-docs.sh` (wrapper) or `bash .project/scripts/ai/check-ai-docs.sh`
 
 When product requirements change, update `.project/docs/requirements/*` first, then sync the relevant canonical AI docs.

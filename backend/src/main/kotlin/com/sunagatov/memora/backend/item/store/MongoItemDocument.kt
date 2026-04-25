@@ -60,7 +60,8 @@ data class TelegramVoiceTraceDocument(
     val telegramFileId: String?,
     val telegramFileUniqueId: String?,
     val durationSeconds: Int?,
-    val mimeType: String?
+    val mimeType: String?,
+    val fileSizeBytes: Long? = null
 )
 
 internal fun MemoraItem.toDocument() = MongoItemDocument(
@@ -130,8 +131,8 @@ internal fun MongoItemDocument.toDomain() = MemoraItem(
 private fun CategoryPath.toDocument() = CategoryPathDocument(category, subcategory, subsubcategory)
 private fun CategoryPathDocument.toDomain() = CategoryPath(category, subcategory, subsubcategory)
 private fun TelegramVoiceTrace.toDocument() = TelegramVoiceTraceDocument(
-    telegramUserId, telegramChatId, telegramMessageId, telegramFileId, telegramFileUniqueId, durationSeconds, mimeType
+    telegramUserId, telegramChatId, telegramMessageId, telegramFileId, telegramFileUniqueId, durationSeconds, mimeType, fileSizeBytes
 )
 private fun TelegramVoiceTraceDocument.toDomain() = TelegramVoiceTrace(
-    telegramUserId, telegramChatId, telegramMessageId, telegramFileId, telegramFileUniqueId, durationSeconds, mimeType
+    telegramUserId, telegramChatId, telegramMessageId, telegramFileId, telegramFileUniqueId, durationSeconds, mimeType, fileSizeBytes
 )

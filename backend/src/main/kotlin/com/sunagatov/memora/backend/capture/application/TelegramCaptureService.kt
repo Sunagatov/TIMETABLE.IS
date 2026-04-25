@@ -37,7 +37,8 @@ class TelegramCaptureService(
             telegramFileId = request.voice?.fileId,
             telegramFileUniqueId = request.voice?.fileUniqueId,
             durationSeconds = request.voice?.durationSeconds,
-            mimeType = request.voice?.mimeType
+            mimeType = request.voice?.mimeType,
+            fileSizeBytes = request.voice?.fileSizeBytes
         )
 
         val item = MemoraItem(
@@ -70,7 +71,9 @@ class TelegramCaptureService(
 
     private fun validateOwner(request: TelegramIngestRequest) {
         val ownerId = properties.ownerTelegramUserId.trim()
-        if (ownerId.isBlank()) return
+        require(ownerId.isNotBlank()) {
+            "Owner Telegram user ID is not configured"
+        }
         require(request.telegramUserId == ownerId) {
             "Telegram user is not allowed to ingest items"
         }

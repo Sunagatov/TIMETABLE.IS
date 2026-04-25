@@ -53,4 +53,4 @@ Stop opening files once you know:
 - avoid stylistic churn
 - update the canonical owner doc when behavior, contracts, routing, or repo structure changes
 - keep agent-specific adapters thin
-- run `bash .project/scripts/ai/check-ai-docs.sh` after documentation architecture changes
+- run `bash scripts/ai/check-ai-docs.sh` after documentation architecture changes

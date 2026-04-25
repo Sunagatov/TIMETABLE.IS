@@ -10,6 +10,7 @@
 - `.claude/request-routing.md` — thin pointer to `.project/docs/ai/request-routing-guide.md`.
 - `.amazonq/rules/00-entrypoint.md` — thin Amazon Q always-loaded entrypoint.
 - `.env.example` — local source-repo config template only; not production truth.
+- `.github/workflows/ci.yml` — source-repo CI for backend, frontend, bot, and AI docs.
 
 ## Backend
 
@@ -64,8 +65,10 @@
 - `.project/docs/ai/env-runtime-reference.md` — source-level config reference; production truth remains Vault.
 - `.project/docs/ai/vault-boundary.md` — deployment/runtime boundary.
 - `.project/docs/ai/change-guide.md` — change-impact checklist: if you change X, also update/check Y.
+- `.project/docs/ai/local-smoke-test.md` — source-repo V1 local smoke checklist.
 
 - `.project/scripts/ai/check-ai-docs.sh` — drift check for stale terms, active legacy docs, and oversized adapters.
+- `scripts/ai/check-ai-docs.sh` — wrapper for the AI docs drift check.
 
 ## Runtime / Deployment
 

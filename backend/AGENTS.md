@@ -163,6 +163,7 @@ All three list endpoints share the same query param model:
 - keep direct `PATCH /api/items/{itemId}` approved-only
 - use `edit-and-approve` for reviewable edits
 - keep unified Telegram ingest at one backend endpoint with nested voice payload
+- reject backend ingest when `MEMORA_OWNER_TELEGRAM_USER_ID` is blank; owner-only capture must not silently become allow-all
 - MongoDB is the production store; in-memory stores are test-only
 - Mongo-backed session storage is the default; in-memory session storage follows `MEMORA_STORAGE_MODE=in-memory`
 - async processing catches non-runtime exceptions from HTTP/IO and maps them to visible failure states; interrupted processing re-interrupts the thread

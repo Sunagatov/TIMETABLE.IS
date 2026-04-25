@@ -16,11 +16,11 @@ Spring Boot config via `application.yml` with env var overrides:
 | `BACKEND_APP_PASSWORD_HASH` | `memora.app-password-hash` | bcrypt hash | bcrypt hash of app password |
 | `BACKEND_SESSION_DAYS` | `memora.session-days` | `30` | session lifetime |
 | `BACKEND_BOT_INGEST_TOKEN` | `memora.bot-ingest-token` | `change-me` | `X-Memora-Bot-Token` value |
-| `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request |
+| `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request; blank config rejects ingest |
 | `DEFAULT_CATEGORY_PATH` | `memora.default-category-path` | `Default/General/Inbox` | format: `L1/L2/L3` |
 | `MEMORA_TELEGRAM_BOT_TOKEN` | `memora.telegram-bot-token` | — | Required for voice download from Telegram; validated non-blank in transcription service |
 | `MEMORA_TELEGRAM_API_BASE_URL` | `memora.telegram-api-base-url` | `https://api.telegram.org` | Telegram API base |
-| `MEMORA_STORAGE_MODE` | `memora.storage.mode` | `mongo` | Storage backend; `mongo` is the only active mode |
+| `MEMORA_STORAGE_MODE` | `memora.storage.mode` | `mongo` | Storage backend; `mongo` is default, `in-memory` is for tests/local only |
 | `MEMORA_TRANSCRIPTION_AUTO_RETRY_ATTEMPTS` | `memora.transcription-auto-retry-attempts` | `3` | voice transcription retries |
 | `MEMORA_AI_AUTO_RETRY_ATTEMPTS` | `memora.ai-auto-retry-attempts` | `2` | AI processing retries |
 | `MONGODB_URI` | resolved via `${MONGODB_URI}` in `spring.mongodb.uri` | `mongodb://localhost:27017/memora` | Mongo connection — **Spring Boot 4**: `spring.data.mongodb.uri` is error-level deprecated and ignored; use `spring.mongodb.uri` or `SPRING_MONGODB_URI` env var |

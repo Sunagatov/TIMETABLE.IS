@@ -50,7 +50,7 @@ Core:
 - `BACKEND_SESSION_DAYS` default `30`
 - `BACKEND_COOKIE_SECURE` default `true`
 - `BACKEND_BOT_INGEST_TOKEN`
-- `MEMORA_OWNER_TELEGRAM_USER_ID`
+- `MEMORA_OWNER_TELEGRAM_USER_ID` required for Telegram ingest; blank config rejects ingest
 - `DEFAULT_CATEGORY_PATH` default `Default/General/Inbox`
 
 Transcription:

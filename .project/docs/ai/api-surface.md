@@ -30,17 +30,18 @@ Current request shape:
 - `telegramMessageId` as a string
 - `voice.fileId`
 - `voice.fileUniqueId`
-- optional voice media metadata: `durationSeconds`, `mimeType`
+- optional voice media metadata: `durationSeconds`, `mimeType`, `fileSizeBytes`
 
 Current behavior:
 - owner Telegram user ID validated in backend against `MEMORA_OWNER_TELEGRAM_USER_ID` config
 - `telegramUserId` in request must equal the configured owner string exactly
+- blank/missing backend owner ID is rejected; ingest must never degrade to allow-all
 - returns backend item ID as `memoraId` on accept responses only
 - accepted items first stored as `RECEIVED`
 - text items processed asynchronously into Needs Review (`AI_PROCESSED_UNREVIEWED`)
 - QUESTION items may carry answer output plus answer status/failure metadata
 - category inference may produce a pending-review proposal path separate from the current category path
-- voice items persist traceability metadata; transcription is **live** (self-hosted whisper); success path: RECEIVED → AI_PROCESSED_UNREVIEWED; failure path: → TRANSCRIPTION_FAILED after retries
+- voice items persist traceability metadata including file size when provided; transcription is **live** (self-hosted whisper); success path: RECEIVED → AI_PROCESSED_UNREVIEWED; failure path: → TRANSCRIPTION_FAILED after retries
 - bot-facing failure notifications exposed for polling and delivery acknowledgement
 - capture endpoints authenticated with `X-Memora-Bot-Token`
 - Telegram bot commands (`/start`, `/help`) are handled locally by the bot and must not call this endpoint

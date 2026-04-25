@@ -32,6 +32,7 @@ export type TelegramVoiceTrace = {
   telegramFileUniqueId: string | null;
   durationSeconds: number | null;
   mimeType: string | null;
+  fileSizeBytes: number | null;
 };
 
 export type MemoraItem = {

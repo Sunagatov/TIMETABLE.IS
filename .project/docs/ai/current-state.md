@@ -67,7 +67,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`
 - category paths are exact leaf paths with `category`, `subcategory`, `subsubcategory`
 - default backend category path is configured through `DEFAULT_CATEGORY_PATH`
-- single-user Telegram ingest is gated by configured owner Telegram user ID
+- single-user Telegram ingest is gated by configured owner Telegram user ID; blank backend owner config is rejected
 - Telegram bot currently uses Telegram long polling, not webhook delivery; it remains a thin adapter and must not contain transcription, AI, category/review, persistence, lifecycle, or retry-state logic
 - all three list endpoints accept query params: `keyword`, `type`, `status`, `priority`, `category`, `subcategory`, `subsubcategory`, `createdFrom`, `createdTo`, `sort`
 - review endpoints now include category-proposal approval/rejection and AI output regeneration actions

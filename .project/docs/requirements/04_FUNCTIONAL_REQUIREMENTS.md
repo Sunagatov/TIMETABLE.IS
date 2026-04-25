@@ -25,8 +25,9 @@ For voice items, Memora shall:
 - run AI cleanup/classification
 - place result into review or failure path
 
-Current bootstrap limitation:
-- voice acceptance may stop at durable metadata persistence and route to visible retryable transcription failure until the transcription slice is implemented.
+Accepted V1 limitation:
+- Memora does not store its own audio objects; retry depends on Telegram file references still being usable.
+- Voice failures remain visible in Failures and retryable where the Telegram reference and local configuration allow it.
 
 ## FR-06 Text processing
 For text items, Memora shall:

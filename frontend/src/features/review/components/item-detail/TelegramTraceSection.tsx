@@ -14,6 +14,7 @@ export function TelegramTraceSection({ item }: { item: MemoraItem }) {
         <KVPair label="File unique ID" value={item.telegramTrace.telegramFileUniqueId} />
         {item.telegramTrace.durationSeconds && <KVPair label="Duration" value={`${item.telegramTrace.durationSeconds}s`} />}
         <KVPair label="MIME" value={item.telegramTrace.mimeType} />
+        {item.telegramTrace.fileSizeBytes && <KVPair label="File size" value={`${item.telegramTrace.fileSizeBytes} bytes`} />}
       </div>
     </section>
   );
