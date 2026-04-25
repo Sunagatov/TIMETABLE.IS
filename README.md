@@ -36,16 +36,17 @@ Primary runtime areas:
 - `backend/` — Kotlin + Spring Boot backend and source-of-truth business logic.
 - `frontend/` — React + Vite + TypeScript web UI.
 - `telegram-bot/` — Kotlin thin Telegram adapter.
-- `docs/requirements/` — product requirements and V1 contracts.
-- `docs/ai/` — canonical detailed AI-agent context for current implementation reality, API surface, invariants, routing, repo map, and token-budget rules.
+- `.project/docs/requirements/` — product requirements and V1 contracts.
+- `.project/docs/ai/` — canonical detailed AI-agent context for current implementation reality, API surface, invariants, routing, repo map, and token-budget rules.
 
 ## Current State
 
 Detailed current implementation state lives in:
-- `docs/ai/current-state.md`
-- `docs/ai/api-surface.md`
-- `docs/ai/invariants.md`
-- `docs/ai/repo-map.md`
+- `.project/docs/ai/current-state.md`
+- `.project/docs/ai/api-surface.md`
+- `.project/docs/ai/invariants.md`
+- `.project/docs/ai/repo-map.md`
+- `.project/docs/ai/frontend-v1-mvp.md` for detailed frontend agent guidance
 
 Keep this README high-level. Do not duplicate long current-state summaries here.
 
@@ -65,9 +66,9 @@ Pure global layering like only `controller / service / repository / dao / conver
 For implementation work:
 
 1. `AGENTS.md`
-2. `docs/ai/request-routing-guide.md`
-3. `docs/ai/README.md`
-4. the smallest relevant canonical docs under `docs/ai/`
+2. `.project/docs/ai/request-routing-guide.md`
+3. `.project/docs/ai/README.md`
+4. the smallest relevant canonical docs under `.project/docs/ai/`
 5. the smallest relevant scoped guide:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`

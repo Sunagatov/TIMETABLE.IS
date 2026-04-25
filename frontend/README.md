@@ -12,6 +12,8 @@ Memora frontend is the authenticated web review workspace for V1.
 - Item detail shows current human-facing values beside original AI values, plus raw input/transcript and Telegram trace metadata.
 - Review actions: approve, edit and approve, reject, delete to trash, retry failures, category proposal accept/dismiss, and AI regeneration actions.
 - Approved items use the direct approved-only edit path and remain approved after save.
+- Errors from failed API calls are shown in the UI; 401 responses return the user to login.
+- Focused tests cover query param handling, category cascades, answer payload behavior, workspace params, and HTTP error parsing.
 
 ## Local Commands
 
@@ -25,6 +27,8 @@ npm run test:run
 
 `npm run build` runs TypeScript and Vite production build.
 `npm run test:run` runs the focused Vitest suite.
+
+Detailed frontend agent guidance lives in `../.project/docs/ai/frontend-v1-mvp.md`.
 
 ## Docker
 
@@ -40,3 +44,5 @@ Runtime/deployment wiring lives in the Vault repository, not here.
 - Approved view remains approved-only by default.
 - Telegram-only capture remains the V1 input path; no manual web item creation.
 - Labels are out of scope for V1.
+- Search is backend keyword search, not semantic search.
+- Category paths are exactly 3 levels in V1.

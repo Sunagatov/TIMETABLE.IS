@@ -26,8 +26,9 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 ## Documentation Source Of Truth
 
 - `AGENTS.md` is only the bootloader.
-- `docs/ai/*` owns detailed current implementation facts, contracts, routing, repo map, token discipline, and environment/runtime boundaries.
-- `docs/requirements/*` owns product requirements and V1 behavior.
+- `.project/docs/ai/*` owns detailed current implementation facts, contracts, routing, repo map, token discipline, and environment/runtime boundaries.
+- `.project/docs/ai/frontend-v1-mvp.md` owns detailed frontend V1 agent guidance.
+- `.project/docs/requirements/*` owns product requirements and V1 behavior.
 - `backend/AGENTS.md`, `frontend/AGENTS.md`, and `telegram-bot/AGENTS.md` own module-specific rules.
 - `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`, `.claude/*`, and `.amazonq/*` are adapters only.
 - Vault owns runtime/deployment/local orchestration truth.
@@ -35,17 +36,18 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 
 ## Minimal Read Order
 
-1. `docs/ai/request-routing-guide.md` — choose the smallest context for the task.
-2. `docs/ai/current-state.md` — current implementation reality.
-3. `docs/ai/api-surface.md` — endpoint contracts, filters, sort, state guards.
-4. `docs/ai/invariants.md` — non-negotiable behavior.
-5. The smallest exact requirement file(s) under `docs/requirements/`.
-6. The relevant scoped guide:
+1. `.project/docs/ai/request-routing-guide.md` — choose the smallest context for the task.
+2. `.project/docs/ai/current-state.md` — current implementation reality.
+3. `.project/docs/ai/api-surface.md` — endpoint contracts, filters, sort, state guards.
+4. `.project/docs/ai/invariants.md` — non-negotiable behavior.
+5. `.project/docs/ai/frontend-v1-mvp.md` — only for broad frontend work.
+6. The smallest exact requirement file(s) under `.project/docs/requirements/`.
+7. The relevant scoped guide:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`
    - `telegram-bot/AGENTS.md`
 
-Use `docs/ai/README.md` as the AI-docs index.
+Use `.project/docs/ai/README.md` as the AI-docs index.
 
 ## Structural Rule
 
@@ -65,6 +67,6 @@ Technical building blocks such as controllers, services, repositories, converter
 - Backend use cases/services must remain reusable by future non-Telegram clients.
 - If requirements and code disagree, requirements win unless the task is explicitly to update requirements.
 - If requirements are ambiguous, ask or update docs first instead of inventing behavior.
-- Preserve stable V1 contracts documented in `docs/ai/api-surface.md` and `docs/ai/invariants.md`.
+- Preserve stable V1 contracts documented in `.project/docs/ai/api-surface.md` and `.project/docs/ai/invariants.md`.
 - Update high-signal AI docs when concrete behavior, contracts, routing, or repo structure changes.
 - Do not read archive/stale docs as active context unless the user explicitly asks.

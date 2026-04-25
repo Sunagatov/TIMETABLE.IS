@@ -4,12 +4,13 @@
 
 ## Claude Adapter
 
-This file is Claude-specific workflow only. Detailed Memora facts live in `docs/ai/*`; do not duplicate them here.
+This file is Claude-specific workflow only. Detailed Memora facts live in `.project/docs/ai/*`; do not duplicate them here.
 
 Before broad scans:
-- use `.claude/request-routing.md` or `docs/ai/request-routing-guide.md`
+- use `.claude/request-routing.md` or `.project/docs/ai/request-routing-guide.md`
 - read only the smallest scoped docs and files needed for the task
-- treat `docs/ai/current-state.md`, `docs/ai/api-surface.md`, and `docs/ai/invariants.md` as canonical for current implementation details
+- treat `.project/docs/ai/current-state.md`, `.project/docs/ai/api-surface.md`, and `.project/docs/ai/invariants.md` as canonical for current implementation details
+- for broad frontend auth/review/category/item-detail work, read `.project/docs/ai/frontend-v1-mvp.md`
 
 Claude-specific habits:
 - keep generated or cached context out of the source of truth unless a generator owns it

@@ -29,5 +29,5 @@ A good change is:
 - scoped
 - understandable
 - easy to review
-- aligned with `docs/requirements/`
+- aligned with `.project/docs/requirements/`
 - consistent with the current package and folder style

@@ -4,9 +4,9 @@
 
 ## Related docs
 
-- [ ] `docs/03_FUNCTIONAL_REQUIREMENTS.md`
-- [ ] `docs/04_NON_FUNCTIONAL_REQUIREMENTS.md`
-- [ ] `docs/13_ENGINEERING_PRINCIPLES.md`
+- [ ] `.project/docs/requirements/README.md`
+- [ ] `.project/docs/ai/change-guide.md`
+- [ ] `.project/docs/ai/api-surface.md` or `.project/docs/ai/invariants.md`, if contracts or durable behavior changed
 
 ## Checklist
 
