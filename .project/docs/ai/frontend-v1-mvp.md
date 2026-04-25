@@ -33,7 +33,7 @@ npm run build
 npm run test:run
 ```
 
-Use `npm ci` for clean install/build verification when lockfile reproducibility matters, such as Docker or CI checks.
+Use `npm ci` for clean install/build verification when lockfile reproducibility matters, such as Docker builds or final local validation.
 
 Useful one-off checks:
 

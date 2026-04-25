@@ -10,7 +10,6 @@
 - `.claude/request-routing.md` — thin pointer to `.project/docs/ai/request-routing-guide.md`.
 - `.amazonq/rules/00-entrypoint.md` — thin Amazon Q always-loaded entrypoint.
 - `.env.example` — local source-repo config template only; not production truth.
-- `.github/workflows/ci.yml` — source-repo CI for backend, frontend, bot, and AI docs.
 
 ## Backend
 
