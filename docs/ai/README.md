@@ -1,34 +1,49 @@
 # AI Docs
 
-This folder exists to reduce assumptions and wasted tokens for:
+`docs/ai/*` is Memora's canonical detailed knowledge base for AI agents and human maintainers.
 
-- Claude CLI
-- Codex CLI
-- human maintainers
+Root and tool-specific files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`, `.claude/*`, `.amazonq/*`) are adapters. They may explain workflow, but they must not duplicate long current-state facts.
 
-## Read order
+## Canonical Files
 
-1. `repo-map.md`
-2. `current-bootstrap-state.md`
-3. `api-surface.md`
-4. `invariants.md`
-5. `request-routing-guide.md`
-6. `change-playbook.md`
-7. `vault-boundary.md`
+- `current-bootstrap-state.md` — current implementation reality, including what is live and what remains starter-level.
+- `api-surface.md` — backend endpoints, request/response contracts, filter params, sort format, and state guards.
+- `invariants.md` — durable product, model, state, category, query, and boundary rules.
+- `repo-map.md` — current repository structure and where to start for each module.
+- `request-routing-guide.md` — minimal context selection by task type.
+- `token-budget-rules.md` — what to read, what to avoid, and when to stop.
+- `env-runtime-reference.md` — source-repo config keys and runtime boundary notes.
+- `vault-boundary.md` — production/deployment ownership boundary.
+- `architecture.md` — project architecture and responsibility split.
 
-## Most useful files for current backend work
+Other files in this directory may be useful for sequencing or change checklists, but the files above own the active agent facts.
 
-- `current-bootstrap-state.md` for what is already implemented vs still bootstrap
-- `api-surface.md` for the current backend and bot-facing contracts
-- `invariants.md` for stable product/state boundaries
-- `env-runtime-reference.md` for source-repo config keys
-- `request-routing-guide.md` for minimal-context file selection
-- `token-budget-rules.md` for what to avoid loading by default
+## Adapter Duplication Policy
 
-## Current high-signal traps
+Allowed in adapters:
+- links to `AGENTS.md` and `docs/ai/*`
+- tool-specific workflow notes
+- safety reminders about secrets, scans, and validation
 
-- Telegram bot is Kotlin long polling under `telegram-bot/`, not Python and not webhook-based.
-- The bot is a thin adapter: commands are local-only, supported owner messages are forwarded, unsupported owner messages get guidance, unauthorized users are ignored.
-- Use `spring.mongodb.uri` / `SPRING_MONGODB_URI`; Spring Boot 4 ignores the old `spring.data.mongodb.uri` path.
-- Date filters are `createdFrom` and `createdTo`; do not use `dateFrom` / `dateTo`.
-- Production runtime/deployment details belong in Vault, especially `apps/memora/` and `apps/whisper/`.
+Not allowed in adapters:
+- endpoint lists
+- current stack encyclopedias
+- current backend/frontend/bot behavior summaries
+- runtime/deployment details from Vault
+- manually maintained generated copies of canonical docs
+
+## Read-On-Demand Discipline
+
+Start with `docs/ai/request-routing-guide.md`. Read only the smallest exact docs and files needed for the task. Stop reading once the relevant contract, source files, and validation command are known.
+
+Do not read archive or stale docs as active context unless the user explicitly asks. Do not scan Vault unless the task is explicitly about runtime, deployment, operations, or local orchestration.
+
+## Updating Docs
+
+When behavior, API contracts, invariants, repo structure, or routing changes:
+- update the owning canonical file in `docs/ai/*`
+- update scoped `AGENTS.md` files if module-specific rules changed
+- keep root/tool adapters thin
+- run `bash scripts/ai/check-ai-docs.sh`
+
+When product requirements change, update `docs/requirements/*` first, then sync the relevant canonical AI docs.

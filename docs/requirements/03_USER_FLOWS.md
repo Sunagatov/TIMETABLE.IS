@@ -11,8 +11,8 @@
    - processing asynchronously
    - Memora ID
 6. Backend persists voice traceability metadata and processes asynchronously.
-7. Current bootstrap routes voice items to visible retryable transcription failure after bounded retries because the transcription slice is not implemented yet.
-8. Item enters Needs Review or Failures depending on outcome once the full voice pipeline exists.
+7. Backend downloads the Telegram voice file, prepares audio, and calls the configured OpenAI-compatible transcription service.
+8. Item enters Needs Review after transcription and AI processing succeed, or Failures if bounded transcription/AI retries are exhausted.
 
 ## Flow 2 — capture text message
 

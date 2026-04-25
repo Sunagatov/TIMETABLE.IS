@@ -53,6 +53,6 @@ Use:
 
 ## Persistence decision
 
-Target persistence is MongoDB.
+Persistence is MongoDB for the active runtime.
 
-Current runnable bootstrap still uses in-memory starter storage to keep the app easy to run locally before the real Mongo implementation slice is done.
+In-memory stores exist only for focused tests and explicitly configured local development.

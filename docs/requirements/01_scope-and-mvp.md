@@ -14,8 +14,8 @@
 - Telegram ingest endpoint
 - review queues
 - approved items list
-- in-memory starter persistence for runnable bootstrap
-- MongoDB-targeted persistence model in docs and structure
+- MongoDB persistence for active runtime
+- in-memory stores only for focused tests or explicitly configured local development
 
 ### Frontend
 - password login screen
@@ -37,7 +37,4 @@
 - deployment/runtime files in this repo
 - semantic search
 - labels
-- AI-generated new categories
-- question-answering flow
-- full voice transcription pipeline implementation
 - media storage in Memora repo/app runtime

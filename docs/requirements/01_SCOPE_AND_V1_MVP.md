@@ -55,7 +55,7 @@
 - public sharing
 - analytics dashboards
 - reminders/calendar integration
-- Memora-managed audio object storage
+- Memora-managed audio storage
 - audio playback in web app
 - audio download in web app
 - manual item creation from web app
