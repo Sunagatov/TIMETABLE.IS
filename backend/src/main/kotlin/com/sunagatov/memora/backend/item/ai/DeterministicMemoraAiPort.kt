@@ -132,13 +132,12 @@ class DeterministicMemoraAiPort : MemoraAiPort {
     private fun findExistingPath(text: String, existingCategoryPaths: List<CategoryPath>): CategoryPath? {
         val normalized = text.lowercase()
         return existingCategoryPaths.firstOrNull { path ->
-            val candidate = listOf(path.category, path.subcategory, path.subsubcategory)
+            val candidate = listOf(path.category, path.subcategory)
                 .joinToString(" ")
                 .lowercase()
             normalized.contains(candidate) ||
                 normalized.contains(path.category.lowercase()) ||
-                normalized.contains(path.subcategory.lowercase()) ||
-                normalized.contains(path.subsubcategory.lowercase())
+                normalized.contains(path.subcategory.lowercase())
         }
     }
 
@@ -146,23 +145,23 @@ class DeterministicMemoraAiPort : MemoraAiPort {
         val normalized = text.lowercase()
         return when {
             normalized.contains("question") || normalized.endsWith("?") -> {
-                CategoryPath("Questions", "General", "Curiosity")
+                CategoryPath("Questions", "General")
             }
 
             normalized.contains("finance") || normalized.contains("money") || normalized.contains("investment") -> {
-                CategoryPath("Ideas", "Finance", "Money")
+                CategoryPath("Ideas", "Finance")
             }
 
             normalized.contains("health") || normalized.contains("exercise") || normalized.contains("workout") -> {
-                CategoryPath("Ideas", "Health", "Improvement")
+                CategoryPath("Ideas", "Health")
             }
 
             normalized.contains("project") || normalized.contains("build") || normalized.contains("feature") -> {
-                CategoryPath("Ideas", "Product", "Projects")
+                CategoryPath("Ideas", "Product")
             }
 
             normalized.contains("learn") || normalized.contains("study") || normalized.contains("practice") -> {
-                CategoryPath("Ideas", "Learning", "Practice")
+                CategoryPath("Ideas", "Learning")
             }
 
             else -> null

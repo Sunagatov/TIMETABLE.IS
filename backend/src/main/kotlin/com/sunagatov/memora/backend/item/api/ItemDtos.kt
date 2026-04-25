@@ -52,7 +52,6 @@ data class ItemListQueryRequest(
     val priority: Priority? = null,
     val category: String? = null,
     val subcategory: String? = null,
-    val subsubcategory: String? = null,
     @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     val createdFrom: LocalDate? = null,
     @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

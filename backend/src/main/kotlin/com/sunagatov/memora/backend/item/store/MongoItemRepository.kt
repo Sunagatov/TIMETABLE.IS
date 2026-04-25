@@ -8,20 +8,18 @@ interface MongoItemRepository : MongoRepository<MongoItemDocument, String> {
 
     fun findByStatusIn(statuses: Collection<ItemStatus>): List<MongoItemDocument>
 
-    @Query("{ 'categoryPath.category': ?0, 'categoryPath.subcategory': ?1, 'categoryPath.subsubcategory': ?2 }")
+    @Query("{ 'categoryPath.category': ?0, 'categoryPath.subcategory': ?1 }")
     fun findByCategoryPathFields(
         category: String,
-        subcategory: String,
-        subsubcategory: String
+        subcategory: String
     ): List<MongoItemDocument>
 
     @Query(
-        value = "{ 'categoryPath.category': ?0, 'categoryPath.subcategory': ?1, 'categoryPath.subsubcategory': ?2 }",
+        value = "{ 'categoryPath.category': ?0, 'categoryPath.subcategory': ?1 }",
         count = true
     )
     fun countByCategoryPathFields(
         category: String,
-        subcategory: String,
-        subsubcategory: String
+        subcategory: String
     ): Long
 }

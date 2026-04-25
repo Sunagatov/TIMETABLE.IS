@@ -39,7 +39,7 @@ class OpenAiCompatibleMemoraAiPort(
             input = AiTextInput(
                 rawText = cleanedText,
                 existingCategoryPaths = emptyList(),
-                defaultCategoryPath = CategoryPath("Default", "General", "Inbox")
+                defaultCategoryPath = CategoryPath("Default", "General")
             ),
             includeCategory = false
         ).answerDraft
@@ -136,8 +136,7 @@ class OpenAiCompatibleMemoraAiPort(
     private fun parseCategory(node: JsonNode, isExisting: Boolean, input: AiTextInput): AiCategoryDraft {
         val parsed = CategoryPath(
             category = requiredText(node, "category"),
-            subcategory = requiredText(node, "subcategory"),
-            subsubcategory = requiredText(node, "subsubcategory")
+            subcategory = requiredText(node, "subcategory")
         )
         val existing = input.existingCategoryPaths.firstOrNull { it == parsed }
 
@@ -163,14 +162,29 @@ class OpenAiCompatibleMemoraAiPort(
             appendLine("Return only JSON with keys: title, cleanedText, type, priority, categoryPath, categoryPathIsExisting, answer.")
             appendLine("Allowed type values: ${ItemType.entries.joinToString()}.")
             appendLine("Allowed priority values: ${Priority.entries.joinToString()}.")
-            appendLine("Clean the text for readability but preserve the user's intended meaning.")
-            appendLine("Do not add moral commentary, ideological correction, or refusal-style meta-commentary.")
+            appendLine("Clean and polish the text into fluent natural English.")
+            appendLine("Preserve Zufar's intended meaning as closely as possible.")
+            appendLine("Do not summarize.")
+            appendLine("Do not convert the text into short notes.")
+            appendLine("Do not strongly simplify the thought.")
+            appendLine("Do not remove complexity just because the original was complex.")
+            appendLine("Do not change opinions or factual claims.")
+            appendLine("Do not correct the user's worldview or conclusions.")
+            appendLine("Do not add moral commentary.")
+            appendLine("Do not add ideological correction.")
+            appendLine("Do not add refusal-style meta-commentary into the cleaned text.")
+            appendLine("Do not invent new meaning.")
+            appendLine("The result should feel like the same thought said by Zufar in excellent, fluent, clear English.")
             if (includeCategory) {
-                appendLine("Prefer one exact existing 3-level category path when it fits.")
+                appendLine("Use categoryPath with exactly two fields: category and subcategory.")
+                appendLine("Prefer one exact existing two-level category path when it fits.")
                 appendLine("Existing category paths: ${input.existingCategoryPaths.joinToString { it.asPromptPath() }}")
                 appendLine("Default category path: ${input.defaultCategoryPath.asPromptPath()}")
-                appendLine("If no existing path fits, propose exactly one new 3-level path and set categoryPathIsExisting false.")
+                appendLine("If no existing path fits and confidence is high, propose exactly one new two-level path and set categoryPathIsExisting false.")
+                appendLine("If uncertain, use the default category path and set categoryPathIsExisting true only when it already exists.")
             }
+            appendLine("If type is uncertain, use OTHER.")
+            appendLine("If priority is uncertain, use NOT_APPLICABLE.")
             appendLine("If type is QUESTION, answer from model knowledge only. Otherwise answer must be null.")
             appendLine("User text:")
             append(input.rawText)
@@ -191,7 +205,7 @@ class OpenAiCompatibleMemoraAiPort(
             .trim()
 
     private fun CategoryPath.asPromptPath(): String =
-        "$category/$subcategory/$subsubcategory"
+        "$category/$subcategory"
 
     private companion object {
         const val SYSTEM_PROMPT =

@@ -4,9 +4,8 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface MongoCategoryRepository : MongoRepository<MongoCategoryDocument, String> {
 
-    fun findByCategoryAndSubcategoryAndSubsubcategory(
+    fun findByCategoryAndSubcategory(
         category: String,
-        subcategory: String,
-        subsubcategory: String
+        subcategory: String
     ): MongoCategoryDocument?
 }

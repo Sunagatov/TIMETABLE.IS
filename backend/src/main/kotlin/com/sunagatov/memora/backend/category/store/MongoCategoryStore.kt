@@ -25,8 +25,7 @@ class MongoCategoryStore(private val repository: MongoCategoryRepository) : Cate
             .sortedWith(
                 compareBy(
                     { it.path.category.lowercase() },
-                    { it.path.subcategory.lowercase() },
-                    { it.path.subsubcategory.lowercase() }
+                    { it.path.subcategory.lowercase() }
                 )
             )
 
@@ -34,10 +33,9 @@ class MongoCategoryStore(private val repository: MongoCategoryRepository) : Cate
         repository.findById(id).orElse(null)?.toDomain()
 
     override fun findByPath(path: CategoryPath): MemoraCategory? =
-        repository.findByCategoryAndSubcategoryAndSubsubcategory(
+        repository.findByCategoryAndSubcategory(
             path.category,
-            path.subcategory,
-            path.subsubcategory
+            path.subcategory
         )?.toDomain()
 
     override fun delete(id: String) {

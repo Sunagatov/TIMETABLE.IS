@@ -21,8 +21,7 @@ class InMemoryCategoryStore : CategoryStore {
         categories.values.sortedWith(
             compareBy(
                 { it.path.category.lowercase() },
-                { it.path.subcategory.lowercase() },
-                { it.path.subsubcategory.lowercase() }
+                { it.path.subcategory.lowercase() }
             )
         )
 

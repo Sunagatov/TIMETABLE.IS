@@ -34,10 +34,10 @@ class MongoItemStore(private val repository: MongoItemRepository) : ItemStore {
             .sortedByDescending { it.createdAt }
 
     override fun findByCategoryPath(path: CategoryPath): List<MemoraItem> =
-        repository.findByCategoryPathFields(path.category, path.subcategory, path.subsubcategory)
+        repository.findByCategoryPathFields(path.category, path.subcategory)
             .map { it.toDomain() }
             .sortedByDescending { it.createdAt }
 
     override fun countByCategoryPath(path: CategoryPath): Long =
-        repository.countByCategoryPathFields(path.category, path.subcategory, path.subsubcategory)
+        repository.countByCategoryPathFields(path.category, path.subcategory)
 }

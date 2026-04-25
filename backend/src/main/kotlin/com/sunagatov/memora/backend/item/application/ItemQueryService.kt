@@ -23,7 +23,7 @@ class ItemQueryService {
             .filter { request.type?.let { type -> it.type == type } ?: true }
             .filter { request.status?.let { status -> it.status == status } ?: true }
             .filter { request.priority?.let { priority -> it.priority == priority } ?: true }
-            .filter { matchesCategoryPath(it.categoryPath, request.category, request.subcategory, request.subsubcategory) }
+            .filter { matchesCategoryPath(it.categoryPath, request.category, request.subcategory) }
             .filter { matchesCreatedFrom(it, request.createdFrom) }
             .filter { matchesCreatedTo(it, request.createdTo) }
             .toList()
@@ -51,22 +51,16 @@ class ItemQueryService {
     private fun matchesCategoryPath(
         path: CategoryPath,
         category: String?,
-        subcategory: String?,
-        subsubcategory: String?
+        subcategory: String?
     ): Boolean {
         val normalizedCategory = category?.trim()?.takeIf { it.isNotBlank() }
         val normalizedSubcategory = subcategory?.trim()?.takeIf { it.isNotBlank() }
-        val normalizedSubsubcategory = subsubcategory?.trim()?.takeIf { it.isNotBlank() }
 
         if (normalizedCategory != null && path.category != normalizedCategory) {
             return false
         }
 
         if (normalizedSubcategory != null && path.subcategory != normalizedSubcategory) {
-            return false
-        }
-
-        if (normalizedSubsubcategory != null && path.subsubcategory != normalizedSubsubcategory) {
             return false
         }
 
@@ -96,8 +90,6 @@ class ItemQueryService {
                     append(it.categoryPath.category.lowercase())
                     append('/')
                     append(it.categoryPath.subcategory.lowercase())
-                    append('/')
-                    append(it.categoryPath.subsubcategory.lowercase())
                 }
             }
         }.thenBy { it.id }

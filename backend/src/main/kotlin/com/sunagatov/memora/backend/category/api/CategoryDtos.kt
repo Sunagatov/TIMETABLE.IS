@@ -8,15 +8,12 @@ data class CategoryPathRequest(
     @field:NotBlank
     val category: String,
     @field:NotBlank
-    val subcategory: String,
-    @field:NotBlank
-    val subsubcategory: String
+    val subcategory: String
 ) {
     fun toCategoryPath(): CategoryPath =
         CategoryPath(
             category = category.trim(),
-            subcategory = subcategory.trim(),
-            subsubcategory = subsubcategory.trim()
+            subcategory = subcategory.trim()
         )
 }
 

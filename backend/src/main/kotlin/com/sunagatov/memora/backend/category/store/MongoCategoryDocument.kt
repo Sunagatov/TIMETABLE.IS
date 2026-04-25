@@ -11,7 +11,6 @@ data class MongoCategoryDocument(
     @Id val id: String,
     val category: String,
     val subcategory: String,
-    val subsubcategory: String,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -20,14 +19,13 @@ internal fun MemoraCategory.toDocument() = MongoCategoryDocument(
     id = id,
     category = path.category,
     subcategory = path.subcategory,
-    subsubcategory = path.subsubcategory,
     createdAt = createdAt,
     updatedAt = updatedAt
 )
 
 internal fun MongoCategoryDocument.toDomain() = MemoraCategory(
     id = id,
-    path = CategoryPath(category, subcategory, subsubcategory),
+    path = CategoryPath(category, subcategory),
     createdAt = createdAt,
     updatedAt = updatedAt
 )

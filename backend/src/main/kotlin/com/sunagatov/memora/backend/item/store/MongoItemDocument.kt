@@ -49,8 +49,7 @@ data class MongoItemDocument(
 
 data class CategoryPathDocument(
     val category: String,
-    val subcategory: String,
-    val subsubcategory: String
+    val subcategory: String
 )
 
 data class TelegramVoiceTraceDocument(
@@ -128,8 +127,8 @@ internal fun MongoItemDocument.toDomain() = MemoraItem(
     updatedAt = updatedAt
 )
 
-private fun CategoryPath.toDocument() = CategoryPathDocument(category, subcategory, subsubcategory)
-private fun CategoryPathDocument.toDomain() = CategoryPath(category, subcategory, subsubcategory)
+private fun CategoryPath.toDocument() = CategoryPathDocument(category, subcategory)
+private fun CategoryPathDocument.toDomain() = CategoryPath(category, subcategory)
 private fun TelegramVoiceTrace.toDocument() = TelegramVoiceTraceDocument(
     telegramUserId, telegramChatId, telegramMessageId, telegramFileId, telegramFileUniqueId, durationSeconds, mimeType, fileSizeBytes
 )
