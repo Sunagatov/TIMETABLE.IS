@@ -25,8 +25,19 @@ backend-owned state transitions and business rules.
 
 ```bash
 cd ../Vault/apps/memora/backend
+task local:doctor
+task local:whisper:tunnel
 task local:run
 ```
+
+`task local:run` prefers source `backend/.env.local` and fills missing AI/voice
+secrets from Vault backend `.env.prod` when available, without importing the
+production-only transcription endpoint.
+
+For local voice transcription, open the SSH tunnel first with
+`task local:whisper:tunnel`. The local backend can then use the Hetzner whisper
+worker through `http://127.0.0.1:18083`, and the whisper-compatible
+`MEMORA_TRANSCRIPTION_API_KEY=placeholder` value is valid for that path.
 
 If you run Gradle directly from the source repo, load `backend/.env.local` first so
 local auth and cookie settings are applied:
