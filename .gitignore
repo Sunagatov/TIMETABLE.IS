@@ -24,3 +24,4 @@ patch-backup/
 install_*_patch.sh
 apply_*_patch.sh
 /telegram-bot/.kotlin/sessions/*
+/backend/.kotlin/
