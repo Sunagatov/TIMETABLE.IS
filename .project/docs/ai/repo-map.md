@@ -67,7 +67,6 @@
 - `.project/docs/ai/local-smoke-test.md` — source-repo V1 local smoke checklist.
 
 - `.project/scripts/ai/check-ai-docs.sh` — drift check for stale terms, active legacy docs, and oversized adapters.
-- `scripts/ai/check-ai-docs.sh` — wrapper for the AI docs drift check.
 
 ## Runtime / Deployment
 

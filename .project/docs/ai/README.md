@@ -52,6 +52,6 @@ When behavior, API contracts, invariants, repo structure, or routing changes:
 - use `change-guide.md` for change-impact checklists
 - update scoped `AGENTS.md` files if module-specific rules changed
 - keep root/tool adapters thin
-- run `bash scripts/ai/check-ai-docs.sh` (wrapper) or `bash .project/scripts/ai/check-ai-docs.sh`
+- run `bash .project/scripts/ai/check-ai-docs.sh`
 
 When product requirements change, update `.project/docs/requirements/*` first, then sync the relevant canonical AI docs.

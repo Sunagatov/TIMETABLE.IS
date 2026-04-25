@@ -79,5 +79,5 @@ Run from the repo root after code or docs changes:
 cd backend && ./gradlew compileKotlin && ./gradlew test && ./gradlew build
 cd ../frontend && npm ci && npm run build && npm run test:run
 cd ../telegram-bot && ./gradlew clean test && ./gradlew installDist
-cd .. && bash scripts/ai/check-ai-docs.sh
+cd .. && bash .project/scripts/ai/check-ai-docs.sh
 ```

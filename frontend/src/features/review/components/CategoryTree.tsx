@@ -106,8 +106,6 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                       {[...subMap.entries()]
                         .sort(([a], [b]) => a.localeCompare(b))
                         .map(([subcategory]) => {
-                          const subKey = `sub:${category}/${subcategory}`;
-                          const subOpen = expandedKeys.has(subKey);
                           const subActive = catActive && filter.subcategory === subcategory;
 
                           const subBtnClass = dark
@@ -123,20 +121,15 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                               <button
                                 type="button"
                                 onClick={() => {
-                                  toggle(subKey);
                                   onSelect({ category, subcategory });
                                 }}
                                 className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${subBtnClass}`}
                               >
                                 <span className={`w-3 shrink-0 text-[10px] ${dark ? "text-stone-600" : "text-stone-400"}`}>
-                                  {subOpen ? "▼" : "▶"}
+                                  •
                                 </span>
                                 <span className="truncate">{subcategory}</span>
                               </button>
-
-                              {subOpen && (
-                                <div className={`ml-3 mt-0.5 border-l pl-2 ${dark ? "border-white/8" : "border-stone-200"}`} />
-                              )}
                             </div>
                           );
                         })}
