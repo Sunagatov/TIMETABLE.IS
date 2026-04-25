@@ -67,7 +67,7 @@ Owns production/deployment/runtime truth.
 - one Telegram message maps to one backend item, except local bot commands never create items
 - review-first trust model must remain visible everywhere
 - original AI output and latest human-approved values must remain separately visible
-- category model must stay exactly 3 levels in V1
+- category model must stay exactly 2 levels in V1
 - direct item edits must not bypass review semantics (PATCH is approved-only)
 - simplicity > flexibility theater
 - requirements > stale comments

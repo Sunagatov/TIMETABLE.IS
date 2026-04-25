@@ -89,8 +89,8 @@ Also review:
 - `frontend/src/features/review/hooks/useReviewWorkspaceState.ts`
 
 Keep these facts stable:
-- exactly 3 levels, all non-blank for create/update paths
-- category, subcategory, and leaf clicks can filter the active view
+- exactly 2 levels, all non-blank for create/update paths
+- category and subcategory clicks can filter the active view
 - rename updates active category filter when needed
 - delete clears active category filter when needed
 - backend category errors are visible to the user
@@ -147,6 +147,18 @@ Also review:
 - backend auth package (`backend/src/main/kotlin/com/sunagatov/memora/backend/auth/`)
 - `.project/docs/ai/env-runtime-reference.md`
 - `.project/docs/ai/api-surface.md` if a contract is renamed
+
+If AI mode or AI provider config changes, also review:
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/config/ProductionConfigValidator.kt`
+- `backend/src/main/kotlin/com/sunagatov/memora/backend/item/ai/OpenAiCompatibleMemoraAiPort.kt`
+- `.project/docs/ai/invariants.md`
+
+Keep these facts stable:
+- deterministic AI is local/dev/test fallback only
+- real V1 polishing requires `MEMORA_AI_MODE=openai`
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true`
+- production-like runtime should keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- unsafe production-like AI config should fail visibly, not fake success through silent deterministic fallback
 
 ## If you change the Telegram bot
 
@@ -215,6 +227,20 @@ Key facts:
 - prod base URL: `http://whisper-worker:8000`; API key: `placeholder` (whisper doesn't validate)
 - model: `Systran/faster-whisper-base` (downloaded on first request from HuggingFace)
 - `MEMORA_TRANSCRIPTION_API_KEY` must be non-blank — code throws if blank (even though whisper ignores it)
+
+## If you clean up hardcoded values
+
+Also review:
+- `.project/docs/ai/repo-map.md`
+- the exact module `AGENTS.md`
+
+Prefer these existing owners before adding new constants:
+- backend capture paths/header → `backend/src/main/kotlin/com/sunagatov/memora/backend/capture/api/TelegramCaptureApi.kt`
+- frontend review query/filter/api constants → `frontend/src/features/review/reviewConstants.ts`
+- bot backend path/header defaults → `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/backend/BotBackendContract.kt`
+- bot repeated owner-facing messages → `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/bot/BotMessages.kt`
+
+Do not extract one-off labels, harmless local formatting strings, test data, or CSS classes just to create indirection.
 
 ## If you think a change belongs in deployment/runtime
 

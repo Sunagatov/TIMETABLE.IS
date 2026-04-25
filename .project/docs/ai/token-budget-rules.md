@@ -36,7 +36,7 @@ Stop opening files once you know:
 
 - Date filters are `createdFrom` and `createdTo`, not `dateFrom` or `dateTo`.
 - Sort format is `field-direction`, for example `createdAt-desc`, `title-asc`, `category-desc`.
-- Category paths are exactly 3 levels in V1.
+- Category paths are exactly 2 levels in V1: `category` and `subcategory`.
 - Frontend is a client: user-visible actions call backend APIs and failed calls show visible errors.
 - Frontend keeps separate filters for Needs Review, Failures, and Approved.
 - Approved view remains approved-only by default.
@@ -45,12 +45,20 @@ Stop opening files once you know:
 - Voice transcription is live through the backend transcription integration; runtime/service details are owned by Vault.
 - MongoDB persistence is active in production; in-memory stores are test/local only.
 - Spring Boot 4 uses `spring.mongodb.uri` / `SPRING_MONGODB_URI`, not `spring.data.mongodb.uri`.
+- deterministic AI is local/dev/test fallback only; real V1 polishing requires `MEMORA_AI_MODE=openai`
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- `frontend/src/features/review/api/reviewApi.ts` may still strip stale `subsubcategory` query params defensively; that compatibility behavior is acceptable unless the task explicitly removes legacy tolerance
 
 ## Editing Strategy
 
 - modify as few files as needed
 - prefer vertical slices
 - avoid stylistic churn
+- look for an existing owner before extracting constants:
+  - backend capture paths/header → `TelegramCaptureApi.kt`
+  - frontend review paths/filter values → `reviewConstants.ts`
+  - bot backend paths/header defaults → `BotBackendContract.kt`
+  - bot repeated messages → `BotMessages.kt`
 - update the canonical owner doc when behavior, contracts, routing, or repo structure changes
 - keep agent-specific adapters thin
 - run `bash .project/scripts/ai/check-ai-docs.sh` after documentation architecture changes

@@ -11,7 +11,10 @@ Canonical details:
 - `.project/docs/ai/api-surface.md`
 - `.project/docs/ai/invariants.md`
 - `.project/docs/ai/repo-map.md`
+- `.project/docs/ai/env-runtime-reference.md` for source-level config questions
+- `.project/docs/ai/change-guide.md` for change-impact routing
 - `.project/docs/ai/frontend-v1-mvp.md` for broad frontend work
 - `.project/docs/ai/token-budget-rules.md`
 
 Runtime and deployment truth belongs in Vault, not Memora.
+Run `bash .project/scripts/ai/check-ai-docs.sh` after canonical doc or adapter changes.

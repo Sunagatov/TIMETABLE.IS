@@ -12,11 +12,11 @@ Root and tool-specific files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `AMAZONQ.md`
 - `repo-map.md` — current repository structure and where to start for each module.
 - `request-routing-guide.md` — minimal context selection by task type.
 - `token-budget-rules.md` — what to read, what to avoid, and when to stop.
+- `change-guide.md` — if-you-change-X, also-check-Y routing.
 - `frontend-v1-mvp.md` — detailed frontend V1 guide for auth, review workspace, filters, item detail, categories, tests, and runtime checks.
 - `env-runtime-reference.md` — source-repo config keys and runtime boundary notes.
 - `vault-boundary.md` — production/deployment ownership boundary.
 - `architecture.md` — project architecture and responsibility split.
-- `change-guide.md` — change-impact checklist: if you change X, also update/check Y.
 - `local-smoke-test.md` — source-repo V1 local smoke checklist; Vault still owns runtime/deployment truth.
 
 Other files in this directory may be useful for sequencing, but the files above own the active agent facts.
@@ -40,6 +40,12 @@ Not allowed in adapters:
 Start with `.project/docs/ai/request-routing-guide.md`. Read only the smallest exact docs and files needed for the task. Stop reading once the relevant contract, source files, and validation command are known.
 
 Do not read archive or stale docs as active context unless the user explicitly asks. Do not scan Vault unless the task is explicitly about runtime, deployment, operations, or local orchestration.
+
+Useful recent stability facts:
+- category paths are exactly 2 levels in V1: `category` / `subcategory`
+- deterministic AI is local/dev/test fallback only; real V1 polishing requires `MEMORA_AI_MODE=openai`
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- the canonical AI-doc drift checker lives at `.project/scripts/ai/check-ai-docs.sh`
 
 ## Updating Docs
 

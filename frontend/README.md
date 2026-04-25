@@ -45,4 +45,4 @@ Runtime/deployment wiring lives in the Vault repository, not here.
 - Telegram-only capture remains the V1 input path; no manual web item creation.
 - Labels are out of scope for V1.
 - Search is backend keyword search, not semantic search.
-- Category paths are exactly 3 levels in V1.
+- Category paths are exactly 2 levels in V1: `category` / `subcategory`.

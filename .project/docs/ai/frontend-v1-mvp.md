@@ -326,7 +326,7 @@ Relevant files:
 
 ## Category UI Rules
 
-Category paths are exactly 3 levels:
+Category paths are exactly 2 levels:
 
 ```text
 category / subcategory
@@ -339,13 +339,16 @@ Frontend category behavior:
 - Subcategory clicks filter exact 2-level path.
 - Clear filter works.
 - Active filter is visually indicated.
-- Create requires all 3 levels non-blank before API call.
+- Create requires both levels non-blank before API call.
 - Rename and delete are backend API calls.
 - Delete requires confirmation.
 - Backend errors such as non-empty category path, default-category deletion, or duplicate path must be visible.
 - After rename, update the active filter if it referenced the renamed path.
 - After delete, clear the active filter if it referenced the deleted path.
 - Long category names should truncate/wrap safely.
+
+Current implementation note:
+- subcategories are leaf rows, not expandable empty third-level nodes
 
 Do not implement arbitrary-depth categories in V1.
 

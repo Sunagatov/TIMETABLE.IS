@@ -36,6 +36,47 @@ Read:
 
 Key: param names must match exactly between frontend and backend. Date params are `createdFrom`/`createdTo`.
 
+## AI mode / production config safety task
+Read:
+1. `.project/docs/ai/env-runtime-reference.md`
+2. `.project/docs/ai/invariants.md`
+3. `backend/AGENTS.md`
+4. `backend/src/main/resources/application.yml`
+5. `backend/src/main/kotlin/.../config/MemoraProperties.kt`
+6. `backend/src/main/kotlin/.../config/ProductionConfigValidator.kt`
+7. exact AI adapter file under `backend/src/main/kotlin/.../item/ai/`
+
+Key:
+- deterministic AI is local/dev/test fallback only
+- real V1 polishing requires `MEMORA_AI_MODE=openai`
+- production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true`
+- production-like runtime should keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+
+## Hardcoded values / constants cleanup task
+Read:
+1. `.project/docs/ai/change-guide.md`
+2. `.project/docs/ai/repo-map.md`
+3. the smallest module `AGENTS.md`
+4. exact owning constant module before extracting anything
+
+Look for these small owners before inventing new constants:
+- backend capture API paths/header: `backend/.../capture/api/TelegramCaptureApi.kt`
+- frontend review query/filter constants: `frontend/src/features/review/reviewConstants.ts`
+- telegram bot backend paths/header defaults: `telegram-bot/.../backend/BotBackendContract.kt`
+- telegram bot repeated user-facing messages: `telegram-bot/.../bot/BotMessages.kt`
+
+Do not extract one-off labels or harmless local literals just to create indirection.
+
+## Docs / agent-doc maintenance task
+Read:
+1. `.project/docs/ai/README.md`
+2. `.project/docs/ai/change-guide.md`
+3. `.project/docs/ai/repo-map.md`
+4. `.project/docs/ai/token-budget-rules.md`
+5. the exact adapter or scoped guide you plan to change
+
+Keep canonical facts in `.project/docs/ai/*`, keep adapters thin, and run `bash .project/scripts/ai/check-ai-docs.sh` after the change.
+
 ## Frontend auth/review/category/item-detail task
 Read:
 1. `frontend/AGENTS.md`

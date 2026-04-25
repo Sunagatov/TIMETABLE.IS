@@ -19,6 +19,7 @@
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/`
   - `auth/` — login, logout, session cookie flow, session stores.
   - `capture/` — Telegram ingest, bot auth, failure notification polling/ack services.
+    - `capture/api/TelegramCaptureApi.kt` — canonical capture paths and `X-Memora-Bot-Token` header owner.
   - `category/` — exact 2-level category model, CRUD, store implementations.
   - `common/` — API error response and global exception handler.
   - `config/` — Memora properties, security, async processing, production config validation.
@@ -36,6 +37,7 @@
   - `app/` — app root and providers.
   - `features/auth/` — login and session bootstrap.
   - `features/review/` — review workspace, filters, category tree/management, item detail, actions, queries, types.
+    - `features/review/reviewConstants.ts` — shared review filter values, sort options, API paths, and default filter objects.
   - `shared/api/httpClient.ts` — fetch wrapper and unauthorized handling.
   - `shared/config/env.ts` — frontend source-level env mapping.
 
@@ -45,7 +47,9 @@
 - `telegram-bot/README.md`
 - `telegram-bot/src/main/kotlin/com/sunagatov/memora/telegrambot/`
   - `bot/` — long-polling bot message dispatch and failure notification delivery.
+    - `bot/BotMessages.kt` — owner-facing repeated bot message templates.
   - `backend/` — backend HTTP client.
+    - `backend/BotBackendContract.kt` — backend path/header defaults owned by the bot.
   - `command/` — local `/start` and `/help` handling.
   - `config/` — environment-backed bot settings.
   - `ingest/` — Telegram update mapping and backend DTOs.
@@ -66,7 +70,7 @@
 - `.project/docs/ai/change-guide.md` — change-impact checklist: if you change X, also update/check Y.
 - `.project/docs/ai/local-smoke-test.md` — source-repo V1 local smoke checklist.
 
-- `.project/scripts/ai/check-ai-docs.sh` — drift check for stale terms, active legacy docs, and oversized adapters.
+- `.project/scripts/ai/check-ai-docs.sh` — canonical AI-doc drift check for stale terms, active legacy docs, broken wrapper references, and oversized adapters.
 
 ## Runtime / Deployment
 
@@ -89,3 +93,4 @@ The old `.important/` context tree and manually maintained `.claude/generated/*`
 - Backend and telegram bot each own their Gradle wrapper.
 - There is no root `./gradlew`.
 - Frontend uses npm scripts under `frontend/`.
+- There is no root `scripts/ai/check-ai-docs.sh` wrapper; use `.project/scripts/ai/check-ai-docs.sh`.

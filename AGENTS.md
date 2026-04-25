@@ -41,8 +41,10 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 3. `.project/docs/ai/api-surface.md` — endpoint contracts, filters, sort, state guards.
 4. `.project/docs/ai/invariants.md` — non-negotiable behavior.
 5. `.project/docs/ai/frontend-v1-mvp.md` — only for broad frontend work.
-6. The smallest exact requirement file(s) under `.project/docs/requirements/`.
-7. The relevant scoped guide:
+6. `.project/docs/ai/env-runtime-reference.md` — only for source-level config and environment questions.
+7. `.project/docs/ai/change-guide.md` — only when changing contracts, docs, categories, filters, AI/config, or bot behavior.
+8. The smallest exact requirement file(s) under `.project/docs/requirements/`.
+9. The relevant scoped guide:
    - `backend/AGENTS.md`
    - `frontend/AGENTS.md`
    - `telegram-bot/AGENTS.md`
@@ -69,4 +71,5 @@ Technical building blocks such as controllers, services, repositories, converter
 - If requirements are ambiguous, ask or update docs first instead of inventing behavior.
 - Preserve stable V1 contracts documented in `.project/docs/ai/api-surface.md` and `.project/docs/ai/invariants.md`.
 - Update high-signal AI docs when concrete behavior, contracts, routing, or repo structure changes.
+- Run `bash .project/scripts/ai/check-ai-docs.sh` after documentation architecture or canonical doc changes.
 - Do not read archive/stale docs as active context unless the user explicitly asks.
