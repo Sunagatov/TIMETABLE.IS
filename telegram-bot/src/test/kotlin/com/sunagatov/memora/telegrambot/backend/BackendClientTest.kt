@@ -8,6 +8,8 @@ import java.net.InetSocketAddress
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class BackendClientTest {
 
@@ -98,6 +100,17 @@ class BackendClientTest {
     }
 
     @Test
+    fun `blank failure notifications response returns empty list`() {
+        startServer { exchange ->
+            exchange.respond("")
+        }
+
+        val notifications = client().fetchFailureNotifications()
+
+        assertEquals(emptyList(), notifications)
+    }
+
+    @Test
     fun `url encodes failure notification acknowledgement id`() {
         var seenPath = ""
         startServer { exchange ->
@@ -108,6 +121,21 @@ class BackendClientTest {
         client().acknowledgeFailureNotification("item 1:456")
 
         assertEquals("/api/capture/telegram/failure-notifications/item%201%3A456/delivered", seenPath)
+    }
+
+    @Test
+    fun `non success backend response throws useful exception`() {
+        startServer { exchange ->
+            exchange.respond("""{"error":"bad token"}""", status = 401)
+        }
+
+        val exception = assertFailsWith<IllegalStateException> {
+            client().fetchFailureNotifications()
+        }
+
+        assertTrue(exception.message?.contains("Backend call failed for") == true)
+        assertTrue(exception.message?.contains("401") == true)
+        assertTrue(exception.message?.contains("bad token") == true)
     }
 
     private fun startServer(handler: (HttpExchange) -> Unit) {
@@ -133,10 +161,10 @@ class BackendClientTest {
     private fun serverAddress(): InetSocketAddress =
         server?.address ?: error("server is not started")
 
-    private fun HttpExchange.respond(body: String) {
+    private fun HttpExchange.respond(body: String, status: Int = 200) {
         val bytes = body.toByteArray()
         responseHeaders.add("Content-Type", "application/json")
-        sendResponseHeaders(200, bytes.size.toLong())
+        sendResponseHeaders(status, bytes.size.toLong())
         responseBody.use { it.write(bytes) }
     }
 }
