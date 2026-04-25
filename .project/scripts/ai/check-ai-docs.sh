@@ -71,12 +71,8 @@ check_no_root_patch_artifacts() {
 }
 
 check_single_change_guide_owner() {
-  if [ -f ".project/docs/ai/change-guide.md" ] && [ -f ".project/docs/ai/change-playbook.md" ]; then
-    fail "duplicate active AI change checklist docs found: .project/docs/ai/change-guide.md and .project/docs/ai/change-playbook.md"
-  elif [ -f ".project/docs/ai/change-guide.md" ]; then
+  if [ -f ".project/docs/ai/change-guide.md" ]; then
     pass "single AI change checklist owner: .project/docs/ai/change-guide.md"
-  elif [ -f ".project/docs/ai/change-playbook.md" ]; then
-    pass "single AI change checklist owner: .project/docs/ai/change-playbook.md"
   else
     fail "no active AI change checklist doc found"
   fi
