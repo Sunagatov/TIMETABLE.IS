@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { login } from "../api/authApi";
+import { readableErrorMessage } from "../../../shared/api/httpClient";
 
 const schema = z.object({
   password: z.string().min(1, "Password is required")
@@ -27,8 +28,8 @@ export function LoginForm({ onLoggedIn }: Props) {
     try {
       await login(values.password);
       onLoggedIn();
-    } catch {
-      setError("password", { message: "Login failed" });
+    } catch (error) {
+      setError("password", { message: readableErrorMessage(error, "Login failed") });
     }
   };
 

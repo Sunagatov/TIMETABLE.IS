@@ -1,5 +1,5 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
-import type { FailuresFilters, ListSort, MemoraCategory } from "../types/reviewTypes";
+import type { FailuresFilters, ItemStatus, ItemType, ListSort, MemoraCategory, Priority } from "../types/reviewTypes";
 
 const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
 const PRIORITY_OPTIONS = [
@@ -49,9 +49,9 @@ export function FailuresFiltersBar({ filters, categories, onChange, onReset }: P
         onSubsubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subsubcategory", v))}
       />
       <div className="grid gap-3 md:grid-cols-4">
-        <FilterSelect label="Type" value={filters.type} options={TYPE_OPTIONS} onChange={(v) => set({ type: v })} />
-        <FilterSelect label="Priority" value={filters.priority} options={PRIORITY_OPTIONS} onChange={(v) => set({ priority: v })} />
-        <FilterSelect label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(v) => set({ status: v })} />
+        <FilterSelect label="Type" value={filters.type} options={TYPE_OPTIONS} onChange={(v) => set({ type: v as ItemType | "ALL" })} />
+        <FilterSelect label="Priority" value={filters.priority} options={PRIORITY_OPTIONS} onChange={(v) => set({ priority: v as Priority | "ALL" })} />
+        <FilterSelect label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(v) => set({ status: v as Extract<ItemStatus, "TRANSCRIPTION_FAILED" | "AI_PROCESSING_FAILED"> | "ALL" })} />
         <FilterSelect label="Sort" value={filters.sort} options={SORT_OPTIONS} onChange={(v) => set({ sort: v as ListSort })} />
       </div>
       <div className="grid gap-3 md:grid-cols-2">

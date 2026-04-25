@@ -24,8 +24,13 @@ export function useSessionBootstrap() {
     loading,
     onLoggedIn: () => setAuthenticated(true),
     onLoggedOut: async () => {
-      await logout();
-      setAuthenticated(false);
+      try {
+        await logout();
+      } catch {
+        // A failed logout request should not trap the user in the workspace.
+      } finally {
+        setAuthenticated(false);
+      }
     }
   };
 }

@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { MemoraCategory, MemoraItem, UpdateItemRequest } from "../../types/reviewTypes";
+import type { ItemType, Priority } from "../../types/reviewTypes";
 import { CheckIcon, FormField } from "./DetailPrimitives";
 import { AnswerEditor } from "./AnswerEditor";
 import type { DetailView, ItemDetailFormState } from "./itemDetailUtils";
@@ -13,6 +14,7 @@ type Props = {
   busyAction: string | null;
   isQuestion: boolean;
   answerFailureMessage: string | null;
+  validationError: string | null;
   formState: ItemDetailFormState;
   setFormState: Dispatch<SetStateAction<ItemDetailFormState>>;
   request: UpdateItemRequest;
@@ -51,8 +53,8 @@ export function ItemEditForm(props: Props) {
           </FormField>
         )}
         <div className="grid gap-3 sm:grid-cols-3">
-          <SelectField label="Type" value={props.formState.type} options={TYPE_OPTIONS} onChange={(type) => props.setFormState((state) => ({ ...state, type }))} />
-          <SelectField label="Priority" value={props.formState.priority} options={PRIORITY_OPTIONS} onChange={(priority) => props.setFormState((state) => ({ ...state, priority }))} />
+          <SelectField label="Type" value={props.formState.type} options={TYPE_OPTIONS} onChange={(type) => props.setFormState((state) => ({ ...state, type: type as ItemType }))} />
+          <SelectField label="Priority" value={props.formState.priority} options={PRIORITY_OPTIONS} onChange={(priority) => props.setFormState((state) => ({ ...state, priority: priority as Priority }))} />
           <FormField label="Category">
             <select
               value={props.formState.categoryId}
@@ -80,7 +82,7 @@ export function ItemEditForm(props: Props) {
         {props.view === "needs-review" && (
           <button
             type="button"
-            disabled={props.busy}
+            disabled={props.busy || Boolean(props.validationError)}
             onClick={() => void props.onEditAndApprove(props.item.id, props.request)}
             className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-55"
           >

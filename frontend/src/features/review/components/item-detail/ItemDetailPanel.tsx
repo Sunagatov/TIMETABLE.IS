@@ -17,6 +17,7 @@ import {
   EMPTY_FORM_STATE,
   formStateFromItem,
   formatDate,
+  getUpdateRequestValidationError,
   isQuestionItem
 } from "./itemDetailUtils";
 
@@ -70,12 +71,16 @@ export function ItemDetailPanel({
 
   useEffect(() => setEditOpen(false), [item?.id]);
   useEffect(() => {
-    if (item) setFormState(formStateFromItem(item, categories));
-  }, [categories, item]);
+    if (item && !editOpen) setFormState(formStateFromItem(item, categories));
+  }, [categories, editOpen, item]);
 
   const request = useMemo(
     () => buildUpdateItemRequest(formState, categories),
     [categories, formState]
+  );
+  const validationError = useMemo(
+    () => getUpdateRequestValidationError(formState),
+    [formState]
   );
 
   if (isLoading) {
@@ -111,6 +116,7 @@ export function ItemDetailPanel({
         editOpen={editOpen}
         busyAction={busyAction}
         actionError={actionError}
+        validationError={validationError}
         request={request}
         onToggleEdit={() => setEditOpen((open) => !open)}
         onApprove={onApprove}
@@ -148,6 +154,7 @@ export function ItemDetailPanel({
               busyAction={busyAction}
               isQuestion={isQuestion}
               answerFailureMessage={answerFailureMessage}
+              validationError={validationError}
               formState={formState}
               setFormState={setFormState}
               request={request}

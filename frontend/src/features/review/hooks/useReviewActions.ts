@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { readableErrorMessage } from "../../../shared/api/httpClient";
 import {
   approveItem,
   approveCategoryProposal,
@@ -47,8 +48,7 @@ export function useReviewActions({ setBusyAction, setActionError, setSelectedIte
         setSelectedItemId((current) => (current === itemId ? null : current));
       }
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Action failed");
-      throw error;
+      setActionError(readableErrorMessage(error));
     } finally {
       setBusyAction(null);
     }

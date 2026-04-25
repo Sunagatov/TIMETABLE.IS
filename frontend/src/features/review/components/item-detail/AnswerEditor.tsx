@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { MemoraItem } from "../../types/reviewTypes";
+import type { AnswerStatus } from "../../types/reviewTypes";
 import { FormField } from "./DetailPrimitives";
 import type { ItemDetailFormState } from "./itemDetailUtils";
 import { ANSWER_STATUS_OPTIONS } from "./itemDetailUtils";
@@ -43,7 +44,7 @@ export function AnswerEditor({
         <FormField label="Status">
           <select
             value={formState.answerStatus}
-            onChange={(event) => setFormState((state) => ({ ...state, answerStatus: event.target.value }))}
+            onChange={(event) => setFormState((state) => ({ ...state, answerStatus: event.target.value as AnswerStatus }))}
             className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-400"
           >
             {answerStatusOptions.map((option) => (
@@ -81,7 +82,10 @@ export function AnswerEditor({
   );
 }
 
-function answerActions(item: MemoraItem) {
+function answerActions(item: MemoraItem): Array<{
+  label: string;
+  action: (state: ItemDetailFormState) => ItemDetailFormState;
+}> {
   return [
     {
       label: "Use AI",

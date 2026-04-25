@@ -1,4 +1,12 @@
-import type { CategoryPath, MemoraCategory, MemoraItem, UpdateItemRequest } from "../../types/reviewTypes";
+import type {
+  AnswerStatus,
+  CategoryPath,
+  ItemType,
+  MemoraCategory,
+  MemoraItem,
+  Priority,
+  UpdateItemRequest
+} from "../../types/reviewTypes";
 
 export type DetailView = "needs-review" | "failures" | "approved";
 
@@ -6,16 +14,22 @@ export type ItemDetailFormState = {
   title: string;
   cleanedText: string;
   rawTranscript: string;
-  type: string;
-  priority: string;
+  type: ItemType;
+  priority: Priority;
   categoryId: string;
   answer: string;
-  answerStatus: string;
+  answerStatus: AnswerStatus;
 };
 
-export const ANSWER_STATUS_OPTIONS = ["NONE", "GENERATED", "EDITED", "REJECTED", "DELETED"];
-export const TYPE_OPTIONS = ["IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
-export const PRIORITY_OPTIONS = [
+export const ANSWER_STATUS_OPTIONS: Exclude<AnswerStatus, "FAILED">[] = [
+  "NONE",
+  "GENERATED",
+  "EDITED",
+  "REJECTED",
+  "DELETED"
+];
+export const TYPE_OPTIONS: ItemType[] = ["IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
+export const PRIORITY_OPTIONS: Priority[] = [
   "URGENT_IMPORTANT",
   "URGENT_NOT_IMPORTANT",
   "NOT_URGENT_IMPORTANT",
@@ -69,9 +83,20 @@ export function buildUpdateItemRequest(
   };
 }
 
-export function normalizeAnswerStatus(status: string, answer: string): string | undefined {
+export function normalizeAnswerStatus(status: AnswerStatus, answer: string): AnswerStatus | undefined {
+  if ((status === "GENERATED" || status === "EDITED") && !answer.trim()) return undefined;
   if (status === "FAILED") return answer.trim() ? "EDITED" : undefined;
   return ANSWER_STATUS_OPTIONS.includes(status) ? status : answer.trim() ? "EDITED" : "NONE";
+}
+
+export function getUpdateRequestValidationError(formState: ItemDetailFormState): string | null {
+  if (
+    (formState.answerStatus === "GENERATED" || formState.answerStatus === "EDITED") &&
+    !formState.answer.trim()
+  ) {
+    return "Generated or edited answers require answer text.";
+  }
+  return null;
 }
 
 export function isQuestionItem(item: MemoraItem): boolean {

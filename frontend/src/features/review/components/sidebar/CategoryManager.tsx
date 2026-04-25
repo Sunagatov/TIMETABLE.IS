@@ -7,6 +7,7 @@ import type {
   MemoraCategory,
   RenameCategoryRequest
 } from "../../types/reviewTypes";
+import { readableErrorMessage } from "../../../../shared/api/httpClient";
 
 type CategoryDraft = {
   category: string;
@@ -36,6 +37,11 @@ export function CategoryManager(props: Props) {
     event.preventDefault();
     setMessage(null);
     const nextPath = trimDraft(draft);
+    const validationError = validatePath(nextPath);
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
     try {
       if (isEditing && editingCategoryId) {
         await props.onRenameCategory(editingCategoryId, { path: nextPath });
@@ -44,7 +50,7 @@ export function CategoryManager(props: Props) {
       }
       clearDraft();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed");
+      setMessage(readableErrorMessage(error, "Failed"));
     }
   }
 
@@ -59,7 +65,7 @@ export function CategoryManager(props: Props) {
       }
       if (editingCategoryId === categoryId) clearDraft();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Delete failed");
+      setMessage(readableErrorMessage(error, "Delete failed"));
     }
   }
 
@@ -177,6 +183,13 @@ function trimDraft(draft: CategoryDraft): CategoryPathRequest {
     subcategory: draft.subcategory.trim(),
     subsubcategory: draft.subsubcategory.trim()
   };
+}
+
+function validatePath(path: CategoryPathRequest): string | null {
+  if (!path.category || !path.subcategory || !path.subsubcategory) {
+    return "Category, subcategory, and subsubcategory are all required.";
+  }
+  return null;
 }
 
 function sameFilter(left: CategoryPathFilter, right: CategoryPathRequest): boolean {

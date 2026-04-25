@@ -32,4 +32,14 @@ describe("httpClient", () => {
     await expect(httpClient.get("/api/bad")).rejects.toThrow("Fallback error");
     vi.unstubAllGlobals();
   });
+
+  it("turns fetch failures into a user-readable network message", async () => {
+    vi.stubGlobal("fetch", () => Promise.reject(new TypeError("Failed to fetch")));
+
+    await expect(httpClient.get("/api/private")).rejects.toThrow(
+      "Network request failed. Check that the Memora backend is reachable."
+    );
+
+    vi.unstubAllGlobals();
+  });
 });

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { readableErrorMessage } from "../../../shared/api/httpClient";
 import { createCategory, deleteCategory, renameCategory } from "../api/reviewApi";
 import { ApprovedFiltersBar } from "../components/ApprovedFiltersBar";
 import { FailuresFiltersBar } from "../components/FailuresFiltersBar";
@@ -55,6 +56,10 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     }
   }, [items, state.selectedItemId, state.setSelectedItemId]);
 
+  useEffect(() => {
+    state.setActionError(null);
+  }, [state.view, state.selectedItemId, state.setActionError]);
+
   async function runCategoryAction(action: string, handler: () => Promise<unknown>) {
     state.setBusyAction(action);
     state.setActionError(null);
@@ -66,7 +71,8 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
         queryClient.invalidateQueries({ queryKey: ["categories"] })
       ]);
     } catch (error) {
-      state.setActionError(error instanceof Error ? error.message : "Action failed");
+      state.setActionError(readableErrorMessage(error));
+      throw error;
     } finally {
       state.setBusyAction(null);
     }

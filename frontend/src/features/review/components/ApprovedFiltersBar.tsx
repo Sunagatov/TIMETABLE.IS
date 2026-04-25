@@ -1,5 +1,5 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
-import type { ApprovedFilters, ListSort, MemoraCategory } from "../types/reviewTypes";
+import type { ApprovedFilters, ItemStatus, ItemType, ListSort, MemoraCategory, Priority } from "../types/reviewTypes";
 
 const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
 const PRIORITY_OPTIONS = [
@@ -57,19 +57,19 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
           label="Type"
           value={filters.type}
           options={TYPE_OPTIONS}
-          onChange={(v) => set({ type: v })}
+          onChange={(v) => set({ type: v as ItemType | "ALL" })}
         />
         <FilterSelect
           label="Priority"
           value={filters.priority}
           options={PRIORITY_OPTIONS}
-          onChange={(v) => set({ priority: v })}
+          onChange={(v) => set({ priority: v as Priority | "ALL" })}
         />
         <FilterSelect
           label="Status"
           value={filters.status}
           options={STATUS_OPTIONS}
-          onChange={(v) => set({ status: v })}
+          onChange={(v) => set({ status: v as Extract<ItemStatus, "HUMAN_APPROVED" | "HUMAN_EDITED_APPROVED"> | "ALL" })}
         />
         <FilterSelect
           label="Sort"

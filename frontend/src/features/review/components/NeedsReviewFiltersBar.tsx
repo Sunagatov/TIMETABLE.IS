@@ -1,5 +1,5 @@
 import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
-import type { ListSort, MemoraCategory, NeedsReviewFilters } from "../types/reviewTypes";
+import type { ItemType, ListSort, MemoraCategory, NeedsReviewFilters, Priority } from "../types/reviewTypes";
 
 const TYPE_OPTIONS = ["ALL", "IDEA", "THOUGHT", "QUESTION", "REMINDER", "OTHER"];
 const PRIORITY_OPTIONS = [
@@ -52,13 +52,13 @@ export function NeedsReviewFiltersBar({ filters, categories, onChange, onReset }
           label="Type"
           value={filters.type}
           options={TYPE_OPTIONS}
-          onChange={(v) => set({ type: v })}
+          onChange={(v) => set({ type: v as ItemType | "ALL" })}
         />
         <FilterSelect
           label="Priority"
           value={filters.priority}
           options={PRIORITY_OPTIONS}
-          onChange={(v) => set({ priority: v })}
+          onChange={(v) => set({ priority: v as Priority | "ALL" })}
         />
         <FilterSelect
           label="Sort"

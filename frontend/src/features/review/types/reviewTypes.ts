@@ -4,6 +4,26 @@ export type CategoryPath = {
   subsubcategory: string;
 };
 
+export type SourceType = "TELEGRAM_TEXT" | "TELEGRAM_VOICE";
+export type ItemType = "IDEA" | "THOUGHT" | "QUESTION" | "REMINDER" | "OTHER";
+export type Priority =
+  | "URGENT_IMPORTANT"
+  | "URGENT_NOT_IMPORTANT"
+  | "NOT_URGENT_IMPORTANT"
+  | "NOT_URGENT_NOT_IMPORTANT"
+  | "NOT_APPLICABLE";
+export type ItemStatus =
+  | "RECEIVED"
+  | "AI_PROCESSED_UNREVIEWED"
+  | "TRANSCRIPTION_FAILED"
+  | "AI_PROCESSING_FAILED"
+  | "HUMAN_APPROVED"
+  | "HUMAN_EDITED_APPROVED"
+  | "REJECTED"
+  | "DELETED";
+export type AnswerStatus = "NONE" | "GENERATED" | "EDITED" | "REJECTED" | "DELETED" | "FAILED";
+export type ProposedCategoryStatus = "NONE" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+
 export type TelegramVoiceTrace = {
   telegramUserId: string;
   telegramChatId: string;
@@ -16,27 +36,27 @@ export type TelegramVoiceTrace = {
 
 export type MemoraItem = {
   id: string;
-  sourceType: string;
+  sourceType: SourceType;
   rawInputText: string | null;
   rawTranscript: string | null;
   aiTitle: string;
   aiCleanedText: string;
-  aiType: string;
+  aiType: ItemType;
   aiCategoryPath: CategoryPath;
   proposedCategoryPath: CategoryPath | null;
-  proposedCategoryStatus: string;
-  aiPriority: string;
+  proposedCategoryStatus: ProposedCategoryStatus;
+  aiPriority: Priority;
   aiAnswer: string | null;
   title: string;
   cleanedText: string;
-  type: string;
+  type: ItemType;
   categoryPath: CategoryPath;
-  priority: string;
+  priority: Priority;
   answer: string | null;
-  answerStatus: string;
+  answerStatus: AnswerStatus;
   answerFailureStage: string | null;
   answerFailureReason: string | null;
-  status: string;
+  status: ItemStatus;
   retryCountTranscription: number;
   retryCountAi: number;
   failureStage: string | null;
@@ -77,11 +97,11 @@ export type UpdateItemRequest = {
   title?: string;
   cleanedText?: string;
   rawTranscript?: string;
-  type?: string;
+  type?: ItemType;
   categoryPath?: CategoryPathRequest;
-  priority?: string;
+  priority?: Priority;
   answer?: string;
-  answerStatus?: string;
+  answerStatus?: AnswerStatus;
 };
 
 export type ListSort =
@@ -96,9 +116,9 @@ export type ApprovedSort = ListSort;
 
 export type ListParams = {
   keyword?: string;
-  type?: string;
-  priority?: string;
-  status?: string;
+  type?: ItemType;
+  priority?: Priority;
+  status?: ItemStatus;
   category?: string;
   subcategory?: string;
   subsubcategory?: string;
@@ -109,8 +129,8 @@ export type ListParams = {
 
 export type NeedsReviewFilters = {
   keyword: string;
-  type: string;
-  priority: string;
+  type: ItemType | "ALL";
+  priority: Priority | "ALL";
   category: string;
   subcategory: string;
   subsubcategory: string;
@@ -121,9 +141,9 @@ export type NeedsReviewFilters = {
 
 export type FailuresFilters = {
   keyword: string;
-  type: string;
-  priority: string;
-  status: string;
+  type: ItemType | "ALL";
+  priority: Priority | "ALL";
+  status: Extract<ItemStatus, "TRANSCRIPTION_FAILED" | "AI_PROCESSING_FAILED"> | "ALL";
   category: string;
   subcategory: string;
   subsubcategory: string;
@@ -134,9 +154,9 @@ export type FailuresFilters = {
 
 export type ApprovedFilters = {
   keyword: string;
-  type: string;
-  priority: string;
-  status: string;
+  type: ItemType | "ALL";
+  priority: Priority | "ALL";
+  status: Extract<ItemStatus, "HUMAN_APPROVED" | "HUMAN_EDITED_APPROVED"> | "ALL";
   category: string;
   subcategory: string;
   subsubcategory: string;

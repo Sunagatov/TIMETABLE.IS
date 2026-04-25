@@ -8,6 +8,7 @@ type Props = {
   editOpen: boolean;
   busyAction: string | null;
   actionError: string | null;
+  validationError: string | null;
   request: UpdateItemRequest;
   onToggleEdit: () => void;
   onApprove: (itemId: string) => Promise<void>;
@@ -28,6 +29,11 @@ export function ItemActionToolbar(props: Props) {
       {props.actionError && (
         <div className="border-b border-red-100 bg-red-50 px-5 py-2 text-xs text-red-700">
           {props.actionError}
+        </div>
+      )}
+      {props.validationError && props.editOpen && (
+        <div className="border-b border-amber-100 bg-amber-50 px-5 py-2 text-xs text-amber-800">
+          {props.validationError}
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2 px-5 py-3">
@@ -66,7 +72,7 @@ export function ItemActionToolbar(props: Props) {
               <PencilIcon /> {props.editOpen ? "Cancel edit" : "Edit item"}
             </ToolbarBtn>
             {props.editOpen && (
-              <ToolbarBtn tone="approve" busy={props.busyAction === "save"} disabled={busy} onClick={() => void props.onSave(props.itemId, props.request)}>
+              <ToolbarBtn tone="approve" busy={props.busyAction === "save"} disabled={busy || Boolean(props.validationError)} onClick={() => void props.onSave(props.itemId, props.request)}>
                 Save Changes
               </ToolbarBtn>
             )}

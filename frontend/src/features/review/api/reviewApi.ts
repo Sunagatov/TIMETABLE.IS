@@ -8,7 +8,7 @@ import type {
   UpdateItemRequest
 } from "../types/reviewTypes";
 
-export function buildQuery(params: ListParams): string {
+export function buildQuery(params: Record<string, string | undefined>): string {
   const entries = (Object.entries(params) as [string, string | undefined][]).filter(
     ([, v]) => Boolean(v) && v !== "ALL"
   ) as [string, string][];

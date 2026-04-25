@@ -89,7 +89,10 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                 <div key={category}>
                   <button
                     type="button"
-                    onClick={() => { toggle(catKey); if (!catOpen && !catActive) onSelect({ category, subcategory: "", subsubcategory: "" }); }}
+                    onClick={() => {
+                      toggle(catKey);
+                      onSelect({ category, subcategory: "", subsubcategory: "" });
+                    }}
                     className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs font-semibold transition ${catBtnClass}`}
                   >
                     <span className={`w-3 shrink-0 text-[10px] ${dark ? "text-stone-600" : "text-stone-400"}`}>
@@ -119,7 +122,10 @@ export function CategoryTree({ categories, loading, errorMessage, filter, onSele
                             <div key={subcategory}>
                               <button
                                 type="button"
-                                onClick={() => toggle(subKey)}
+                                onClick={() => {
+                                  toggle(subKey);
+                                  onSelect({ category, subcategory, subsubcategory: "" });
+                                }}
                                 className={`flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${subBtnClass}`}
                               >
                                 <span className={`w-3 shrink-0 text-[10px] ${dark ? "text-stone-600" : "text-stone-400"}`}>
