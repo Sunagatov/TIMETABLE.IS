@@ -19,7 +19,7 @@ internal class LangChain4jMemoraAiPort(
             action = {
                 LangChain4jMemoraAiMapper.toTextDraft(aiService.generateTextDraft(
                     LangChain4jMemoraAiPrompts.textDraftUserPrompt(input.rawText)
-                ))
+                ), input.rawText)
             }
         )
 

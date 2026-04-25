@@ -9,7 +9,7 @@ import com.sunagatov.memora.backend.item.model.ProposedCategoryStatus
 internal object LangChain4jMemoraAiMapper {
 
     fun toDraft(response: LangChain4jMemoraAiResponse, input: AiTextInput): AiAllDraft {
-        val textDraft = response.toTextDraft()
+        val textDraft = response.toTextDraft(input.rawText)
         return AiAllDraft(
             textDraft = textDraft,
             categoryDraft = response.toCategoryDraft(input),
@@ -17,11 +17,13 @@ internal object LangChain4jMemoraAiMapper {
         )
     }
 
-    fun toTextDraft(response: LangChain4jTextDraftResponse): AiTextDraft {
+    fun toTextDraft(response: LangChain4jTextDraftResponse, fallbackSourceText: String): AiTextDraft {
+        val normalizedCleanedText = response.cleanedText.normalizeCleanedText(fallbackSourceText)
+        val normalizedTitle = response.title.normalizeTitle(normalizedCleanedText)
         val normalizedType = response.type.toItemType()
         return AiTextDraft(
-            title = response.title.requireNonBlank("title").take(120),
-            cleanedText = response.cleanedText.requireNonBlank("cleanedText"),
+            title = normalizedTitle,
+            cleanedText = normalizedCleanedText,
             type = normalizedType,
             priority = response.priority.toPriority()
         )
@@ -43,14 +45,15 @@ internal object LangChain4jMemoraAiMapper {
         }
     }
 
-    private fun LangChain4jMemoraAiResponse.toTextDraft(): AiTextDraft =
+    private fun LangChain4jMemoraAiResponse.toTextDraft(fallbackSourceText: String): AiTextDraft =
         toTextDraft(
             LangChain4jTextDraftResponse(
                 title = title,
                 cleanedText = cleanedText,
                 type = type,
                 priority = priority
-            )
+            ),
+            fallbackSourceText
         )
 
     private fun LangChain4jMemoraAiResponse.toCategoryDraft(input: AiTextInput): AiCategoryDraft =
@@ -99,6 +102,25 @@ internal object LangChain4jMemoraAiMapper {
             proposedCategoryStatus = ProposedCategoryStatus.NONE,
             currentCategoryPath = input.defaultCategoryPath
         )
+
+    private fun String?.normalizeCleanedText(fallbackSourceText: String): String =
+        this?.trim()?.takeIf { it.isNotBlank() }
+            ?: fallbackSourceText.trim().takeIf { it.isNotBlank() }
+            ?: throw IllegalStateException("AI response missing non-blank field: cleanedText")
+
+    private fun String?.normalizeTitle(cleanedText: String): String =
+        this?.trim()?.takeIf { it.isNotBlank() }
+            ?.take(120)
+            ?: cleanedText.toTitle()
+
+    private fun String.toTitle(): String =
+        trim()
+            .replace(Regex("\\s+"), " ")
+            .split(" ")
+            .take(6)
+            .joinToString(" ")
+            .ifBlank { throw IllegalStateException("AI response missing non-blank field: title") }
+            .take(120)
 
     private fun String?.requireNonBlank(fieldName: String): String =
         this?.trim()?.takeIf { it.isNotBlank() }

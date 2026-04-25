@@ -245,6 +245,62 @@ class AiAdapterTests {
     }
 
     @Test
+    fun `full draft derives title from cleaned text when provider omits title`() {
+        val defaultPath = CategoryPath("Default", "General")
+        val adapter = adapter {
+            LangChain4jMemoraAiResponse(
+                title = "   ",
+                cleanedText = "What is Kotlin and why is it used?",
+                type = "QUESTION",
+                priority = "NOT_APPLICABLE",
+                categoryPath = LangChain4jCategoryPathResponse("Default", "General"),
+                answer = "Kotlin is a modern language used for concise, safer JVM and Android development."
+            )
+        }
+
+        val draft = adapter.generateAllDraft(
+            AiTextInput(
+                rawText = "what is kotlin and why is it used?",
+                existingCategoryPaths = listOf(defaultPath),
+                defaultCategoryPath = defaultPath
+            )
+        )
+
+        assertEquals("What is Kotlin and why is", draft.textDraft.title)
+        assertEquals("What is Kotlin and why is it used?", draft.textDraft.cleanedText)
+        assertEquals(ItemType.QUESTION, draft.textDraft.type)
+    }
+
+    @Test
+    fun `text regeneration derives missing fields from source text`() {
+        val adapter = adapter(
+            generateDraft = {
+                throw IllegalStateException("full draft should not be called")
+            },
+            generateTextDraft = {
+                LangChain4jTextDraftResponse(
+                    title = " ",
+                    cleanedText = null,
+                    type = "THOUGHT",
+                    priority = "NOT_APPLICABLE"
+                )
+            }
+        )
+
+        val draft = adapter.generateTextDraft(
+            AiTextInput(
+                rawText = "rough note about kotlin coroutines and flows",
+                existingCategoryPaths = listOf(CategoryPath("Default", "General")),
+                defaultCategoryPath = CategoryPath("Default", "General")
+            )
+        )
+
+        assertEquals("rough note about kotlin coroutines and", draft.title)
+        assertEquals("rough note about kotlin coroutines and flows", draft.cleanedText)
+        assertEquals(ItemType.THOUGHT, draft.type)
+    }
+
+    @Test
     fun `category regeneration uses category-only structured response`() {
         val defaultPath = CategoryPath("Default", "General")
         val existingPath = CategoryPath("Work", "Backend")
