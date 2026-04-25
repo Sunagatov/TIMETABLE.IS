@@ -1,9 +1,8 @@
 spring:
   application:
     name: memora-backend
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/memora}
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/memora}
 
 server:
   port: ${BACKEND_PORT:8080}
