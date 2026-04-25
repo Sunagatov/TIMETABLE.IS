@@ -1,8 +1,8 @@
 package com.sunagatov.memora.backend.review.api
 
 import com.sunagatov.memora.backend.item.model.MemoraItem
-import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
+import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.review.application.ReviewService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -35,7 +35,7 @@ class ReviewController(
     @PostMapping("/{itemId}/edit-and-approve")
     fun editAndApprove(
         @PathVariable itemId: String,
-        @Valid @RequestBody request: EditAndApproveRequest
+        @Valid @RequestBody request: UpdateItemRequest
     ): MemoraItem = reviewService.editAndApprove(itemId, request)
 
     @PostMapping("/{itemId}/category-proposal/approve")

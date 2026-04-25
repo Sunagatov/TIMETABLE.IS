@@ -1,5 +1,5 @@
 import { CategoryTree } from "../CategoryTree";
-import type { ReviewView } from "../../hooks/useReviewWorkspaceState";
+import type { ReviewView } from "../../reviewViewMeta";
 import type {
   CategoryPathFilter,
   CreateCategoryRequest,

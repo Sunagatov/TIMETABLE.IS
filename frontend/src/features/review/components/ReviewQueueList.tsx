@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { REVIEW_VIEW_META, type ReviewView } from "../reviewViewMeta";
 import type { MemoraItem } from "../types/reviewTypes";
-
-type View = "needs-review" | "failures" | "approved";
 
 type Props = {
   title: string;
@@ -11,7 +10,7 @@ type Props = {
   selectedItemId: string | null;
   onSelect: (itemId: string) => void;
   toolbar?: ReactNode;
-  view?: View;
+  view?: ReviewView;
   isLoading: boolean;
   errorMessage: string | null;
 };
@@ -28,36 +27,17 @@ export function ReviewQueueList({
   errorMessage
 }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  const accentBorder =
-    view === "needs-review"
-      ? "border-l-amber-400"
-      : view === "failures"
-        ? "border-l-red-400"
-        : "border-l-emerald-400";
-
-  const accentBg =
-    view === "needs-review"
-      ? "bg-amber-500"
-      : view === "failures"
-        ? "bg-red-500"
-        : "bg-emerald-500";
+  const viewMeta = view ? REVIEW_VIEW_META[view] : null;
+  const countClass = items.length > 0 && viewMeta ? viewMeta.countClass : "bg-stone-100 text-stone-500";
 
   return (
     <section className="flex h-full flex-col border-r border-stone-200 bg-[#faf8f4]">
-      {/* Header */}
       <header className="border-b border-stone-200 px-5 py-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className={`h-2 w-2 shrink-0 rounded-full ${accentBg}`} />
+            {viewMeta && <span className={`h-2 w-2 shrink-0 rounded-full ${viewMeta.accentDotClass}`} />}
             <h1 className="truncate text-sm font-semibold text-stone-900">{title}</h1>
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-              items.length > 0
-                ? view === "needs-review" ? "bg-amber-100 text-amber-700"
-                  : view === "failures" ? "bg-red-100 text-red-700"
-                  : "bg-emerald-100 text-emerald-700"
-                : "bg-stone-100 text-stone-500"
-            }`}>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${countClass}`}>
               {items.length}
             </span>
           </div>
@@ -79,111 +59,132 @@ export function ReviewQueueList({
         <p className="mt-1 text-xs leading-5 text-stone-400">{description}</p>
       </header>
 
-      {/* Collapsible filters */}
       {filtersOpen && toolbar ? (
         <div className="border-b border-stone-200 bg-white px-5 py-4">
           {toolbar}
         </div>
       ) : null}
 
-      {/* Item list */}
       <div className="flex-1 overflow-y-auto p-3">
-        {isLoading ? (
-          <EmptyState>
-            <LoadingDots />
-            <p className="mt-3 text-sm text-stone-400">Loading items…</p>
-          </EmptyState>
-        ) : errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700">
-            {errorMessage}
-          </div>
-        ) : items.length === 0 ? (
-          <EmptyState>
-            <div className="text-2xl text-stone-300">∅</div>
-            <p className="mt-2 text-sm text-stone-400">No items match the current filters.</p>
-          </EmptyState>
-        ) : (
+        <QueueListState
+          isLoading={isLoading}
+          errorMessage={errorMessage}
+          hasItems={items.length > 0}
+        >
           <div className="space-y-2">
-            {items.map((item) => {
-              const selected = item.id === selectedItemId;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onSelect(item.id)}
-                  className={`block w-full rounded-2xl border-l-[3px] border border-stone-200 p-4 text-left transition ${accentBorder} ${
-                    selected
-                      ? "bg-stone-900 border-stone-900 border-l-current shadow-sm"
-                      : "bg-white hover:border-stone-300 hover:shadow-sm"
-                  }`}
-                >
-                  {/* Top row: type label + badges */}
-                  <div className="flex items-start justify-between gap-2">
-                    <p
-                      className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${
-                        selected ? "text-stone-400" : "text-stone-400"
-                      }`}
-                    >
-                      {item.sourceType.replace(/_/g, " ")}
-                    </p>
-                    <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-                      <StatusBadge status={item.status} selected={selected} />
-                      {view === "failures" && item.failureStage ? (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          selected ? "bg-red-400/30 text-red-200" : "bg-red-50 text-red-600"
-                        }`}>
-                          {item.failureStage.replace(/_/g, " ")}
-                        </span>
-                      ) : null}
-                      {item.type === "QUESTION" || item.aiType === "QUESTION" ? (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          selected ? "bg-amber-400/20 text-amber-200" : "bg-amber-50 text-amber-700"
-                        }`}>
-                          Q
-                        </span>
-                      ) : null}
-                      {item.proposedCategoryStatus === "PENDING_REVIEW" ? (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          selected ? "bg-indigo-400/20 text-indigo-200" : "bg-indigo-50 text-indigo-600"
-                        }`}>
-                          Cat
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h2 className={`mt-2 text-sm font-semibold leading-snug line-clamp-2 ${
-                    selected ? "text-white" : "text-stone-900"
-                  }`}>
-                    {item.title || "Untitled"}
-                  </h2>
-
-                  {/* Preview */}
-                  <p className={`mt-1.5 line-clamp-2 text-xs leading-5 ${
-                    selected ? "text-stone-300" : "text-stone-500"
-                  }`}>
-                    {item.cleanedText || item.rawTranscript || item.rawInputText || "No content"}
-                  </p>
-
-                  {/* Metadata row */}
-                  <div className={`mt-3 flex items-center gap-2 text-[11px] font-medium ${
-                    selected ? "text-stone-400" : "text-stone-400"
-                  }`}>
-                    <span className="truncate max-w-[100px]">{item.categoryPath.category || "—"}</span>
-                    <span className="text-stone-500">·</span>
-                    <span>{item.priority === "NOT_APPLICABLE" ? "—" : priorityShort(item.priority)}</span>
-                    <span className="text-stone-500">·</span>
-                    <span className="ml-auto shrink-0">{formatRelativeDate(item.createdAt)}</span>
-                  </div>
-                </button>
-              );
-            })}
+            {items.map((item) => (
+              <ReviewQueueItemCard
+                key={item.id}
+                item={item}
+                selected={item.id === selectedItemId}
+                view={view}
+                accentBorderClass={viewMeta?.accentBorderClass}
+                onSelect={onSelect}
+              />
+            ))}
           </div>
-        )}
+        </QueueListState>
       </div>
     </section>
+  );
+}
+
+function QueueListState(props: {
+  isLoading: boolean;
+  errorMessage: string | null;
+  hasItems: boolean;
+  children: ReactNode;
+}) {
+  if (props.isLoading) {
+    return (
+      <EmptyState>
+        <LoadingDots />
+        <p className="mt-3 text-sm text-stone-400">Loading items…</p>
+      </EmptyState>
+    );
+  }
+
+  if (props.errorMessage) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700">
+        {props.errorMessage}
+      </div>
+    );
+  }
+
+  if (!props.hasItems) {
+    return (
+      <EmptyState>
+        <div className="text-2xl text-stone-300">∅</div>
+        <p className="mt-2 text-sm text-stone-400">No items match the current filters.</p>
+      </EmptyState>
+    );
+  }
+
+  return props.children;
+}
+
+function ReviewQueueItemCard(props: {
+  item: MemoraItem;
+  selected: boolean;
+  view?: ReviewView;
+  accentBorderClass?: string;
+  onSelect: (itemId: string) => void;
+}) {
+  const preview = props.item.cleanedText || props.item.rawTranscript || props.item.rawInputText || "No content";
+
+  return (
+    <button
+      type="button"
+      onClick={() => props.onSelect(props.item.id)}
+      className={`block w-full rounded-2xl border border-stone-200 border-l-[3px] p-4 text-left transition ${
+        props.accentBorderClass ?? ""
+      } ${
+        props.selected
+          ? "border-stone-900 border-l-current bg-stone-900 shadow-sm"
+          : "bg-white hover:border-stone-300 hover:shadow-sm"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-400">
+          {props.item.sourceType.replace(/_/g, " ")}
+        </p>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+          <StatusBadge status={props.item.status} selected={props.selected} />
+          {props.view === "failures" && props.item.failureStage ? (
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${failureBadgeClass(props.selected)}`}>
+              {props.item.failureStage.replace(/_/g, " ")}
+            </span>
+          ) : null}
+          {isQuestion(props.item) ? (
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${questionBadgeClass(props.selected)}`}>
+              Q
+            </span>
+          ) : null}
+          {props.item.proposedCategoryStatus === "PENDING_REVIEW" ? (
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${categoryBadgeClass(props.selected)}`}>
+              Cat
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <h2 className={`mt-2 line-clamp-2 text-sm font-semibold leading-snug ${props.selected ? "text-white" : "text-stone-900"}`}>
+        {props.item.title || "Untitled"}
+      </h2>
+
+      <p className={`mt-1.5 line-clamp-2 text-xs leading-5 ${props.selected ? "text-stone-300" : "text-stone-500"}`}>
+        {preview}
+      </p>
+
+      <div className="mt-3 flex items-center gap-2 text-[11px] font-medium text-stone-400">
+        <span className="max-w-[100px] truncate">{props.item.categoryPath.category || "—"}</span>
+        <span className="text-stone-500">·</span>
+        <span>{props.item.priority === "NOT_APPLICABLE" ? "—" : priorityShort(props.item.priority)}</span>
+        <span className="text-stone-500">·</span>
+        <span className="ml-auto shrink-0">{formatRelativeDate(props.item.createdAt)}</span>
+      </div>
+    </button>
   );
 }
 
@@ -256,4 +257,20 @@ function formatRelativeDate(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(iso));
+}
+
+function isQuestion(item: MemoraItem): boolean {
+  return item.type === "QUESTION" || item.aiType === "QUESTION";
+}
+
+function failureBadgeClass(selected: boolean): string {
+  return selected ? "bg-red-400/30 text-red-200" : "bg-red-50 text-red-600";
+}
+
+function questionBadgeClass(selected: boolean): string {
+  return selected ? "bg-amber-400/20 text-amber-200" : "bg-amber-50 text-amber-700";
+}
+
+function categoryBadgeClass(selected: boolean): string {
+  return selected ? "bg-indigo-400/20 text-indigo-200" : "bg-indigo-50 text-indigo-600";
 }

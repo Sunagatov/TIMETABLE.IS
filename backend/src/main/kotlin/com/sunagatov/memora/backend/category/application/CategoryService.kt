@@ -28,14 +28,7 @@ class CategoryService(
     fun create(request: CreateCategoryRequest): MemoraCategory {
         val path = request.path.toCategoryPath()
         require(categoryStore.findByPath(path) == null) { "Category path already exists" }
-
-        val category = MemoraCategory(
-            id = UUID.randomUUID().toString(),
-            path = path,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
-        return categoryStore.save(category)
+        return categoryStore.save(newCategory(path))
     }
 
     fun rename(categoryId: String, request: RenameCategoryRequest): MemoraCategory {
@@ -67,24 +60,12 @@ class CategoryService(
         categoryStore.delete(categoryId)
     }
 
-    fun requireExistingPath(path: CategoryPath): CategoryPath {
-        ensureCategoryExists(defaultCategoryPath)
-        return categoryStore.findByPath(path)?.path
+    fun requireExistingPath(path: CategoryPath): CategoryPath =
+        categoryStore.findByPath(path)?.path
             ?: throw IllegalArgumentException("Category path does not exist")
-    }
 
-    fun ensureReusablePath(path: CategoryPath): MemoraCategory {
-        ensureCategoryExists(defaultCategoryPath)
-        return categoryStore.findByPath(path)
-            ?: categoryStore.save(
-                MemoraCategory(
-                    id = UUID.randomUUID().toString(),
-                    path = path,
-                    createdAt = Instant.now(),
-                    updatedAt = Instant.now()
-                )
-            )
-    }
+    fun ensureReusablePath(path: CategoryPath): MemoraCategory =
+        categoryStore.findByPath(path) ?: categoryStore.save(newCategory(path))
 
     fun defaultPath(): CategoryPath {
         ensureCategoryExists(defaultCategoryPath)
@@ -92,19 +73,18 @@ class CategoryService(
     }
 
     private fun ensureCategoryExists(path: CategoryPath) {
-        if (categoryStore.findByPath(path) != null) {
-            return
+        if (categoryStore.findByPath(path) == null) {
+            categoryStore.save(newCategory(path))
         }
-
-        categoryStore.save(
-            MemoraCategory(
-                id = UUID.randomUUID().toString(),
-                path = path,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now()
-            )
-        )
     }
+
+    private fun newCategory(path: CategoryPath): MemoraCategory =
+        MemoraCategory(
+            id = UUID.randomUUID().toString(),
+            path = path,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now()
+        )
 
     private fun requireCategory(categoryId: String): MemoraCategory =
         categoryStore.findById(categoryId)

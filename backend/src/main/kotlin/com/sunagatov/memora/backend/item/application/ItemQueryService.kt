@@ -48,23 +48,10 @@ class ItemQueryService {
         return haystack.contains(term)
     }
 
-    private fun matchesCategoryPath(
-        path: CategoryPath,
-        category: String?,
-        subcategory: String?
-    ): Boolean {
-        val normalizedCategory = category?.trim()?.takeIf { it.isNotBlank() }
-        val normalizedSubcategory = subcategory?.trim()?.takeIf { it.isNotBlank() }
-
-        if (normalizedCategory != null && path.category != normalizedCategory) {
-            return false
-        }
-
-        if (normalizedSubcategory != null && path.subcategory != normalizedSubcategory) {
-            return false
-        }
-
-        return true
+    private fun matchesCategoryPath(path: CategoryPath, category: String?, subcategory: String?): Boolean {
+        val cat = category?.trim()?.takeIf { it.isNotBlank() }
+        val sub = subcategory?.trim()?.takeIf { it.isNotBlank() }
+        return (cat == null || path.category == cat) && (sub == null || path.subcategory == sub)
     }
 
     private fun matchesCreatedFrom(item: MemoraItem, createdFrom: LocalDate?): Boolean {
@@ -85,13 +72,7 @@ class ItemQueryService {
         val comparator = when (requestedSort.field) {
             SortField.CREATED_AT -> compareBy<MemoraItem> { it.createdAt }
             SortField.TITLE -> compareBy<MemoraItem> { it.title.lowercase() }
-            SortField.CATEGORY -> compareBy<MemoraItem> {
-                buildString {
-                    append(it.categoryPath.category.lowercase())
-                    append('/')
-                    append(it.categoryPath.subcategory.lowercase())
-                }
-            }
+            SortField.CATEGORY -> compareBy<MemoraItem> { "${it.categoryPath.category}/${it.categoryPath.subcategory}".lowercase() }
         }.thenBy { it.id }
 
         return if (requestedSort.direction == SortDirection.ASC) {

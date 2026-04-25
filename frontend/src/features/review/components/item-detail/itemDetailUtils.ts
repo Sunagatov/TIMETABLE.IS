@@ -7,8 +7,9 @@ import type {
   Priority,
   UpdateItemRequest
 } from "../../types/reviewTypes";
+import type { ReviewView } from "../../reviewViewMeta";
 
-export type DetailView = "needs-review" | "failures" | "approved";
+export type DetailView = ReviewView;
 
 export type ItemDetailFormState = {
   title: string;

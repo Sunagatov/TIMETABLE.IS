@@ -18,7 +18,6 @@ import com.sunagatov.memora.backend.item.ai.AiAnswerDraft
 import com.sunagatov.memora.backend.item.ai.AiCategoryDraft
 import com.sunagatov.memora.backend.item.ai.AiTextDraft
 import com.sunagatov.memora.backend.item.ai.AiTextInput
-import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
 import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.item.ai.DeterministicMemoraAiPort
@@ -315,7 +314,7 @@ class FoundationServicesTests {
 
         val approved = reviewService.editAndApprove(
             ingested.id,
-            EditAndApproveRequest(
+            UpdateItemRequest(
                 categoryPath = CategoryPathRequest("Work", "Backend")
             )
         )
@@ -541,7 +540,7 @@ class FoundationServicesTests {
 
         // Already approved — edit-and-approve must be rejected
         assertFailsWith<IllegalArgumentException> {
-            reviewService.editAndApprove(ingested.id, EditAndApproveRequest(title = "Cannot re-approve"))
+            reviewService.editAndApprove(ingested.id, UpdateItemRequest(title = "Cannot re-approve"))
         }
     }
 
@@ -599,7 +598,7 @@ class FoundationServicesTests {
         )
         reviewService.editAndApprove(
             ingested.id,
-            EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Ops"))
+            UpdateItemRequest(categoryPath = CategoryPathRequest("Work", "Ops"))
         )
 
         assertFailsWith<IllegalArgumentException> {
@@ -708,7 +707,7 @@ class FoundationServicesTests {
         val inWork = captureService.ingest(
             TelegramIngestRequest(telegramUserId = "owner-1", telegramChatId = "chat-1", telegramMessageId = "msg-catflt-2", text = "work kotlin item")
         )
-        reviewService.editAndApprove(inWork.id, EditAndApproveRequest(categoryPath = CategoryPathRequest("Work", "Code")))
+        reviewService.editAndApprove(inWork.id, UpdateItemRequest(categoryPath = CategoryPathRequest("Work", "Code")))
 
         val all = itemService.listApproved()
         assertEquals(2, all.size)
@@ -793,7 +792,7 @@ class FoundationServicesTests {
         )
         reviewService.editAndApprove(
             question.id,
-            EditAndApproveRequest(answer = "Photosynthesis is the process by which plants convert light into energy.")
+            UpdateItemRequest(answer = "Photosynthesis is the process by which plants convert light into energy.")
         )
 
         val results = itemService.listApproved(ItemListQueryRequest(keyword = "photosynthesis"))

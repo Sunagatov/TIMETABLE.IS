@@ -4,6 +4,7 @@ import {
   DEFAULT_FAILURE_FILTERS,
   DEFAULT_NEEDS_REVIEW_FILTERS
 } from "../reviewConstants";
+import type { ReviewView } from "../reviewViewMeta";
 import type {
   ApprovedFilters,
   CategoryPathFilter,
@@ -12,7 +13,6 @@ import type {
   NeedsReviewFilters
 } from "../types/reviewTypes";
 
-export type ReviewView = "needs-review" | "failures" | "approved";
 export type MobilePanel = "sidebar" | "list" | "detail";
 
 export const DEFAULT_NR_FILTERS: NeedsReviewFilters = DEFAULT_NEEDS_REVIEW_FILTERS;

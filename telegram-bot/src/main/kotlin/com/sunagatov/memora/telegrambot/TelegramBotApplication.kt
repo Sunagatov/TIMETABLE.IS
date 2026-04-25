@@ -16,11 +16,11 @@ fun main() {
     val logger = LoggerFactory.getLogger("MemoraTelegramBot")
     val settings = BotSettings.fromEnvironment()
     val telegramClient = OkHttpTelegramClient(settings.token)
-    val backendClient = BackendClient(settings = settings)
-    val bot = MemoraLongPollingBot(
+    val backendGateway = BackendClient(settings = settings)
+    val bot = MemoraLongPollingBot.create(
         settings = settings,
         messageSender = TelegramClientMessageSender(telegramClient),
-        backendClient = backendClient,
+        backendGateway = backendGateway,
         updateMapper = TelegramUpdateMapper(),
         startCommandHandler = StartCommandHandler()
     )

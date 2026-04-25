@@ -21,30 +21,6 @@ data class UpdateItemRequest(
     val answerStatus: AnswerStatus? = null
 )
 
-data class EditAndApproveRequest(
-    val title: String? = null,
-    val cleanedText: String? = null,
-    val rawTranscript: String? = null,
-    val type: ItemType? = null,
-    @field:Valid
-    val categoryPath: CategoryPathRequest? = null,
-    val priority: Priority? = null,
-    val answer: String? = null,
-    val answerStatus: AnswerStatus? = null
-) {
-    fun toUpdateItemRequest(): UpdateItemRequest =
-        UpdateItemRequest(
-            title = title,
-            cleanedText = cleanedText,
-            rawTranscript = rawTranscript,
-            type = type,
-            categoryPath = categoryPath,
-            priority = priority,
-            answer = answer,
-            answerStatus = answerStatus
-        )
-}
-
 data class ItemListQueryRequest(
     val keyword: String? = null,
     val type: ItemType? = null,

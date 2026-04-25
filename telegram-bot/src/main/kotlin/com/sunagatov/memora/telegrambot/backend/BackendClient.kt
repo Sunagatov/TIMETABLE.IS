@@ -14,13 +14,6 @@ import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 import java.time.Duration
 
-interface BackendGateway {
-    fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse
-    fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse
-    fun fetchFailureNotifications(): List<TelegramFailureNotification>
-    fun acknowledgeFailureNotification(notificationId: String)
-}
-
 class BackendClient(
     private val settings: BotSettings
 ) : BackendGateway {
@@ -31,27 +24,20 @@ class BackendClient(
     private val mapper = jacksonObjectMapper()
 
     override fun ingestText(request: TelegramIngestRequest): TelegramAcceptedResponse =
-        post(path = settings.ingestPath, requestBody = request)
+        ingest(request)
 
     override fun ingestVoice(request: TelegramIngestRequest): TelegramAcceptedResponse =
-        post(path = settings.ingestPath, requestBody = request)
+        ingest(request)
 
     override fun fetchFailureNotifications(): List<TelegramFailureNotification> {
-        val response = send(
+        val responseBody = send(
             authorizedRequestBuilder(settings.failureNotificationsPath)
                 .header("Accept", "application/json")
                 .GET()
                 .build()
-        )
+        ).body()
 
-        return when {
-            response.body().isBlank() -> emptyList()
-            response.body().trimStart().startsWith("[") -> mapper.readValue(response.body())
-            else -> {
-                val root = mapper.readTree(response.body())
-                root["notifications"]?.let { mapper.readValue(it.toString()) } ?: emptyList()
-            }
-        }
+        return parseFailureNotifications(responseBody)
     }
 
     override fun acknowledgeFailureNotification(notificationId: String) {
@@ -62,6 +48,9 @@ class BackendClient(
                 .build()
         )
     }
+
+    private fun ingest(request: TelegramIngestRequest): TelegramAcceptedResponse =
+        post(path = settings.ingestPath, requestBody = request)
 
     private inline fun <reified T> post(path: String, requestBody: Any): T {
         val payload = mapper.writeValueAsString(requestBody)
@@ -74,6 +63,16 @@ class BackendClient(
         )
         return mapper.readValue(response.body())
     }
+
+    private fun parseFailureNotifications(responseBody: String): List<TelegramFailureNotification> =
+        when {
+            responseBody.isBlank() -> emptyList()
+            responseBody.trimStart().startsWith("[") -> mapper.readValue(responseBody)
+            else -> {
+                val root = mapper.readTree(responseBody)
+                root["notifications"]?.let { mapper.readValue(it.toString()) } ?: emptyList()
+            }
+        }
 
     private fun send(httpRequest: HttpRequest): HttpResponse<String> =
         try {

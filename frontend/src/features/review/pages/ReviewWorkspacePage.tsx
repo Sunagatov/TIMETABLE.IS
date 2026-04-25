@@ -18,6 +18,7 @@ import {
   DEFAULT_NR_FILTERS,
   useReviewWorkspaceState
 } from "../hooks/useReviewWorkspaceState";
+import { REVIEW_VIEW_META, type ReviewView } from "../reviewViewMeta";
 import type { CategoryPathFilter, RenameCategoryRequest } from "../types/reviewTypes";
 
 type Props = {
@@ -38,13 +39,9 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     setActionError: state.setActionError,
     setSelectedItemId: state.setSelectedItemId
   });
-
-  const items =
-    state.view === "needs-review"
-      ? queries.needsReview.data ?? []
-      : state.view === "failures"
-        ? queries.failures.data ?? []
-        : queries.approved.data ?? [];
+  const items = getItemsForView(state.view, queries);
+  const listQuery = getListQueryForView(state.view, queries);
+  const viewMeta = REVIEW_VIEW_META[state.view];
 
   useEffect(() => {
     if (!items.length) {
@@ -83,15 +80,7 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
     failures: queries.failures.data?.length ?? 0,
     approved: queries.approved.data?.length ?? 0
   };
-  const title = state.view === "needs-review" ? "Needs Review" : state.view === "failures" ? "Failures" : "Approved";
-  const listQuery = currentListQuery();
-  const description =
-    state.view === "needs-review"
-      ? "Unapproved items waiting for human review."
-      : state.view === "failures"
-        ? "Items that failed at a processing stage and remain retryable."
-        : "Human-approved items only.";
-  const activeCount = state.view === "needs-review" ? counts.needsReview : state.view === "failures" ? counts.failures : counts.approved;
+  const activeCount = countForView(state.view, counts);
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] text-stone-900">
@@ -116,12 +105,12 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
 
         <WorkspaceColumn panel="list" activePanel={state.mobilePanel}>
           <ReviewQueueList
-            title={title}
-            description={description}
+            title={viewMeta.title}
+            description={viewMeta.description}
             items={items}
             selectedItemId={state.selectedItemId}
             onSelect={(itemId) => { state.setSelectedItemId(itemId); state.setMobilePanel("detail"); }}
-            toolbar={renderToolbar()}
+            toolbar={renderToolbarForView(state.view, state, queries.categories.data ?? [])}
             view={state.view}
             isLoading={listQuery.isPending}
             errorMessage={listQuery.error instanceof Error ? listQuery.error.message : null}
@@ -155,7 +144,7 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
       </div>
       <MobileBottomNav
         panel={state.mobilePanel}
-        title={title}
+        title={viewMeta.title}
         activeCount={activeCount}
         hasSelectedItem={Boolean(state.selectedItemId)}
         onChange={state.setMobilePanel}
@@ -170,24 +159,75 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
       if (original && sameFilter(activeFilter, original)) setActiveFilter(request.path);
     });
   }
-
-  function renderToolbar() {
-    const categories = queries.categories.data ?? [];
-    if (state.view === "needs-review") {
-      return <NeedsReviewFiltersBar filters={state.nrFilters} categories={categories} onChange={state.setNrFilters} onReset={() => state.setNrFilters(DEFAULT_NR_FILTERS)} />;
-    }
-    if (state.view === "failures") {
-      return <FailuresFiltersBar filters={state.failFilters} categories={categories} onChange={state.setFailFilters} onReset={() => state.setFailFilters(DEFAULT_FAIL_FILTERS)} />;
-    }
-    return <ApprovedFiltersBar filters={state.approvedFilters} categories={categories} onChange={state.setApprovedFilters} onReset={() => state.setApprovedFilters(DEFAULT_APPROVED_FILTERS)} />;
-  }
-
-  function currentListQuery() {
-    return state.view === "needs-review" ? queries.needsReview : state.view === "failures" ? queries.failures : queries.approved;
-  }
 }
 
 function sameFilter(left: CategoryPathFilter, right: CategoryPathFilter): boolean {
   return left.category === right.category &&
     left.subcategory === right.subcategory;
+}
+
+function countForView(
+  view: ReviewView,
+  counts: { needsReview: number; failures: number; approved: number }
+): number {
+  if (view === "needs-review") return counts.needsReview;
+  if (view === "failures") return counts.failures;
+  return counts.approved;
+}
+
+function getItemsForView(
+  view: ReviewView,
+  queries: ReturnType<typeof useReviewQueries>
+) {
+  if (view === "needs-review") return queries.needsReview.data ?? [];
+  if (view === "failures") return queries.failures.data ?? [];
+  return queries.approved.data ?? [];
+}
+
+function getListQueryForView(
+  view: ReviewView,
+  queries: ReturnType<typeof useReviewQueries>
+) {
+  if (view === "needs-review") return queries.needsReview;
+  if (view === "failures") return queries.failures;
+  return queries.approved;
+}
+
+function renderToolbarForView(
+  view: ReviewView,
+  state: ReturnType<typeof useReviewWorkspaceState>,
+  categories: ReturnType<typeof useReviewQueries>["categories"]["data"] extends infer T
+    ? NonNullable<T>
+    : never
+) {
+  if (view === "needs-review") {
+    return (
+      <NeedsReviewFiltersBar
+        filters={state.nrFilters}
+        categories={categories}
+        onChange={state.setNrFilters}
+        onReset={() => state.setNrFilters(DEFAULT_NR_FILTERS)}
+      />
+    );
+  }
+
+  if (view === "failures") {
+    return (
+      <FailuresFiltersBar
+        filters={state.failFilters}
+        categories={categories}
+        onChange={state.setFailFilters}
+        onReset={() => state.setFailFilters(DEFAULT_FAIL_FILTERS)}
+      />
+    );
+  }
+
+  return (
+    <ApprovedFiltersBar
+      filters={state.approvedFilters}
+      categories={categories}
+      onChange={state.setApprovedFilters}
+      onReset={() => state.setApprovedFilters(DEFAULT_APPROVED_FILTERS)}
+    />
+  );
 }

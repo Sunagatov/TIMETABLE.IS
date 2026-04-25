@@ -1,8 +1,8 @@
 package com.sunagatov.memora.backend.review.application
 
 import com.sunagatov.memora.backend.category.application.CategoryService
-import com.sunagatov.memora.backend.item.api.EditAndApproveRequest
 import com.sunagatov.memora.backend.item.api.ItemListQueryRequest
+import com.sunagatov.memora.backend.item.api.UpdateItemRequest
 import com.sunagatov.memora.backend.item.application.ItemService
 import com.sunagatov.memora.backend.item.application.ItemProcessingService
 import com.sunagatov.memora.backend.item.application.ItemQueryService
@@ -49,8 +49,8 @@ class ReviewService(
         return itemStore.save(next)
     }
 
-    fun editAndApprove(itemId: String, request: EditAndApproveRequest): MemoraItem =
-        itemService.editAndApprove(itemId, request.toUpdateItemRequest())
+    fun editAndApprove(itemId: String, request: UpdateItemRequest): MemoraItem =
+        itemService.editAndApprove(itemId, request)
 
     fun approveCategoryProposal(itemId: String): MemoraItem {
         val item = requireItem(itemId)

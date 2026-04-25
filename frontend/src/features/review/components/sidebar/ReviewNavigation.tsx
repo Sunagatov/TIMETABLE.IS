@@ -1,4 +1,4 @@
-import type { ReviewView } from "../../hooks/useReviewWorkspaceState";
+import { REVIEW_VIEW_META, REVIEW_VIEW_ORDER, type ReviewView } from "../../reviewViewMeta";
 
 type Props = {
   view: ReviewView;
@@ -11,11 +11,25 @@ type Props = {
 };
 
 export function ReviewNavigation({ view, counts, onChange }: Props) {
+  const icons: Record<ReviewView, React.ReactNode> = {
+    "needs-review": <InboxIcon />,
+    failures: <AlertIcon />,
+    approved: <CheckIcon />
+  };
+
   return (
     <nav className="space-y-0.5 px-3">
-      <NavItem active={view === "needs-review"} onClick={() => onChange("needs-review")} icon={<InboxIcon />} label="Needs Review" count={counts.needsReview} countColor="amber" />
-      <NavItem active={view === "failures"} onClick={() => onChange("failures")} icon={<AlertIcon />} label="Failures" count={counts.failures} countColor="red" />
-      <NavItem active={view === "approved"} onClick={() => onChange("approved")} icon={<CheckIcon />} label="Approved" count={counts.approved} countColor="emerald" />
+      {REVIEW_VIEW_ORDER.map((reviewView) => (
+        <NavItem
+          key={reviewView}
+          active={view === reviewView}
+          onClick={() => onChange(reviewView)}
+          icon={icons[reviewView]}
+          label={REVIEW_VIEW_META[reviewView].title}
+          count={countForView(reviewView, counts)}
+          countClass={REVIEW_VIEW_META[reviewView].navCountClass}
+        />
+      ))}
     </nav>
   );
 }
@@ -26,15 +40,8 @@ function NavItem(props: {
   icon: React.ReactNode;
   label: string;
   count: number;
-  countColor: "amber" | "red" | "emerald";
+  countClass: string;
 }) {
-  const countClass =
-    props.countColor === "amber"
-      ? "bg-amber-500/20 text-amber-400"
-      : props.countColor === "red"
-        ? "bg-red-500/20 text-red-400"
-        : "bg-emerald-500/20 text-emerald-400";
-
   return (
     <button
       type="button"
@@ -46,12 +53,21 @@ function NavItem(props: {
       <span className={props.active ? "text-stone-200" : "text-stone-600"}>{props.icon}</span>
       <span className="flex-1 truncate">{props.label}</span>
       {props.count > 0 && (
-        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${countClass}`}>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${props.countClass}`}>
           {props.count}
         </span>
       )}
     </button>
   );
+}
+
+function countForView(
+  view: ReviewView,
+  counts: { needsReview: number; failures: number; approved: number }
+): number {
+  if (view === "needs-review") return counts.needsReview;
+  if (view === "failures") return counts.failures;
+  return counts.approved;
 }
 
 function InboxIcon() {
