@@ -73,6 +73,9 @@ For current backend foundation work, the most common requirement files are:
 - filter params for all list endpoints: keyword, type, priority, status, category, subcategory, subsubcategory, `createdFrom`, `createdTo`, sort
 - sort format: `field-direction` (createdAt-desc, title-asc, category-desc, etc.)
 - MongoDB persistence is active in production; in-memory stores are test-only
+- voice transcription is **live** — `transcription/` package handles download → audio prep → OpenAI-compatible HTTP call to `http://whisper-worker:8000`
+- AI categorization/answer generation: still stub/placeholder
+- Spring Boot 4: MongoDB property is `spring.mongodb.uri` (not `spring.data.mongodb.uri` — deprecated at error level, completely ignored)
 
 ### Frontend
 - review-first 3-column workspace: sidebar / item list / item detail

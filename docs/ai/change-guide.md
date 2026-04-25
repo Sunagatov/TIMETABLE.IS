@@ -75,6 +75,22 @@ Also review:
 - root `README.md`
 - subproject READMEs
 
+## If you change voice transcription (client side)
+
+Also review:
+- `backend/src/main/kotlin/.../transcription/` (all 5 files)
+- `backend/src/main/resources/application.yml` — `memora.transcription-*` keys
+- `docs/ai/env-runtime-reference.md` (transcription env vars table)
+- `Vault/apps/memora/backend/.env.prod` — `MEMORA_TRANSCRIPTION_API_BASE_URL`, `MEMORA_TRANSCRIPTION_MODEL`
+- `Vault/apps/whisper/` — if changing whisper deployment itself
+
+Key facts:
+- `OpenAiAudioTranscriptionClient` posts to `${transcriptionApiBaseUrl}/v1/audio/transcriptions`
+- multipart fields: `model`, `language` (optional, omitted if blank), `response_format=text`, `file`
+- prod base URL: `http://whisper-worker:8000`; API key: `placeholder` (whisper doesn't validate)
+- model: `Systran/faster-whisper-base` (downloaded on first request from HuggingFace)
+- `MEMORA_TRANSCRIPTION_API_KEY` must be non-blank — code throws if blank (even though whisper ignores it)
+
 ## If you think a change belongs in deployment/runtime
 
 Stop and check Vault first.

@@ -36,6 +36,7 @@ Owns production/deployment/runtime truth.
   - `item` — item model, lifecycle, query service
   - `review` — needs-review/failures lists + approve/reject/retry/trash/edit-and-approve
   - `health` — `GET /api/health`
+  - `transcription` — voice pipeline: download from Telegram, audio preparation (ffmpeg fallback), OpenAI-compatible HTTP client
 
 ### Frontend
 - React 19 + TypeScript + Vite 7

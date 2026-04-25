@@ -67,6 +67,21 @@ They are re-derived each poll, not persisted. If an item is retried and fails ag
 Filter state uses `"ALL"` as the "no filter selected" sentinel for select dropdowns.
 `buildQuery()` in `reviewApi.ts` strips it before building the URL. Never send `"ALL"` to backend.
 
+### Spring Boot 4 MongoDB property name trap
+
+`spring.data.mongodb.uri` is **error-level deprecated** in Spring Boot 4.0 and silently ignored at runtime.
+The correct property is `spring.mongodb.uri`. Env var: `SPRING_MONGODB_URI`.
+If you use the old property name (or `SPRING_DATA_MONGODB_URI`), the backend will connect to `localhost:27017` instead of the configured URI, and crash-loop in production.
+
+In `application.yml` this is: `spring.mongodb.uri: ${MONGODB_URI:mongodb://localhost:27017/memora}`.
+
+### Whisper network startup dependency
+
+`memora-backend` container joins `whisper-network` as an external network.
+`whisper-network` is created by `apps/whisper/docker-compose.yml`.
+If whisper is not running when backend starts, Docker Compose will fail with a network-not-found error.
+Deploy/start whisper first, then Memora backend.
+
 ## Editing strategy
 
 - modify as few files as possible

@@ -62,6 +62,25 @@ Read:
 
 Note: `notificationId` is `"${item.id}:${item.updatedAt.epochSecond}"` — re-derived each poll, not stored.
 
+## If changing voice transcription integration
+
+Read:
+- `backend/src/main/kotlin/.../transcription/application/OpenAiCompatibleVoiceTranscriptionService.kt`
+- `backend/src/main/kotlin/.../transcription/infrastructure/OpenAiAudioTranscriptionClient.kt`
+- `backend/src/main/kotlin/.../transcription/infrastructure/TelegramVoiceDownloader.kt`
+- `backend/src/main/kotlin/.../transcription/infrastructure/TranscriptionAudioPreparer.kt`
+- `backend/src/main/resources/application.yml` — `memora.transcription-*` config keys
+- `docs/ai/env-runtime-reference.md` — transcription env vars
+
+For runtime/deployment changes (model, URL, whisper service config):
+- `Vault/apps/whisper/` — whisper service deployment
+- `Vault/apps/memora/backend/.env.prod` — `MEMORA_TRANSCRIPTION_API_BASE_URL`, `MEMORA_TRANSCRIPTION_MODEL`
+
+Notes:
+- transcription client validates `MEMORA_TRANSCRIPTION_API_KEY` is non-blank (required; whisper itself doesn't validate it)
+- in tests: transcription fails by design (no real whisper endpoint) → `TRANSCRIPTION_FAILED` test assertion remains valid
+- in production: success path → `AI_PROCESSED_UNREVIEWED`
+
 ## If changing deployment or runtime
 Do not start here.
 Read Vault docs first:

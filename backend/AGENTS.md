@@ -157,12 +157,13 @@ All three list endpoints share the same query param model:
 - `testProperties()` helper provides valid bcrypt hash and sane defaults
 - `MemoraBackendApplicationTests` — Spring context load test only
 - Current test count: 23 in `FoundationServicesTests` + 1 context load = 24 total
+- **Note on voice tests**: `voice ingest → TRANSCRIPTION_FAILED` is still correct in tests — no real whisper endpoint in test context. In production, transcription succeeds. Do not change this test expectation.
 
 Tests that must remain green:
 - owner-only ingest (non-owner throws)
 - xor validation (both text+voice rejected; neither rejected)
 - text ingest → AI_PROCESSED_UNREVIEWED
-- voice ingest → TRANSCRIPTION_FAILED
+- voice ingest → TRANSCRIPTION_FAILED (test-only; production uses real whisper → AI_PROCESSED_UNREVIEWED)
 - category rename cascades to item.categoryPath but not aiCategoryPath
 - approved edits stay approved
 - approved query with keyword/status/sort filters

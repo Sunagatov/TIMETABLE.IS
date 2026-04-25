@@ -19,8 +19,8 @@ It is not yet the full target V1 implementation.
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
 - backend deterministic placeholder AI port for cleaned text, type, category proposal, answer generation, and regeneration actions
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
-- backend in-memory stores for items, sessions, categories, and failure notifications
-- backend voice transcription pipeline: Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`), configured via `MEMORA_TRANSCRIPTION_API_KEY`, `MEMORA_TRANSCRIPTION_API_BASE_URL`, `MEMORA_TRANSCRIPTION_MODEL`, `MEMORA_TELEGRAM_BOT_TOKEN`
+- backend MongoDB persistence (Spring Boot 4; use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)
+- backend voice transcription pipeline (live in production): Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`) — `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
 - frontend session-aware login + review workspace
 - frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
 - frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
@@ -51,7 +51,8 @@ It is not yet the full target V1 implementation.
   - `health`
   - `item`
   - `review`
-- voice ingest persists Telegram traceability metadata, is durably accepted first, and then reaches visible retryable transcription failure after bounded retries
+  - `transcription`
+- voice ingest persists Telegram traceability metadata, is durably accepted first; in production reaches AI_PROCESSED_UNREVIEWED on success or TRANSCRIPTION_FAILED after retries
 - backend exposes bot-facing failure notification polling + delivery acknowledgement endpoints for failed Telegram items
 - text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), answer generation or answer failure visibility, and category proposal support
 - approved item edits remain approved in V1; reviewable edits require `edit-and-approve`

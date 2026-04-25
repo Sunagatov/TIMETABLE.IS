@@ -61,8 +61,18 @@ Read:
 
 Use `directExecutor()` for synchronous processing. Use `testProperties()` for consistent config.
 
+## Voice transcription task
+Read:
+1. `backend/src/main/kotlin/.../transcription/` — all 5 files
+2. `backend/src/main/resources/application.yml` — `memora.transcription-*` keys
+3. `docs/ai/change-guide.md` (transcription section)
+
+For production config or model changes: stop and go to Vault (`apps/whisper/`, `apps/memora/backend/.env.prod`).
+
 ## Deployment/runtime/prod question
-Read Vault docs first.
+Read Vault docs first:
+- `Vault/apps/memora/AI_AGENT_GUIDE.md`
+- `Vault/apps/whisper/AI_AGENT_GUIDE.md` (for transcription service)
 
 ## Unclear task
 Start narrow:

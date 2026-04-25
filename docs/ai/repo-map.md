@@ -20,6 +20,7 @@
   - `item/` — MemoraItem model, ItemEnums, ItemService, ItemQueryService, ItemProcessingService, store
   - `review/` — ReviewController, ReviewService
   - `health/` — HealthController
+  - `transcription/` — VoiceTranscriptionService (interface), OpenAiCompatibleVoiceTranscriptionService, OpenAiAudioTranscriptionClient, TelegramVoiceDownloader, TranscriptionAudioPreparer
 - `backend/src/test/kotlin/com/sunagatov/memora/backend/`
   - `FoundationServicesTests.kt` ← 12 tests covering all state guards and contracts
   - `MemoraBackendApplicationTests.kt` ← Spring context load
