@@ -36,7 +36,7 @@ Current areas:
 - `item`
 - `review`
 - `transcription` — voice transcription pipeline: `VoiceTranscriptionService` (interface), `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
-- `item/ai` — deterministic AI adapter for local/dev/test fallback; LangChain4j-backed OpenAI-compatible adapter when `MEMORA_AI_MODE=openai` for real V1 polishing
+- `item/ai` — deterministic AI adapter for local/dev/test fallback; LangChain4j-backed OpenAI-compatible adapter when `MEMORA_AI_MODE=openai` for real V1 polishing, with safe fallback title derivation when a provider response leaves `title` blank
 
 Do not drift back into a broad global technical-layer structure.
 
@@ -137,8 +137,9 @@ All three list endpoints share the same query param model:
 - `MONGODB_URI` (default: `mongodb://localhost:27017/memora`) — resolves via `${MONGODB_URI}` placeholder in `spring.mongodb.uri`; env var `SPRING_MONGODB_URI` also maps to `spring.mongodb.uri`
 - `MEMORA_TRANSCRIPTION_API_BASE_URL` (default: `https://api.openai.com`; prod: `http://whisper-worker:8000`)
 - `MEMORA_TRANSCRIPTION_API_KEY` (no default; prod: `placeholder` — whisper does not validate this)
-- `MEMORA_TRANSCRIPTION_MODEL` (default: `gpt-4o-mini-transcribe`; prod: `Systran/faster-whisper-base`)
+- `MEMORA_TRANSCRIPTION_MODEL` (default: `gpt-4o-mini-transcribe`; current prod in Vault: `Systran/faster-whisper-medium`)
 - `MEMORA_TRANSCRIPTION_LANGUAGE` (optional ISO-639-1 language hint)
+- `MEMORA_TRANSCRIPTION_PROMPT` (optional domain hint forwarded to the transcription endpoint when non-blank)
 - `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` (default: 120)
 - `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` (default: 26214400)
 - `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` (default: 600)
@@ -171,6 +172,7 @@ Production-AI safety anchor points:
 - MongoDB is the production store; in-memory stores are test-only
 - Mongo-backed session storage is the default; in-memory session storage follows `MEMORA_STORAGE_MODE=in-memory`
 - async processing catches non-runtime exceptions from HTTP/IO and maps them to visible failure states; interrupted processing re-interrupts the thread
+- direct backend `./gradlew bootRun` does not auto-load `.env.local`; document local startup assumptions in `backend/README.md`, and keep Vault local task truth in `Vault/apps/memora/backend/`
 
 ## Testing patterns
 

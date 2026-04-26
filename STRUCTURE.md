@@ -20,4 +20,5 @@ High-signal reminders:
 - telegram bot stays thin
 - category paths are exactly 2 levels in V1
 - deterministic AI is local/dev/test fallback only
+- source-level config and local bootstrap caveats live in `.project/docs/ai/env-runtime-reference.md`
 - production/deployment/runtime truth belongs in Vault, not Memora

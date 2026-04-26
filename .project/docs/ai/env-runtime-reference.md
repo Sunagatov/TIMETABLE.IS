@@ -13,8 +13,10 @@ Spring Boot config via `application.yml` with env var overrides:
 | Env var | application.yml key | Default | Notes |
 |---------|-------------------|---------|-------|
 | `BACKEND_ALLOWED_ORIGIN` | `memora.http.allowed-origin` | `http://localhost:5173` | CORS origin |
+| `BACKEND_APP_PASSWORD` | `memora.auth.app-password` | — | Optional local plaintext password override; unsafe for production and rejected by production validation |
 | `BACKEND_APP_PASSWORD_HASH` | `memora.auth.app-password-hash` | bcrypt hash | bcrypt hash of app password |
 | `BACKEND_SESSION_DAYS` | `memora.auth.session-days` | `30` | session lifetime |
+| `BACKEND_COOKIE_SECURE` | `memora.auth.cookie-secure` | `true` | Set `false` only for local HTTP browser testing |
 | `BACKEND_BOT_INGEST_TOKEN` | `memora.capture.bot-ingest-token` | `change-me` | `X-Memora-Bot-Token` value |
 | `MEMORA_OWNER_TELEGRAM_USER_ID` | `memora.capture.owner-telegram-user-id` | placeholder | String; compared to `telegramUserId` in ingest request; blank config rejects ingest |
 | `DEFAULT_CATEGORY_PATH` | `memora.category.default-path` | `Default/General` | format: `L1/L2` (legacy `L1/L2/L3` tolerated with level 3 ignored) |
@@ -27,9 +29,12 @@ Spring Boot config via `application.yml` with env var overrides:
 | `BACKEND_PORT` | `server.port` | `8080` | |
 | `MEMORA_TRANSCRIPTION_API_BASE_URL` | `memora.transcription.api-base-url` | `https://api.openai.com` | Prod: `http://whisper-worker:8000` (self-hosted) |
 | `MEMORA_TRANSCRIPTION_API_KEY` | `memora.transcription.api-key` | — | Prod: `placeholder`; whisper does not validate |
-| `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription.model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-base` |
+| `MEMORA_TRANSCRIPTION_MODEL` | `memora.transcription.model` | `gpt-4o-mini-transcribe` | Prod: `Systran/faster-whisper-medium` |
 | `MEMORA_TRANSCRIPTION_LANGUAGE` | `memora.transcription.language` | — | Optional ISO-639-1 language hint |
+| `MEMORA_TRANSCRIPTION_PROMPT` | `memora.transcription.prompt` | — | Optional domain hint for names/terms; forwarded to the OpenAI-compatible transcription endpoint when non-blank |
 | `MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS` | `memora.transcription.timeout-seconds` | `120` | HTTP timeout for transcription calls |
+| `MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES` | `memora.transcription.max-audio-bytes` | `26214400` | Reject oversize uploads before remote transcription |
+| `MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS` | `memora.transcription.max-duration-seconds` | `600` | Reject overlong uploads before remote transcription |
 | `MEMORA_AI_MODE` | `memora.ai.mode` | `deterministic` | `openai` is required for real V1 AI polishing; deterministic is local/dev/test fallback only; `openai` mode is implemented through LangChain4j in the backend |
 | `MEMORA_AI_API_KEY` | `memora.ai.api-key` | — | Required when `MEMORA_AI_MODE=openai`; production validation requires non-blank |
 | `MEMORA_AI_API_BASE_URL` | `memora.ai.api-base-url` | `https://api.openai.com` | Required and validated non-blank when production validation is enabled |
@@ -47,6 +52,26 @@ Production-like AI safety:
 - the same validator also activates for Spring `prod` / `production` profiles
 - text polishing/classification uses LangChain4j with Memora-owned env keys; Whisper transcription remains separate and is not handled by LangChain4j
 - backend wires LangChain4j manually from Memora properties; it does not rely on Spring Boot starter auto-config or LangChain4j-specific env names
+
+## Local orchestration realities
+
+- Preferred local orchestration is in Vault, not raw source commands:
+  - `Vault/apps/memora/backend`: `task local:doctor`, `task local:run`, `task local:whisper:tunnel`
+  - `Vault/apps/memora/frontend`: `task local:run`
+  - `Vault/apps/memora/telegrambot`: `task local:run`
+- Those Vault tasks exist because they handle source-path resolution, bash-specific sourcing, env loading, and project-local Gradle cache isolation.
+- Raw `cd backend && ./gradlew bootRun` does **not** auto-load `backend/.env.local`. Load the file explicitly first if you bypass Vault tasks:
+
+```bash
+cd backend
+set -a
+source .env.local
+set +a
+./gradlew bootRun
+```
+
+- For local browser auth over plain HTTP, keep `BACKEND_COOKIE_SECURE=false` or the session cookie will be marked `Secure` and ignored by the browser on `http://localhost`.
+- For local voice transcription through the Hetzner SSH tunnel, `MEMORA_TRANSCRIPTION_API_KEY=placeholder` is valid because the self-hosted Whisper service does not validate the key.
 
 ## Backend validation commands
 

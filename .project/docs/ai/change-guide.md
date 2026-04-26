@@ -223,10 +223,11 @@ Also review:
 
 Key facts:
 - `OpenAiAudioTranscriptionClient` posts to `${transcriptionApiBaseUrl}/v1/audio/transcriptions`
-- multipart fields: `model`, `language` (optional, omitted if blank), `response_format=text`, `file`
+- multipart fields: `model`, `language` (optional, omitted if blank), `prompt` (optional, omitted if blank), `response_format=text`, `file`
 - prod base URL: `http://whisper-worker:8000`; API key: `placeholder` (whisper doesn't validate)
-- model: `Systran/faster-whisper-base` (downloaded on first request from HuggingFace)
+- current prod model in Vault: `Systran/faster-whisper-medium` (downloaded on first request from HuggingFace)
 - `MEMORA_TRANSCRIPTION_API_KEY` must be non-blank — code throws if blank (even though whisper ignores it)
+- local orchestration and SSH tunnel behavior are Vault-owned: check `Vault/apps/memora/backend/Taskfile.yml` and `Vault/apps/whisper/` before changing startup assumptions or transcription routing
 
 ## If you clean up hardcoded values
 

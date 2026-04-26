@@ -18,10 +18,11 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - backend explicit item lifecycle/status model
 - backend separation of original AI output vs latest human-facing item values, including `aiAnswer` vs `answer`, `proposedCategoryPath`/`proposedCategoryStatus`, and answer lifecycle state
 - backend deterministic AI port for local/dev/test fallback cleaned text, type, category proposal, answer generation, and regeneration actions; LangChain4j-backed OpenAI-compatible text AI adapter is selected by `MEMORA_AI_MODE=openai` for real V1 polishing
+- backend OpenAI-compatible text AI path now tolerates partial structured responses by deriving a safe fallback title from cleaned/source text instead of failing the whole item only because the provider returned a blank `title`
 - backend Mongo-backed sessions by default; in-memory session store is test/local only with `MEMORA_STORAGE_MODE=in-memory`
 - backend direct item patch is approved-only; reviewable edits go through `edit-and-approve`
 - backend MongoDB persistence (Spring Boot 4; use `spring.mongodb.uri`, not `spring.data.mongodb.uri`)
-- backend voice transcription pipeline (live in production): Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`) — `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`
+- backend voice transcription pipeline (live in production): Telegram voice download → audio preparation (ffmpeg fallback for unsupported formats) → OpenAI-compatible transcription API (`/v1/audio/transcriptions`) — `transcription/` package: `OpenAiCompatibleVoiceTranscriptionService`, `OpenAiAudioTranscriptionClient`, `TelegramVoiceDownloader`, `TranscriptionAudioPreparer`; request supports optional `language` and `prompt` hints
 - frontend session-aware login + review workspace
 - frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
 - frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
@@ -41,6 +42,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 
 - MongoDB persistence is **active** — backend connects to a Mongo sidecar via `spring.mongodb.uri` (Spring Boot 4 property name; `spring.data.mongodb.uri` is error-level deprecated and ignored)
 - Voice transcription is **active** — self-hosted `faster-whisper-server` (`whisper-worker`) runs under `whisper-network` in Vault; backend connects via `MEMORA_TRANSCRIPTION_API_BASE_URL=http://whisper-worker:8000`
+- Current production Whisper model in Vault is `Systran/faster-whisper-medium`; model choice and server sizing remain Vault-owned runtime truth
 - Deployment/runtime is owned by Vault (`apps/memora/`, `apps/whisper/`)
 
 ## What is still intentionally starter-level
@@ -63,6 +65,8 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
   - `review`
   - `transcription`
 - voice ingest persists Telegram traceability metadata, is durably accepted first; in production reaches AI_PROCESSED_UNREVIEWED on success or TRANSCRIPTION_FAILED after retries
+- local browser auth over plain HTTP requires `BACKEND_COOKIE_SECURE=false`; otherwise the secure session cookie is set but not sent back by the browser
+- direct source-repo `./gradlew bootRun` does not auto-load `backend/.env.local`; preferred local orchestration lives in Vault tasks, or load `.env.local` explicitly before raw Gradle commands
 - backend exposes bot-facing failure notification polling + delivery acknowledgement endpoints for failed Telegram items
 - text ingest is durably accepted first, then processed asynchronously into Needs Review with normalized text, inferred type (including QUESTION detection), answer generation or answer failure visibility, and category proposal support
 - async processing maps HTTP/IO exceptions to visible failure states instead of leaving accepted items in `RECEIVED`

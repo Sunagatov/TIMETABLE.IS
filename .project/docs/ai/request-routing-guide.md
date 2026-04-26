@@ -51,6 +51,7 @@ Key:
 - real V1 polishing requires `MEMORA_AI_MODE=openai`
 - production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true`
 - production-like runtime should keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- raw source `./gradlew bootRun` does not auto-load `.env.local`; local orchestration questions usually belong in Vault tasks first
 
 ## Hardcoded values / constants cleanup task
 Read:
@@ -73,7 +74,8 @@ Read:
 2. `.project/docs/ai/change-guide.md`
 3. `.project/docs/ai/repo-map.md`
 4. `.project/docs/ai/token-budget-rules.md`
-5. the exact adapter or scoped guide you plan to change
+5. `AGENTS.md`
+6. the exact adapter or scoped guide you plan to change
 
 Keep canonical facts in `.project/docs/ai/*`, keep adapters thin, and run `bash .project/scripts/ai/check-ai-docs.sh` after the change.
 
@@ -131,7 +133,21 @@ Read:
 2. `backend/src/main/resources/application.yml` — `memora.transcription-*` keys
 3. `.project/docs/ai/change-guide.md` (transcription section)
 
-For production config or model changes: stop and go to Vault (`apps/whisper/`, `apps/memora/backend/.env.prod`).
+Key:
+- request supports optional `language` and `prompt` hints
+- self-hosted whisper still requires a non-blank `MEMORA_TRANSCRIPTION_API_KEY` on the Memora side, even though the service ignores the value
+- for production config, local SSH tunnel behavior, or model changes: stop and go to Vault (`apps/whisper/`, `apps/memora/backend/.env.prod`, `apps/memora/backend/Taskfile.yml`)
+
+## Local bootstrap / shell mismatch task
+Read:
+1. `.project/docs/ai/env-runtime-reference.md`
+2. `.project/docs/ai/local-smoke-test.md`
+3. `backend/README.md` if the issue is backend-local
+4. Vault task docs/config if the issue is about `task local:*`
+
+Key:
+- Memora source docs should describe the source-level reality, but Vault owns local orchestration truth
+- known failure classes from real fixes: raw Gradle not loading `.env.local`, zsh/bash mismatch in sourced task scripts, secure cookies on local HTTP, and shared `~/.gradle` cache lock contention
 
 ## Deployment/runtime/prod question
 Read Vault docs first:

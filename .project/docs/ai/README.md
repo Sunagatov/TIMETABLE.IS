@@ -45,6 +45,7 @@ Useful recent stability facts:
 - category paths are exactly 2 levels in V1: `category` / `subcategory`
 - deterministic AI is local/dev/test fallback only; real V1 polishing requires `MEMORA_AI_MODE=openai`
 - production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- raw source `./gradlew bootRun` does not auto-load `backend/.env.local`; local orchestration usually belongs in Vault task docs
 - the canonical AI-doc drift checker lives at `.project/scripts/ai/check-ai-docs.sh`
 - there is no root `scripts/ai/check-ai-docs.sh` wrapper
 

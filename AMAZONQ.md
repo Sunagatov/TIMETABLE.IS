@@ -17,5 +17,6 @@ Canonical details:
 - `.project/docs/ai/token-budget-rules.md`
 
 Runtime and deployment truth belongs in Vault, not Memora.
+Local bootstrap/auth/transcription troubleshooting usually routes through `.project/docs/ai/env-runtime-reference.md` first, then Vault task docs if the issue is orchestration rather than source logic.
 There is no root `scripts/ai/check-ai-docs.sh` wrapper. Use `bash .project/scripts/ai/check-ai-docs.sh`.
 Run `bash .project/scripts/ai/check-ai-docs.sh` after canonical doc or adapter changes.

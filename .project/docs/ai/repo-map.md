@@ -16,6 +16,7 @@
 - `backend/AGENTS.md` — read before backend work.
 - `backend/README.md`
 - `backend/src/main/resources/application.yml` — source-level config defaults.
+- `backend/.env.local.example` — source-repo local backend env template; local orchestration still belongs in Vault
 - `backend/src/main/kotlin/com/sunagatov/memora/backend/`
   - `auth/` — login, logout, session cookie flow, session stores.
   - `capture/` — Telegram ingest, bot auth, failure notification polling/ack services.
@@ -69,6 +70,7 @@
 - `.project/docs/ai/vault-boundary.md` — deployment/runtime boundary.
 - `.project/docs/ai/change-guide.md` — change-impact checklist: if you change X, also update/check Y.
 - `.project/docs/ai/local-smoke-test.md` — source-repo V1 local smoke checklist.
+- `.project/docs/ai/current-bootstrap-state.md` — compatibility pointer only; real state lives in `current-state.md`
 
 - `.project/scripts/ai/check-ai-docs.sh` — canonical AI-doc drift check for stale terms, active legacy docs, broken wrapper references, and oversized adapters.
 
@@ -81,6 +83,11 @@ Vault owns:
 - `apps/memora/frontend`
 - `apps/memora/telegrambot`
 - `apps/whisper`
+
+Useful Vault runtime entrypoints for this repo:
+- `apps/memora/backend/Taskfile.yml` — preferred local backend run/doctor/whisper-tunnel tasks
+- `apps/memora/frontend/Taskfile.yml` — preferred local frontend tasks
+- `apps/memora/telegrambot/Taskfile.yml` — preferred local telegram-bot tasks
 
 Read Vault only when the task is explicitly about runtime, deployment, production operations, or local orchestration.
 

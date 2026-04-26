@@ -19,20 +19,26 @@ This is a source-repo smoke checklist. Vault owns production deployment, runtime
 ## Start Local Services
 
 ```bash
-cd backend
-./gradlew bootRun
+cd ../Vault/apps/memora/backend
+task local:doctor
+task local:whisper:tunnel
+task local:run
 ```
 
 ```bash
-cd frontend
-npm ci
-npm run dev
+cd ../Vault/apps/memora/frontend
+task local:run
 ```
 
 ```bash
-cd telegram-bot
-./gradlew run
+cd ../Vault/apps/memora/telegrambot
+task local:run
 ```
+
+Notes:
+- `task local:run` is the preferred entrypoint because it resolves the source repo, loads local env, and avoids shell/bootstrap drift that raw commands can miss.
+- For backend-only debugging, raw `./gradlew bootRun` is still valid if and only if `backend/.env.local` is loaded explicitly first.
+- Keep the Whisper tunnel terminal open while testing local voice notes.
 
 ## Text Capture Smoke
 
@@ -65,6 +71,7 @@ cd telegram-bot
 2. Confirm refresh keeps the authenticated session.
 3. Clear or expire the session cookie.
 4. Confirm protected API calls return to login.
+5. If login fails on local HTTP, verify `BACKEND_COOKIE_SECURE=false` and that the backend process actually loaded `backend/.env.local`.
 
 ## Category Smoke
 

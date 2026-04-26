@@ -9,3 +9,4 @@ Use that file before opening broad context, then read only the smallest scoped d
 For broad frontend work, route to `frontend/AGENTS.md` and `.project/docs/ai/frontend-v1-mvp.md`.
 For source-level config questions, route to `.project/docs/ai/env-runtime-reference.md`.
 For doc/change-impact work, route to `.project/docs/ai/change-guide.md`.
+For local run/bootstrap failures, check `.project/docs/ai/env-runtime-reference.md` before assuming a source-code bug.
