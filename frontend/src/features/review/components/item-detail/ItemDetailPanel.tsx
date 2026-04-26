@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MemoraCategory, MemoraItem, UpdateItemRequest } from "../../types/reviewTypes";
 import { CategoryProposalCard } from "./CategoryProposalCard";
 import { CenterState, MobileBack } from "./DetailPrimitives";
@@ -73,6 +73,22 @@ export function ItemDetailPanel({
   useEffect(() => {
     if (item && !editOpen) setFormState(formStateFromItem(item, categories));
   }, [categories, editOpen, item]);
+
+  const handleApproveKey = useCallback(() => {
+    if (item && view === "needs-review" && !editOpen) void onApprove(item.id);
+  }, [item, view, editOpen, onApprove]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "a") { e.preventDefault(); handleApproveKey(); }
+      if (e.key === "e" && view !== "failures") { e.preventDefault(); setEditOpen((o) => !o); }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [handleApproveKey, view]);
 
   const request = useMemo(
     () => buildUpdateItemRequest(formState, categories),

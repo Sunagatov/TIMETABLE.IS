@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { REVIEW_VIEW_ORDER, type ReviewView } from "../reviewViewMeta";
-import { REVIEW_LIST_SORT_OPTIONS } from "../reviewConstants";
-import type { ItemType, MemoraItem } from "../types/reviewTypes";
+import { DEFAULT_LIST_SORT, REVIEW_LIST_SORT_OPTIONS } from "../reviewConstants";
+import type { ItemType, MemoraItem, Priority } from "../types/reviewTypes";
 
 type Props = {
   items: MemoraItem[];
@@ -54,6 +54,7 @@ export function ReviewQueueList({
   renderDesktopDetail,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const expandedCardRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +68,35 @@ export function ReviewQueueList({
     }
   }, [selectedItemId]);
 
+  const hasActiveFilters =
+    searchValue !== "" || typeFilter !== "ALL" || categoryValue !== "" || sortValue !== DEFAULT_LIST_SORT;
+  const activeNonSearchCount = [
+    typeFilter !== "ALL",
+    categoryValue !== "",
+    sortValue !== DEFAULT_LIST_SORT
+  ].filter(Boolean).length;
+
+  function clearFilters() {
+    onSearchChange("");
+    onTypeFilterChange("ALL");
+    onCategoryChange("");
+    onSortChange(DEFAULT_LIST_SORT);
+    setSearchOpen(false);
+  }
+
+  const typeOptions = [
+    { value: "ALL", label: "All types" },
+    { value: "IDEA", label: "Idea" },
+    { value: "THOUGHT", label: "Thought" },
+    { value: "QUESTION", label: "Question" },
+    { value: "REMINDER", label: "Reminder" },
+    { value: "OTHER", label: "Other" }
+  ];
+  const categoryOptions2 = [
+    { value: "", label: "All categories" },
+    ...categoryOptions.map((o) => ({ value: o, label: o }))
+  ];
+
   return (
     <div className="min-h-screen bg-[#f5f0e8] text-stone-900">
       <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/92 backdrop-blur-sm">
@@ -74,14 +104,12 @@ export function ReviewQueueList({
 
           {/* Title row */}
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xl font-semibold tracking-[-0.02em] text-stone-950">Memora</p>
-              <p className="text-[11px] leading-none text-stone-400 mt-0.5">Private review workspace</p>
-            </div>
+            <p className="text-xl font-semibold tracking-[-0.02em] text-stone-950">Memora</p>
             {onLoggedOut && (
               <button
                 type="button"
-                aria-label="Logout"
+                aria-label="Log out"
+                title="Log out"
                 onClick={onLoggedOut}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-400 transition hover:border-stone-300 hover:text-stone-700"
               >
@@ -92,28 +120,33 @@ export function ReviewQueueList({
 
           {/* View tabs */}
           <div className="mt-3 flex gap-1.5">
-            {REVIEW_VIEW_ORDER.map((rv) => (
-              <button
-                key={rv}
-                type="button"
-                onClick={() => onViewChange(rv)}
-                className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition ${
-                  view === rv
-                    ? "bg-stone-900 text-white"
-                    : "border border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
-                }`}
-              >
-                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${viewDotColor(rv)}`} />
-                {shortViewLabel(rv)}
-                <span className="tabular-nums text-xs opacity-60">
-                  {countForView(rv, counts)}
-                </span>
-              </button>
-            ))}
+            {REVIEW_VIEW_ORDER.map((rv) => {
+              const count = countForView(rv, counts);
+              return (
+                <button
+                  key={rv}
+                  type="button"
+                  onClick={() => onViewChange(rv)}
+                  className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition ${
+                    view === rv
+                      ? "bg-stone-900 text-white"
+                      : "border border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${viewDotColor(rv)}`} />
+                  {shortViewLabel(rv)}
+                  <span className={`tabular-nums text-xs ${count === 0 ? "opacity-25" : "opacity-60"}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Filter bar */}
           <div className="mt-3 rounded-[1.5rem] border border-stone-200 bg-white p-3 shadow-[0_1px_4px_rgba(28,25,23,0.04)]">
+
+            {/* Search row: desktop always shown, mobile shown when open */}
             <div className={`items-center gap-2 ${searchOpen ? "flex" : "hidden"} lg:flex`}>
               <label className="relative min-w-0 flex-1">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
@@ -138,13 +171,15 @@ export function ReviewQueueList({
               </button>
             </div>
 
-            <div className={`mt-2 grid gap-2 grid-cols-2 lg:grid-cols-3 ${searchOpen ? "border-t border-stone-100 pt-2" : ""}`}>
-              {/* Mobile-only search toggle */}
+            {/* Controls row */}
+            <div className={`flex items-center gap-2 ${searchOpen ? "mt-2 border-t border-stone-100 pt-2" : ""}`}>
+
+              {/* Mobile: search toggle */}
               <button
                 type="button"
-                aria-label="Search"
+                aria-label="Toggle search"
                 onClick={() => setSearchOpen((o) => !o)}
-                className={`flex h-10 items-center justify-center rounded-xl border text-sm transition lg:hidden ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm transition lg:hidden ${
                   searchOpen || searchValue
                     ? "border-stone-900 bg-stone-900 text-white"
                     : "border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300 hover:bg-white"
@@ -152,31 +187,64 @@ export function ReviewQueueList({
               >
                 <SearchIcon />
               </button>
-              <ToolbarSelect
-                value={typeFilter}
-                onChange={onTypeFilterChange}
-                options={[
-                  { value: "ALL", label: "All types" },
-                  { value: "IDEA", label: "Idea" },
-                  { value: "THOUGHT", label: "Thought" },
-                  { value: "QUESTION", label: "Question" },
-                  { value: "REMINDER", label: "Reminder" },
-                  { value: "OTHER", label: "Other" }
-                ]}
-              />
-              <ToolbarSelect
-                value={categoryValue}
-                onChange={onCategoryChange}
-                options={[
-                  { value: "", label: "All categories" },
-                  ...categoryOptions.map((option) => ({ value: option, label: option }))
-                ]}
-              />
-              <ToolbarSelect
-                value={sortValue}
-                onChange={onSortChange}
-                options={REVIEW_LIST_SORT_OPTIONS}
-              />
+
+              {/* Mobile: Filters button → bottom sheet */}
+              <button
+                type="button"
+                onClick={() => setFiltersSheetOpen(true)}
+                className={`flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition lg:hidden ${
+                  activeNonSearchCount > 0
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300 hover:bg-white"
+                }`}
+              >
+                <FilterIcon />
+                Filters
+                {activeNonSearchCount > 0 && (
+                  <span className="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold leading-none text-stone-900">
+                    {activeNonSearchCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Desktop: inline selects */}
+              <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-2">
+                <div className="flex-1">
+                  <ToolbarSelect
+                    value={typeFilter}
+                    onChange={onTypeFilterChange}
+                    active={typeFilter !== "ALL"}
+                    options={typeOptions}
+                  />
+                </div>
+                <div className="flex-1">
+                  <ToolbarSelect
+                    value={categoryValue}
+                    onChange={onCategoryChange}
+                    active={categoryValue !== ""}
+                    options={categoryOptions2}
+                  />
+                </div>
+                <div className="flex-[0.8]">
+                  <ToolbarSelect
+                    value={sortValue}
+                    onChange={onSortChange}
+                    active={sortValue !== DEFAULT_LIST_SORT}
+                    options={REVIEW_LIST_SORT_OPTIONS}
+                  />
+                </div>
+              </div>
+
+              {/* Clear button — both mobile and desktop */}
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="ml-auto shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -201,12 +269,7 @@ export function ReviewQueueList({
                           </div>
                         </div>
                         <div className="hidden lg:block">
-                          <ReviewQueueItemCard
-                            item={item}
-                            view={view}
-                            selected
-                            onSelect={onSelect}
-                          />
+                          <ReviewQueueItemCard item={item} view={view} selected onSelect={onSelect} />
                         </div>
                       </div>
                     );
@@ -226,12 +289,66 @@ export function ReviewQueueList({
           </div>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-[13.5rem] h-[calc(100vh-15rem)] overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-[0_14px_36px_rgba(28,25,23,0.08)]">
+            <div className="sticky top-[12rem] h-[calc(100vh-13.5rem)] overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-[0_14px_36px_rgba(28,25,23,0.08)]">
               {renderDesktopDetail}
             </div>
           </aside>
         </div>
       </div>
+
+      {/* Mobile filters bottom sheet */}
+      {filtersSheetOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-stone-900/30 backdrop-blur-sm lg:hidden"
+            onClick={() => setFiltersSheetOpen(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t border-stone-200 bg-white p-6 shadow-2xl lg:hidden">
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-base font-semibold text-stone-900">Filters</p>
+              <button
+                type="button"
+                onClick={() => setFiltersSheetOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 text-stone-400 transition hover:text-stone-700"
+              >
+                <XIcon />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Type</p>
+                <ToolbarSelect value={typeFilter} onChange={onTypeFilterChange} active={typeFilter !== "ALL"} options={typeOptions} />
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Category</p>
+                <ToolbarSelect value={categoryValue} onChange={onCategoryChange} active={categoryValue !== ""} options={categoryOptions2} />
+              </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Sort</p>
+                <ToolbarSelect value={sortValue} onChange={onSortChange} active={sortValue !== DEFAULT_LIST_SORT} options={REVIEW_LIST_SORT_OPTIONS} />
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              {activeNonSearchCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { clearFilters(); setFiltersSheetOpen(false); }}
+                  className="flex-1 rounded-xl border border-stone-200 py-3 text-sm font-medium text-stone-600 transition hover:bg-stone-50"
+                >
+                  Clear all
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFiltersSheetOpen(false)}
+                className="flex-1 rounded-xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -240,19 +357,24 @@ function ToolbarSelect(props: {
   value: string;
   onChange: (value: string) => void;
   options: Array<{ value: string; label: string }>;
+  active?: boolean;
 }) {
   return (
     <div className="relative">
       <select
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
-        className="w-full appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 pr-9 text-sm text-stone-700 outline-none transition focus:border-stone-400 focus:bg-white"
+        className={`w-full appearance-none rounded-xl border px-3 py-2.5 pr-9 text-sm outline-none transition focus:bg-white ${
+          props.active
+            ? "border-stone-800 bg-white font-semibold text-stone-900 focus:border-stone-900"
+            : "border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300 focus:border-stone-400"
+        }`}
       >
         {props.options.map((opt) => (
           <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
         ))}
       </select>
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">
+      <span className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ${props.active ? "text-stone-700" : "text-stone-400"}`}>
         <ChevronDownIcon />
       </span>
     </div>
@@ -324,6 +446,16 @@ function humanType(type: ItemType): string {
   }
 }
 
+function priorityDotColor(priority: Priority): string | null {
+  switch (priority) {
+    case "URGENT_IMPORTANT": return "bg-red-500";
+    case "URGENT_NOT_IMPORTANT": return "bg-orange-400";
+    case "NOT_URGENT_IMPORTANT": return "bg-amber-400";
+    case "NOT_URGENT_NOT_IMPORTANT": return "bg-stone-300";
+    default: return null;
+  }
+}
+
 function viewDotColor(view: ReviewView): string {
   if (view === "needs-review") return "bg-amber-400";
   if (view === "failures") return "bg-red-500";
@@ -337,6 +469,7 @@ function ReviewQueueItemCard(props: {
   onSelect: (itemId: string) => void;
 }) {
   const preview = props.item.cleanedText || props.item.rawTranscript || props.item.rawInputText || "No content";
+  const priorityColor = priorityDotColor(props.item.priority);
 
   return (
     <button
@@ -357,9 +490,14 @@ function ReviewQueueItemCard(props: {
             {props.item.title || "Untitled"}
           </h2>
         </div>
-        <span className="shrink-0 text-[11px] font-medium text-stone-400">
-          {formatRelativeDate(props.item.createdAt)}
-        </span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {priorityColor && (
+            <span className={`h-2 w-2 rounded-full ${priorityColor}`} title={props.item.priority.replace(/_/g, " ")} />
+          )}
+          <span className="text-[11px] font-medium text-stone-400">
+            {formatRelativeDate(props.item.createdAt)}
+          </span>
+        </div>
       </div>
 
       <p className="mt-2.5 line-clamp-2 text-sm leading-6 text-stone-500">
@@ -439,6 +577,14 @@ function SearchIcon() {
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
       <circle cx="6.25" cy="6.25" r="4.25" />
       <path d="m9.5 9.5 2.75 2.75" />
+    </svg>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 2h11M3.5 6.5h6M6 11h1" />
     </svg>
   );
 }

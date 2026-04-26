@@ -23,6 +23,7 @@ export function ToolbarBtn(props: {
   disabled: boolean;
   onClick: () => void;
   children: ReactNode;
+  title?: string;
 }) {
   const cls =
     props.tone === "approve"
@@ -30,7 +31,7 @@ export function ToolbarBtn(props: {
       : props.tone === "edit"
         ? "bg-amber-500 text-stone-950 hover:bg-amber-400"
         : props.tone === "danger"
-          ? "text-red-500 hover:bg-red-50"
+          ? "border border-red-200 bg-white text-red-600 hover:border-red-300 hover:bg-red-50"
           : "border border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50";
 
   return (
@@ -38,6 +39,7 @@ export function ToolbarBtn(props: {
       type="button"
       disabled={props.busy || props.disabled}
       onClick={props.onClick}
+      title={props.title}
       className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${cls}`}
     >
       {props.busy ? "..." : props.children}
@@ -45,13 +47,23 @@ export function ToolbarBtn(props: {
   );
 }
 
-export function GhostBtn(props: { busy: boolean; disabled: boolean; onClick: () => void; children: ReactNode }) {
+export function GhostBtn(props: {
+  busy: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+  danger?: boolean;
+}) {
   return (
     <button
       type="button"
       disabled={props.busy || props.disabled}
       onClick={props.onClick}
-      className="w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-800 disabled:opacity-50"
+      className={`w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition disabled:opacity-50 ${
+        props.danger
+          ? "text-red-600 hover:bg-red-50 hover:text-red-700"
+          : "text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+      }`}
     >
       {props.busy ? "..." : props.children}
     </button>
@@ -77,7 +89,7 @@ export function StatusPill({ status }: { status: string }) {
       ? "bg-red-100 text-red-700"
       : status.includes("PENDING")
         ? "bg-amber-100 text-amber-700"
-        : "bg-stone-100 text-stone-600";
+        : "bg-stone-100 text-stone-500";
   return (
     <span className={`rounded px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
       {label}
@@ -85,13 +97,41 @@ export function StatusPill({ status }: { status: string }) {
   );
 }
 
-export function Chip({ label, value }: { label: string; value: string }) {
+export function TypeChip({ type }: { type: string }) {
+  const { bg, text } = typeChipStyle(type);
   return (
-    <div className="flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1">
-      <span className="text-[9px] font-semibold uppercase tracking-widest text-stone-400">{label}</span>
-      <span className="text-[10px] font-semibold text-stone-600">{value}</span>
-    </div>
+    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${bg} ${text}`}>
+      {humanTypeLabel(type)}
+    </span>
   );
+}
+
+export function Chip({ value }: { value: string }) {
+  return (
+    <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-[11px] font-medium text-stone-600">
+      {value}
+    </span>
+  );
+}
+
+function typeChipStyle(type: string): { bg: string; text: string } {
+  switch (type) {
+    case "IDEA": return { bg: "bg-indigo-50", text: "text-indigo-700" };
+    case "THOUGHT": return { bg: "bg-amber-50", text: "text-amber-700" };
+    case "QUESTION": return { bg: "bg-violet-50", text: "text-violet-700" };
+    case "REMINDER": return { bg: "bg-sky-50", text: "text-sky-700" };
+    default: return { bg: "bg-stone-100", text: "text-stone-600" };
+  }
+}
+
+function humanTypeLabel(type: string): string {
+  switch (type) {
+    case "IDEA": return "Idea";
+    case "THOUGHT": return "Thought";
+    case "QUESTION": return "Question";
+    case "REMINDER": return "Reminder";
+    default: return type;
+  }
 }
 
 export function KV({ label, value, multiline }: { label: string; value: string; multiline?: boolean }) {
