@@ -1,91 +1,148 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { REVIEW_VIEW_META, type ReviewView } from "../reviewViewMeta";
+import { REVIEW_VIEW_META, REVIEW_VIEW_ORDER, type ReviewView } from "../reviewViewMeta";
 import type { MemoraItem } from "../types/reviewTypes";
 
 type Props = {
-  title: string;
-  description: string;
   items: MemoraItem[];
   selectedItemId: string | null;
   onSelect: (itemId: string) => void;
   toolbar?: ReactNode;
-  view?: ReviewView;
+  view: ReviewView;
+  counts: {
+    needsReview: number;
+    failures: number;
+    approved: number;
+  };
+  onViewChange: (next: ReviewView) => void;
   isLoading: boolean;
   errorMessage: string | null;
 };
 
 export function ReviewQueueList({
-  title,
-  description,
   items,
   selectedItemId,
   onSelect,
   toolbar,
   view,
+  counts,
+  onViewChange,
   isLoading,
   errorMessage
 }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const viewMeta = view ? REVIEW_VIEW_META[view] : null;
-  const countClass = items.length > 0 && viewMeta ? viewMeta.countClass : "bg-stone-100 text-stone-500";
+  const viewMeta = REVIEW_VIEW_META[view];
 
   return (
     <section className="flex h-full flex-col border-r border-stone-200 bg-[#faf8f4]">
-      <header className="border-b border-stone-200 px-5 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {viewMeta && <span className={`h-2 w-2 shrink-0 rounded-full ${viewMeta.accentDotClass}`} />}
-            <h1 className="truncate text-sm font-semibold text-stone-900">{title}</h1>
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${countClass}`}>
-              {items.length}
-            </span>
+      <header className="border-b border-stone-200 bg-white/88 px-4 py-4 backdrop-blur-sm lg:px-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xl font-semibold tracking-[-0.02em] text-stone-950">Memora</p>
+            <p className="mt-1 text-sm text-stone-500">Private review workspace</p>
           </div>
           {toolbar ? (
             <button
               type="button"
-              onClick={() => setFiltersOpen((o) => !o)}
-              className={`shrink-0 flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              onClick={() => setFiltersOpen((open) => !open)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
                 filtersOpen
-                  ? "border-stone-400 bg-stone-900 text-white"
+                  ? "border-stone-900 bg-stone-900 text-white"
                   : "border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50"
               }`}
             >
               <FilterIcon />
-              <span>Filters</span>
+              <span>{filtersOpen ? "Hide filters" : "Filters"}</span>
             </button>
           ) : null}
         </div>
-        <p className="mt-1 text-xs leading-5 text-stone-400">{description}</p>
+        <div className="mt-4 rounded-[1.35rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,239,232,0.96))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+          <div className="grid grid-cols-3 gap-1.5">
+            {REVIEW_VIEW_ORDER.map((reviewView) => (
+              <ViewTab
+                key={reviewView}
+                view={reviewView}
+                active={reviewView === view}
+                count={countForView(reviewView, counts)}
+                onClick={() => onViewChange(reviewView)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-2.5">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${viewMeta.accentDotClass}`} />
+          <p className="text-sm text-stone-500">{viewMeta.description}</p>
+        </div>
       </header>
 
       {filtersOpen && toolbar ? (
-        <div className="border-b border-stone-200 bg-white px-5 py-4">
+        <div className="border-b border-stone-200 bg-white px-4 py-4 lg:px-5">
           {toolbar}
         </div>
       ) : null}
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3 lg:p-4">
         <QueueListState
           isLoading={isLoading}
           errorMessage={errorMessage}
           hasItems={items.length > 0}
         >
-          <div className="space-y-2">
+          <div className="space-y-3">
             {items.map((item) => (
               <ReviewQueueItemCard
                 key={item.id}
                 item={item}
                 selected={item.id === selectedItemId}
                 view={view}
-                accentBorderClass={viewMeta?.accentBorderClass}
+                accentBorderClass={viewMeta.accentBorderClass}
                 onSelect={onSelect}
               />
             ))}
           </div>
         </QueueListState>
       </div>
+      <footer className="border-t border-stone-200 bg-white/70 px-4 py-3 text-xs text-stone-400 lg:px-5">
+        Memora
+      </footer>
     </section>
+  );
+}
+
+function ViewTab(props: {
+  view: ReviewView;
+  active: boolean;
+  count: number;
+  onClick: () => void;
+}) {
+  const meta = REVIEW_VIEW_META[props.view];
+
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      className={`group relative flex min-h-[58px] flex-col justify-between overflow-hidden rounded-[1rem] border px-3 py-2.5 text-left transition ${
+        props.active
+          ? "border-white/90 bg-white text-stone-950 shadow-[0_12px_28px_rgba(28,25,23,0.10)]"
+          : "border-transparent bg-transparent text-stone-600 hover:border-white/70 hover:bg-white/72 hover:text-stone-900"
+      }`}
+    >
+      <span
+        className={`absolute inset-x-3 top-0 h-[3px] rounded-full transition ${
+          props.active ? meta.accentDotClass : "bg-transparent group-hover:bg-stone-200"
+        }`}
+      />
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold leading-tight">{shortViewLabel(props.view)}</p>
+        </div>
+        <span className={`h-2 w-2 rounded-full ${meta.accentDotClass}`} />
+      </div>
+      <div className="mt-2 flex items-center justify-end gap-2">
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${props.active ? "bg-stone-100 text-stone-700" : meta.countClass}`}>
+          {props.count}
+        </span>
+      </div>
+    </button>
   );
 }
 
@@ -127,8 +184,8 @@ function QueueListState(props: {
 function ReviewQueueItemCard(props: {
   item: MemoraItem;
   selected: boolean;
-  view?: ReviewView;
-  accentBorderClass?: string;
+  view: ReviewView;
+  accentBorderClass: string;
   onSelect: (itemId: string) => void;
 }) {
   const preview = props.item.cleanedText || props.item.rawTranscript || props.item.rawInputText || "No content";
@@ -137,73 +194,77 @@ function ReviewQueueItemCard(props: {
     <button
       type="button"
       onClick={() => props.onSelect(props.item.id)}
-      className={`block w-full rounded-2xl border border-stone-200 border-l-[3px] p-4 text-left transition ${
-        props.accentBorderClass ?? ""
+      className={`block w-full rounded-[1.4rem] border border-stone-200 border-l-[3px] p-4 text-left transition ${
+        props.accentBorderClass
       } ${
         props.selected
-          ? "border-stone-900 border-l-current bg-stone-900 shadow-sm"
-          : "bg-white hover:border-stone-300 hover:shadow-sm"
+          ? "border-stone-900 border-l-current bg-stone-900 shadow-[0_14px_34px_rgba(28,25,23,0.18)]"
+          : "bg-white shadow-[0_8px_24px_rgba(28,25,23,0.04)] hover:border-stone-300 hover:shadow-[0_12px_28px_rgba(28,25,23,0.08)]"
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-400">
-          {props.item.sourceType.replace(/_/g, " ")}
-        </p>
-        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-          <StatusBadge status={props.item.status} selected={props.selected} />
-          {props.view === "failures" && props.item.failureStage ? (
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${failureBadgeClass(props.selected)}`}>
-              {props.item.failureStage.replace(/_/g, " ")}
-            </span>
-          ) : null}
-          {isQuestion(props.item) ? (
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${questionBadgeClass(props.selected)}`}>
-              Q
-            </span>
-          ) : null}
-          {props.item.proposedCategoryStatus === "PENDING_REVIEW" ? (
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${categoryBadgeClass(props.selected)}`}>
-              Cat
-            </span>
-          ) : null}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${props.selected ? "text-stone-400" : "text-stone-400"}`}>
+            {props.item.type.replace(/_/g, " ")}
+          </p>
+          <h2 className={`mt-2 line-clamp-2 text-base font-semibold leading-snug ${props.selected ? "text-white" : "text-stone-950"}`}>
+            {props.item.title || "Untitled"}
+          </h2>
         </div>
+        <span className={`shrink-0 text-[11px] font-medium ${props.selected ? "text-stone-400" : "text-stone-400"}`}>
+          {formatRelativeDate(props.item.createdAt)}
+        </span>
       </div>
 
-      <h2 className={`mt-2 line-clamp-2 text-sm font-semibold leading-snug ${props.selected ? "text-white" : "text-stone-900"}`}>
-        {props.item.title || "Untitled"}
-      </h2>
-
-      <p className={`mt-1.5 line-clamp-2 text-xs leading-5 ${props.selected ? "text-stone-300" : "text-stone-500"}`}>
+      <p className={`mt-3 line-clamp-3 text-sm leading-6 ${props.selected ? "text-stone-300" : "text-stone-600"}`}>
         {preview}
       </p>
 
-      <div className="mt-3 flex items-center gap-2 text-[11px] font-medium text-stone-400">
-        <span className="max-w-[100px] truncate">{props.item.categoryPath.category || "—"}</span>
-        <span className="text-stone-500">·</span>
-        <span>{props.item.priority === "NOT_APPLICABLE" ? "—" : priorityShort(props.item.priority)}</span>
-        <span className="text-stone-500">·</span>
-        <span className="ml-auto shrink-0">{formatRelativeDate(props.item.createdAt)}</span>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <InfoPill selected={props.selected}>{props.item.categoryPath.category || "No category"}</InfoPill>
+        {props.item.categoryPath.subcategory ? (
+          <InfoPill selected={props.selected}>{props.item.categoryPath.subcategory}</InfoPill>
+        ) : null}
+        {isQuestion(props.item) ? (
+          <InfoPill selected={props.selected}>Question</InfoPill>
+        ) : null}
+        {props.view === "failures" && props.item.failureStage ? (
+          <InfoPill selected={props.selected}>{props.item.failureStage.replace(/_/g, " ")}</InfoPill>
+        ) : null}
       </div>
     </button>
   );
 }
 
-function StatusBadge({ status, selected }: { status: string; selected: boolean }) {
-  const colorClass = selected
-    ? "bg-white/15 text-stone-200"
-    : status.includes("APPROVED")
-      ? "bg-emerald-50 text-emerald-700"
-      : status.includes("FAILED")
-        ? "bg-red-50 text-red-700"
-        : status.includes("PENDING")
-          ? "bg-amber-50 text-amber-700"
-          : "bg-stone-100 text-stone-600";
-
+function InfoPill(props: { children: ReactNode; selected: boolean }) {
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${colorClass}`}>
-      {status.replace(/_/g, " ")}
+    <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+      props.selected
+        ? "bg-white/10 text-stone-200"
+        : "bg-stone-100 text-stone-600"
+    }`}>
+      {props.children}
     </span>
   );
+}
+
+function countForView(
+  view: ReviewView,
+  counts: { needsReview: number; failures: number; approved: number }
+): number {
+  if (view === "needs-review") return counts.needsReview;
+  if (view === "failures") return counts.failures;
+  return counts.approved;
+}
+
+function shortViewLabel(view: ReviewView): string {
+  if (view === "needs-review") return "Needs Review";
+  if (view === "failures") return "Failures";
+  return "Approved";
+}
+
+function isQuestion(item: MemoraItem) {
+  return item.type === "QUESTION";
 }
 
 function EmptyState({ children }: { children: React.ReactNode }) {
@@ -220,8 +281,8 @@ function LoadingDots() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="h-1.5 w-1.5 rounded-full bg-stone-300 animate-pulse"
-          style={{ animationDelay: `${i * 150}ms` }}
+          className="h-2.5 w-2.5 animate-pulse rounded-full bg-stone-300"
+          style={{ animationDelay: `${i * 120}ms` }}
         />
       ))}
     </div>
@@ -230,47 +291,21 @@ function LoadingDots() {
 
 function FilterIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <path d="M1.5 2.5h10M3.5 6.5h6M5.5 10.5h2" />
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3.25H12" />
+      <path d="M4.5 7H9.5" />
+      <path d="M6 10.75H8" />
     </svg>
   );
 }
 
-function priorityShort(priority: string): string {
-  if (priority === "URGENT_IMPORTANT") return "Urgent";
-  if (priority === "URGENT_NOT_IMPORTANT") return "U/NI";
-  if (priority === "NOT_URGENT_IMPORTANT") return "Imp.";
-  if (priority === "NOT_URGENT_NOT_IMPORTANT") return "Low";
-  return priority;
-}
-
-function formatRelativeDate(iso: string): string {
-  const now = Date.now();
-  const then = new Date(iso).getTime();
-  const diff = now - then;
-  const mins = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-  const days = Math.floor(diff / 86_400_000);
-
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(iso));
-}
-
-function isQuestion(item: MemoraItem): boolean {
-  return item.type === "QUESTION" || item.aiType === "QUESTION";
-}
-
-function failureBadgeClass(selected: boolean): string {
-  return selected ? "bg-red-400/30 text-red-200" : "bg-red-50 text-red-600";
-}
-
-function questionBadgeClass(selected: boolean): string {
-  return selected ? "bg-amber-400/20 text-amber-200" : "bg-amber-50 text-amber-700";
-}
-
-function categoryBadgeClass(selected: boolean): string {
-  return selected ? "bg-indigo-400/20 text-indigo-200" : "bg-indigo-50 text-indigo-600";
+function formatRelativeDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const diffMs = Date.now() - date.getTime();
+  const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+  if (diffHours < 24) return `${Math.max(diffHours, 0)}h ago`;
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
 }

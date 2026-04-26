@@ -1,9 +1,9 @@
 export function SidebarFooter({ onLoggedOut }: { onLoggedOut: () => void }) {
   return (
-    <div className="px-3 py-4">
+    <div className="border-t border-stone-200 px-4 py-4">
       <button
         type="button"
-        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-500 transition hover:bg-white/5 hover:text-stone-300"
+        className="flex w-full items-center gap-2.5 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm font-medium text-stone-600 transition hover:border-stone-300 hover:text-stone-900"
         onClick={onLoggedOut}
       >
         <LogoutIcon />

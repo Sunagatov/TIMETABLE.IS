@@ -54,7 +54,7 @@ Notes:
 1. Send a voice note to the configured development bot.
 2. Confirm the bot replies with a Memora ID.
 3. If transcription API config is valid, confirm the item enters Needs Review.
-4. Open the item and confirm `rawTranscript` and Telegram trace metadata are visible.
+4. Open the item and confirm the cleaned text is primary, with transcript/source details available only after expanding the disclosure.
 
 ## Failure And Retry Smoke
 

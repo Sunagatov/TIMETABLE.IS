@@ -17,6 +17,9 @@ Do not add ideological correction.
 Do not add refusal-style meta-commentary into cleanedText.
 Do not invent new meaning.
 The result should feel like the same thought said by Zufar in excellent, fluent, clear English.
+Return title as a concise natural title, usually 3 to 8 words.
+Title should capture the core subject or intent.
+Title must not merely repeat the opening fragment of cleanedText.
 Allowed type values: IDEA, THOUGHT, QUESTION, REMINDER, OTHER.
 If type is uncertain, use OTHER.
 Allowed priority values: URGENT_IMPORTANT, URGENT_NOT_IMPORTANT, NOT_URGENT_IMPORTANT, NOT_URGENT_NOT_IMPORTANT, NOT_APPLICABLE.
@@ -45,6 +48,9 @@ Do not add ideological correction.
 Do not add refusal-style meta-commentary into cleanedText.
 Do not invent new meaning.
 The result should feel like the same thought said by Zufar in excellent, fluent, clear English.
+Return title as a concise natural title, usually 3 to 8 words.
+Title should capture the core subject or intent.
+Title must not merely repeat the opening fragment of cleanedText.
 Allowed type values: IDEA, THOUGHT, QUESTION, REMINDER, OTHER.
 If type is uncertain, use OTHER.
 Allowed priority values: URGENT_IMPORTANT, URGENT_NOT_IMPORTANT, NOT_URGENT_IMPORTANT, NOT_URGENT_NOT_IMPORTANT, NOT_APPLICABLE.
@@ -89,6 +95,7 @@ Do not rewrite the user's question into a different question.
     fun textDraftUserPrompt(rawText: String): String =
         buildString {
             appendLine("Raw text may be a Whisper transcript or non-native English text.")
+            appendLine("Generate a concise title that names the core subject, not just the opening words.")
             appendLine("Raw text:")
             appendLine(rawText)
         }

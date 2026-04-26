@@ -1,22 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MemoraCategory, MemoraItem, UpdateItemRequest } from "../../types/reviewTypes";
-import { AiOutputComparison } from "./AiOutputComparison";
 import { CategoryProposalCard } from "./CategoryProposalCard";
 import { CenterState, MobileBack } from "./DetailPrimitives";
-import { ItemActionToolbar } from "./ItemActionToolbar";
+import { ItemActionAlerts, ItemFooterActions, ItemHeaderActions } from "./ItemActionToolbar";
 import { ItemEditForm } from "./ItemEditForm";
 import { ItemFailureNotice } from "./ItemFailureNotice";
 import { ItemHeader } from "./ItemHeader";
 import { ItemMainContent } from "./ItemMainContent";
 import { ItemMetadataChips } from "./ItemMetadataChips";
+import { OriginalAiDraftSection } from "./OriginalAiDraftSection";
 import { OriginalCaptureSection } from "./OriginalCaptureSection";
-import { TelegramTraceSection } from "./TelegramTraceSection";
 import type { DetailView, ItemDetailFormState } from "./itemDetailUtils";
 import {
   buildUpdateItemRequest,
   EMPTY_FORM_STATE,
   formStateFromItem,
-  formatDate,
   getUpdateRequestValidationError,
   isQuestionItem
 } from "./itemDetailUtils";
@@ -99,45 +97,45 @@ export function ItemDetailPanel({
   }
 
   if (!item) {
-    return <PanelShell onMobileBack={onMobileBack}><CenterState icon="□" title="Select an item to review" body="Pick from the list to read, decide, and act." /></PanelShell>;
+    return <PanelShell onMobileBack={onMobileBack}><CenterState icon="□" title="Open the queue on the left" body="Choose one note, read the cleaned version, then approve or edit it." /></PanelShell>;
   }
 
   const busy = busyAction !== null;
   const isQuestion = isQuestionItem(item);
   const answerFailureMessage =
     item.answerStatus === "FAILED" ? (item.answerFailureReason || "Answer generation failed") : null;
+  const actionProps = {
+    view,
+    itemId: item.id,
+    editOpen,
+    busyAction,
+    actionError,
+    validationError,
+    request,
+    onToggleEdit: () => setEditOpen((open) => !open),
+    onApprove,
+    onEditAndApprove,
+    onSave,
+    onReject,
+    onDelete,
+    onRetry,
+    onRegenerateCleanedText,
+    onRegenerateCategoryProposal,
+    onRegenerateAll
+  } satisfies React.ComponentProps<typeof ItemHeaderActions>;
 
   return (
     <section className="flex h-full flex-col bg-white">
       {onMobileBack && <MobileBack onClick={onMobileBack} />}
-      <ItemActionToolbar
-        view={view}
-        itemId={item.id}
-        editOpen={editOpen}
-        busyAction={busyAction}
-        actionError={actionError}
-        validationError={validationError}
-        request={request}
-        onToggleEdit={() => setEditOpen((open) => !open)}
-        onApprove={onApprove}
-        onEditAndApprove={onEditAndApprove}
-        onSave={onSave}
-        onReject={onReject}
-        onDelete={onDelete}
-        onRetry={onRetry}
-        onRegenerateCleanedText={onRegenerateCleanedText}
-        onRegenerateCategoryProposal={onRegenerateCategoryProposal}
-        onRegenerateAll={onRegenerateAll}
-      />
+      <ItemActionAlerts actionError={actionError} validationError={validationError} editOpen={editOpen} />
       <div className="flex-1 overflow-y-auto">
-        <div className="px-8 py-7">
-          <ItemHeader item={item} isQuestion={isQuestion} />
-          <ItemMainContent item={item} isQuestion={isQuestion} />
+        <div className="px-8 py-7 pb-32">
+          <ItemHeader item={item} isQuestion={isQuestion} actions={<ItemHeaderActions {...actionProps} />} />
           <ItemMetadataChips item={item} />
+          <ItemMainContent item={item} isQuestion={isQuestion} />
           <ItemFailureNotice item={item} />
-          <AiOutputComparison item={item} isQuestion={isQuestion} />
+          <OriginalAiDraftSection item={item} isQuestion={isQuestion} />
           <OriginalCaptureSection item={item} />
-          <TelegramTraceSection item={item} />
           {view === "needs-review" && (
             <CategoryProposalCard
               item={item}
@@ -164,15 +162,9 @@ export function ItemDetailPanel({
               onRegenerateAnswer={onRegenerateAnswer}
             />
           )}
-          <div className="mt-8 border-t border-stone-100 pt-4 text-[11px] text-stone-300">
-            <span>Updated {formatDate(item.updatedAt)}</span>
-            <span className="mx-2">.</span>
-            <span>Retries: {item.retryCountTranscription} / {item.retryCountAi}</span>
-            <span className="mx-2">.</span>
-            <span className="font-mono">{item.id}</span>
-          </div>
         </div>
       </div>
+      <ItemFooterActions {...actionProps} />
     </section>
   );
 }

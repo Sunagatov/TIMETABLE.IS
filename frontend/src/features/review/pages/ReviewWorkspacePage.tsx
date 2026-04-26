@@ -8,6 +8,7 @@ import { ItemDetailPanel } from "../components/ItemDetailPanel";
 import { NeedsReviewFiltersBar } from "../components/NeedsReviewFiltersBar";
 import { ReviewQueueList } from "../components/ReviewQueueList";
 import { ReviewSidebar } from "../components/ReviewSidebar";
+import { CategoryManager } from "../components/sidebar/CategoryManager";
 import { MobileBottomNav } from "../components/workspace/MobileBottomNav";
 import { WorkspaceColumn } from "../components/workspace/WorkspaceColumn";
 import { useReviewActions } from "../hooks/useReviewActions";
@@ -19,7 +20,7 @@ import {
   useReviewWorkspaceState
 } from "../hooks/useReviewWorkspaceState";
 import { REVIEW_VIEW_META, type ReviewView } from "../reviewViewMeta";
-import type { CategoryPathFilter, RenameCategoryRequest } from "../types/reviewTypes";
+import type { CategoryPathFilter, CreateCategoryRequest, RenameCategoryRequest } from "../types/reviewTypes";
 
 type Props = {
   onLoggedOut: () => void | Promise<void>;
@@ -84,34 +85,39 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] text-stone-900">
-      <div className="lg:grid lg:h-screen lg:grid-cols-[220px_340px_minmax(0,1fr)] lg:overflow-hidden">
-        <WorkspaceColumn panel="sidebar" activePanel={state.mobilePanel}>
+      {state.mobilePanel === "sidebar" ? (
+        <div className="flex h-[calc(100dvh-4rem)] flex-col lg:hidden">
           <ReviewSidebar
-            view={state.view}
-            onChange={(view) => { state.setView(view); state.setMobilePanel("list"); }}
             onLoggedOut={() => void onLoggedOut()}
             categories={queries.categories.data ?? []}
-            categoriesLoading={queries.categories.isPending}
-            categoriesError={queries.categories.error instanceof Error ? queries.categories.error.message : null}
             categoryFilter={state.activeCategoryFilter}
-            onCategoryFilterChange={(filter) => { state.setActiveCategoryFilter(filter); state.setMobilePanel("list"); }}
+            onCategoryFilterChange={state.setActiveCategoryFilter}
             busyAction={state.busyAction}
-            counts={counts}
             onCreateCategory={(request) => runCategoryAction("category-create", () => createCategory(request))}
             onRenameCategory={(categoryId, request) => handleRenameCategory(categoryId, request, state.activeCategoryFilter, state.setActiveCategoryFilter)}
             onDeleteCategory={(categoryId) => runCategoryAction("category-delete", () => deleteCategory(categoryId))}
           />
-        </WorkspaceColumn>
+        </div>
+      ) : null}
+
+      <div className="lg:grid lg:h-screen lg:grid-cols-[minmax(420px,520px)_minmax(0,1fr)] lg:overflow-hidden">
 
         <WorkspaceColumn panel="list" activePanel={state.mobilePanel}>
           <ReviewQueueList
-            title={viewMeta.title}
-            description={viewMeta.description}
             items={items}
             selectedItemId={state.selectedItemId}
             onSelect={(itemId) => { state.setSelectedItemId(itemId); state.setMobilePanel("detail"); }}
-            toolbar={renderToolbarForView(state.view, state, queries.categories.data ?? [])}
+            toolbar={renderToolbarForView(state, queries.categories.data ?? [], {
+              busyAction: state.busyAction,
+              categoryFilter: state.activeCategoryFilter,
+              onCategoryFilterChange: state.setActiveCategoryFilter,
+              onCreateCategory: (request) => runCategoryAction("category-create", () => createCategory(request)),
+              onRenameCategory: (categoryId, request) => handleRenameCategory(categoryId, request, state.activeCategoryFilter, state.setActiveCategoryFilter),
+              onDeleteCategory: (categoryId) => runCategoryAction("category-delete", () => deleteCategory(categoryId))
+            })}
             view={state.view}
+            counts={counts}
+            onViewChange={(view) => state.setView(view)}
             isLoading={listQuery.isPending}
             errorMessage={listQuery.error instanceof Error ? listQuery.error.message : null}
           />
@@ -194,40 +200,70 @@ function getListQueryForView(
 }
 
 function renderToolbarForView(
-  view: ReviewView,
   state: ReturnType<typeof useReviewWorkspaceState>,
   categories: ReturnType<typeof useReviewQueries>["categories"]["data"] extends infer T
     ? NonNullable<T>
-    : never
+    : never,
+  categoryManagerProps: {
+    busyAction: string | null;
+    categoryFilter: CategoryPathFilter;
+    onCategoryFilterChange: (next: CategoryPathFilter) => void;
+    onCreateCategory: (request: CreateCategoryRequest) => Promise<void>;
+    onRenameCategory: (categoryId: string, request: RenameCategoryRequest) => Promise<void>;
+    onDeleteCategory: (categoryId: string) => Promise<void>;
+  }
 ) {
-  if (view === "needs-review") {
-    return (
+  const view = state.view;
+  const filters = view === "needs-review"
+    ? (
       <NeedsReviewFiltersBar
         filters={state.nrFilters}
         categories={categories}
         onChange={state.setNrFilters}
         onReset={() => state.setNrFilters(DEFAULT_NR_FILTERS)}
       />
-    );
-  }
-
-  if (view === "failures") {
-    return (
-      <FailuresFiltersBar
-        filters={state.failFilters}
-        categories={categories}
-        onChange={state.setFailFilters}
-        onReset={() => state.setFailFilters(DEFAULT_FAIL_FILTERS)}
-      />
-    );
-  }
+    )
+    : view === "failures"
+      ? (
+        <FailuresFiltersBar
+          filters={state.failFilters}
+          categories={categories}
+          onChange={state.setFailFilters}
+          onReset={() => state.setFailFilters(DEFAULT_FAIL_FILTERS)}
+        />
+      )
+      : (
+        <ApprovedFiltersBar
+          filters={state.approvedFilters}
+          categories={categories}
+          onChange={state.setApprovedFilters}
+          onReset={() => state.setApprovedFilters(DEFAULT_APPROVED_FILTERS)}
+        />
+      );
 
   return (
-    <ApprovedFiltersBar
-      filters={state.approvedFilters}
-      categories={categories}
-      onChange={state.setApprovedFilters}
-      onReset={() => state.setApprovedFilters(DEFAULT_APPROVED_FILTERS)}
-    />
+    <div className="space-y-4">
+      {filters}
+      <details className="group rounded-[1.35rem] border border-stone-200 bg-stone-50/70">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-stone-700">
+          <span>Category tools</span>
+          <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500 transition group-open:border-stone-300 group-open:text-stone-800">
+            Manage
+          </span>
+        </summary>
+        <div className="border-t border-stone-200 px-4 py-4">
+          <CategoryManager
+            categories={categories}
+            categoryFilter={categoryManagerProps.categoryFilter}
+            onCategoryFilterChange={categoryManagerProps.onCategoryFilterChange}
+            busyAction={categoryManagerProps.busyAction}
+            onCreateCategory={categoryManagerProps.onCreateCategory}
+            onRenameCategory={categoryManagerProps.onRenameCategory}
+            onDeleteCategory={categoryManagerProps.onDeleteCategory}
+            tone="light"
+          />
+        </div>
+      </details>
+    </div>
   );
 }

@@ -266,7 +266,7 @@ class AiAdapterTests {
             )
         )
 
-        assertEquals("What is Kotlin and why is", draft.textDraft.title)
+        assertEquals("What is Kotlin and why is it used", draft.textDraft.title)
         assertEquals("What is Kotlin and why is it used?", draft.textDraft.cleanedText)
         assertEquals(ItemType.QUESTION, draft.textDraft.type)
     }
@@ -295,9 +295,36 @@ class AiAdapterTests {
             )
         )
 
-        assertEquals("rough note about kotlin coroutines and", draft.title)
+        assertEquals("Rough note about kotlin coroutines and flows", draft.title)
         assertEquals("rough note about kotlin coroutines and flows", draft.cleanedText)
         assertEquals(ItemType.THOUGHT, draft.type)
+    }
+
+    @Test
+    fun `text regeneration strips conversational preamble when deriving fallback title`() {
+        val adapter = adapter(
+            generateDraft = {
+                throw IllegalStateException("full draft should not be called")
+            },
+            generateTextDraft = {
+                LangChain4jTextDraftResponse(
+                    title = null,
+                    cleanedText = "Can you check the current state of the database?",
+                    type = "QUESTION",
+                    priority = "NOT_APPLICABLE"
+                )
+            }
+        )
+
+        val draft = adapter.generateTextDraft(
+            AiTextInput(
+                rawText = "can you check the current state of the database?",
+                existingCategoryPaths = listOf(CategoryPath("Default", "General")),
+                defaultCategoryPath = CategoryPath("Default", "General")
+            )
+        )
+
+        assertEquals("Check the current state of the database", draft.title)
     }
 
     @Test

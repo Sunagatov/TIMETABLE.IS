@@ -1,4 +1,4 @@
-import { CategoryCascade, DateField, FilterSelect, ResetButton, updateCascadeFilter } from "./FilterControls";
+import { CategoryCascade, DateField, FilterSection, FilterSelect, ResetButton, SearchField, updateCascadeFilter } from "./FilterControls";
 import {
   APPROVED_STATUS_FILTER_OPTIONS,
   ITEM_TYPE_FILTER_OPTIONS,
@@ -18,22 +18,22 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
   const set = (partial: Partial<ApprovedFilters>) => onChange({ ...filters, ...partial });
 
   return (
-    <div className="space-y-4">
-      <input
-        type="search"
+    <div className="space-y-3.5">
+      <SearchField
         value={filters.keyword}
-        onChange={(e) => set({ keyword: e.target.value })}
+        onChange={(value) => set({ keyword: value })}
         placeholder="Search title, cleaned text, raw transcript, raw input, answer..."
-        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-900"
       />
-      <CategoryCascade
-        category={filters.category}
-        subcategory={filters.subcategory}
-        categories={categories}
-        onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
-        onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
-      />
-      <div className="grid gap-3 md:grid-cols-4">
+      <FilterSection title="Category" columns="one">
+        <CategoryCascade
+          category={filters.category}
+          subcategory={filters.subcategory}
+          categories={categories}
+          onCategoryChange={(v) => onChange(updateCascadeFilter(filters, "category", v))}
+          onSubcategoryChange={(v) => onChange(updateCascadeFilter(filters, "subcategory", v))}
+        />
+      </FilterSection>
+      <FilterSection title="Refine">
         <FilterSelect
           label="Type"
           value={filters.type}
@@ -58,19 +58,19 @@ export function ApprovedFiltersBar({ filters, categories, onChange, onReset }: P
           options={REVIEW_LIST_SORT_OPTIONS}
           onChange={(v) => set({ sort: v as ListSort })}
         />
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
+      </FilterSection>
+      <FilterSection title="Created">
         <DateField
-          label="Created from"
+          label="From"
           value={filters.createdFrom}
           onChange={(v) => set({ createdFrom: v })}
         />
         <DateField
-          label="Created to"
+          label="To"
           value={filters.createdTo}
           onChange={(v) => set({ createdTo: v })}
         />
-      </div>
+      </FilterSection>
       <ResetButton onClick={onReset} />
     </div>
   );

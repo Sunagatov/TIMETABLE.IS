@@ -79,6 +79,6 @@ Each `MemoraItem` has two separate value sets:
 - **Original AI output**: `aiTitle`, `aiCleanedText`, `aiType`, `aiCategoryPath`, `aiPriority`
 - **Latest human-facing values**: `title`, `cleanedText`, `type`, `categoryPath`, `priority`
 
-Both are always visible in the frontend ItemDetailPanel.
+The frontend keeps the current human-facing values as the primary visible content. Original AI values may be disclosed on demand when they meaningfully differ, but should not dominate the default review surface.
 
 The `telegramTrace` field holds Telegram metadata for traceability (present for all ingest items, not just voice).

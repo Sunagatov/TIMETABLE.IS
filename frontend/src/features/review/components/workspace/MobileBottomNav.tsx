@@ -13,7 +13,7 @@ export function MobileBottomNav({ panel, title, activeCount, hasSelectedItem, on
     <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 items-stretch border-t border-stone-200/80 bg-white/96 shadow-[0_-1px_8px_rgba(0,0,0,0.06)] backdrop-blur-sm lg:hidden">
       <MobileNavTab active={panel === "sidebar"} onClick={() => onChange("sidebar")}>
         <MenuIcon />
-        <span>Menu</span>
+        <span>Tools</span>
       </MobileNavTab>
       <MobileNavTab active={panel === "list"} onClick={() => onChange("list")}>
         <ListIcon />

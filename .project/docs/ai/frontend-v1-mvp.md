@@ -73,7 +73,14 @@ The workspace has three backend-backed list views:
 
 Approved remains approved-only by default. Capture is Telegram-only in V1. Do not add manual web item creation, labels, semantic search, or frontend-owned backend state transitions.
 
-The mobile model is a simple three-panel flow: sidebar, list, detail. Do not introduce React Router unless a task has a strong reason.
+Desktop priority is review-first, not admin-first:
+
+- desktop should prefer a two-column queue + detail layout instead of spending permanent width on admin/navigation chrome
+- the list rail should make it obvious which queue the user is in; Needs Review, Failures, and Approved belong with list controls, not as a separate black navigation area
+- the detail pane should keep title, cleaned text, category, subcategory, type, and main review actions primary
+- category browsing, category management, transcript/source inspection, original AI draft comparison, and other technical/debugging data should stay secondary or hidden behind explicit disclosure by default
+
+The mobile model is a simple three-panel flow: tools, list, detail. Do not introduce React Router unless a task has a strong reason.
 
 ## Frontend Structure
 
@@ -95,6 +102,7 @@ Review feature landmarks:
 - `pages/ReviewWorkspacePage.tsx` — page orchestration and layout wiring
 - `components/CategoryTree.tsx` — collapsible 2-level category filter tree
 - `components/sidebar/CategoryManager.tsx` — category create/rename/delete UI
+- `components/ReviewQueueList.tsx` — queue header, view switching, filter toggle, and list cards
 - `components/item-detail/*` — detail rendering, edit form, action toolbar, editor utilities
 - `components/workspace/*` — responsive layout helpers
 
@@ -255,28 +263,38 @@ Action UI rules:
 
 ## Item Detail And Editing
 
-The detail panel must show current human-facing values and original AI values.
+The detail panel should default to the user-facing note, not ingestion/debug data.
 
-Human-facing values:
+Primary visible values:
 
 - title
 - cleaned text
-- raw transcript when applicable
 - type
 - priority
 - category path
 - answer for QUESTION items
 - answer status
 
-Original and trace values:
+Secondary details:
 
-- raw input text
-- raw transcript
-- Telegram trace metadata
-- original AI title/cleaned text/type/priority/category path
-- category proposal and proposal status
-- failure reason
-- answer failure reason
+- original raw text should be hidden behind an explicit disclosure and should not compete visually with the main cleaned note
+- original AI draft should be hidden by default and shown only on demand when it meaningfully differs from the current values
+- Telegram trace metadata should not appear in the normal review surface
+- technical record metadata should not appear in the normal review surface
+- category proposal and proposal status remain visible when actionable
+- failure reason and answer failure reason remain visible when relevant
+
+Action placement:
+
+- place `Edit` as a contextual action in the item header, not as the main completion action
+- place the main completion action in a sticky footer at the end of the reading flow: `Approve` for needs review, `Retry` for failures, `Save` while editing approved items; keep this footer visually minimal instead of wrapping it in a heavy control panel
+- keep destructive and exceptional actions like reject, delete, and regeneration inside a secondary `More` menu instead of a full-width top button row
+
+Queue header:
+
+- show a clear Memora brand header
+- present `Needs Review`, `Failures`, and `Approved` as a coherent view switcher, not as random standalone pills
+- avoid high-attention logout chrome in the primary review surface for the current single-user flow
 
 Needs Review items can:
 

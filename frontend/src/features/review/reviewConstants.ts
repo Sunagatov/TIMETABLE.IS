@@ -1,50 +1,56 @@
 import type {
   ApprovedFilters,
   FailuresFilters,
-  ItemStatus,
-  ItemType,
   ListSort,
-  NeedsReviewFilters,
-  Priority
+  NeedsReviewFilters
 } from "./types/reviewTypes";
+
+type FilterOption = {
+  value: string;
+  label: string;
+};
 
 export const ALL_FILTER_VALUE = "ALL" as const;
 export const DEFAULT_LIST_SORT: ListSort = "createdAt-desc";
 
-export const REVIEW_LIST_SORT_OPTIONS: ListSort[] = [
-  "createdAt-desc",
-  "createdAt-asc",
-  "title-asc",
-  "title-desc",
-  "category-asc",
-  "category-desc"
+export const REVIEW_LIST_SORT_OPTIONS: FilterOption[] = [
+  { value: "createdAt-desc", label: "Newest" },
+  { value: "createdAt-asc", label: "Oldest" },
+  { value: "title-asc", label: "Title A-Z" },
+  { value: "title-desc", label: "Title Z-A" },
+  { value: "category-asc", label: "Category A-Z" },
+  { value: "category-desc", label: "Category Z-A" }
 ];
 
-export const ITEM_TYPE_FILTER_OPTIONS: Array<ItemType | typeof ALL_FILTER_VALUE> = [
-  ALL_FILTER_VALUE,
-  "IDEA",
-  "THOUGHT",
-  "QUESTION",
-  "REMINDER",
-  "OTHER"
+export const ITEM_TYPE_FILTER_OPTIONS: FilterOption[] = [
+  { value: ALL_FILTER_VALUE, label: "All types" },
+  { value: "IDEA", label: "Idea" },
+  { value: "THOUGHT", label: "Thought" },
+  { value: "QUESTION", label: "Question" },
+  { value: "REMINDER", label: "Reminder" },
+  { value: "OTHER", label: "Other" }
 ];
 
-export const PRIORITY_FILTER_OPTIONS: Array<Priority | typeof ALL_FILTER_VALUE> = [
-  ALL_FILTER_VALUE,
-  "URGENT_IMPORTANT",
-  "URGENT_NOT_IMPORTANT",
-  "NOT_URGENT_IMPORTANT",
-  "NOT_URGENT_NOT_IMPORTANT",
-  "NOT_APPLICABLE"
+export const PRIORITY_FILTER_OPTIONS: FilterOption[] = [
+  { value: ALL_FILTER_VALUE, label: "All priorities" },
+  { value: "URGENT_IMPORTANT", label: "Urgent + important" },
+  { value: "URGENT_NOT_IMPORTANT", label: "Urgent only" },
+  { value: "NOT_URGENT_IMPORTANT", label: "Important only" },
+  { value: "NOT_URGENT_NOT_IMPORTANT", label: "Low priority" },
+  { value: "NOT_APPLICABLE", label: "Not applicable" }
 ];
 
-export const FAILURE_STATUS_FILTER_OPTIONS: Array<
-  Extract<ItemStatus, "TRANSCRIPTION_FAILED" | "AI_PROCESSING_FAILED"> | typeof ALL_FILTER_VALUE
-> = [ALL_FILTER_VALUE, "TRANSCRIPTION_FAILED", "AI_PROCESSING_FAILED"];
+export const FAILURE_STATUS_FILTER_OPTIONS: FilterOption[] = [
+  { value: ALL_FILTER_VALUE, label: "All statuses" },
+  { value: "TRANSCRIPTION_FAILED", label: "Transcription failed" },
+  { value: "AI_PROCESSING_FAILED", label: "AI processing failed" }
+];
 
-export const APPROVED_STATUS_FILTER_OPTIONS: Array<
-  Extract<ItemStatus, "HUMAN_APPROVED" | "HUMAN_EDITED_APPROVED"> | typeof ALL_FILTER_VALUE
-> = [ALL_FILTER_VALUE, "HUMAN_APPROVED", "HUMAN_EDITED_APPROVED"];
+export const APPROVED_STATUS_FILTER_OPTIONS: FilterOption[] = [
+  { value: ALL_FILTER_VALUE, label: "All statuses" },
+  { value: "HUMAN_APPROVED", label: "Approved" },
+  { value: "HUMAN_EDITED_APPROVED", label: "Edited + approved" }
+];
 
 export const REVIEW_API_PATHS = {
   needsReview: "/api/review/needs-review",

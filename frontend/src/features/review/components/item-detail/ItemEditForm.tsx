@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { MemoraCategory, MemoraItem, UpdateItemRequest } from "../../types/reviewTypes";
 import type { ItemType, Priority } from "../../types/reviewTypes";
-import { CheckIcon, FormField } from "./DetailPrimitives";
+import { FormField } from "./DetailPrimitives";
 import { AnswerEditor } from "./AnswerEditor";
 import type { DetailView, ItemDetailFormState } from "./itemDetailUtils";
 import { formatCategoryPath, PRIORITY_OPTIONS, TYPE_OPTIONS } from "./itemDetailUtils";
@@ -80,15 +80,7 @@ export function ItemEditForm(props: Props) {
           />
         )}
         {props.view === "needs-review" && (
-          <button
-            type="button"
-            disabled={props.busy || Boolean(props.validationError)}
-            onClick={() => void props.onEditAndApprove(props.item.id, props.request)}
-            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-55"
-          >
-            <CheckIcon />
-            {props.busyAction === "edit-approve" ? "Approving..." : "Confirm Edit & Approve"}
-          </button>
+          <p className="text-sm text-stone-500">Use the footer action to save and approve this edited note.</p>
         )}
       </div>
     </div>

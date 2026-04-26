@@ -116,11 +116,40 @@ internal object LangChain4jMemoraAiMapper {
     private fun String.toTitle(): String =
         trim()
             .replace(Regex("\\s+"), " ")
+            .replace(Regex("""[.?!,:;]+$"""), "")
+            .removeLeadingTitlePreamble()
             .split(" ")
-            .take(6)
+            .take(8)
             .joinToString(" ")
+            .trimTrailingTitleConnector()
             .ifBlank { throw IllegalStateException("AI response missing non-blank field: title") }
+            .replaceFirstChar { char ->
+                if (char.isLowerCase()) char.titlecase() else char.toString()
+            }
             .take(120)
+
+    private fun String.removeLeadingTitlePreamble(): String =
+        replace(
+            Regex(
+                pattern = """^(can|could|would|will)\s+you\s+(please\s+)?""",
+                option = RegexOption.IGNORE_CASE
+            ),
+            ""
+        ).replace(
+            Regex(pattern = """^please\s+""", option = RegexOption.IGNORE_CASE),
+            ""
+        )
+
+    private fun String.trimTrailingTitleConnector(): String {
+        val trailing = setOf(
+            "a", "an", "and", "are", "for", "from", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "with"
+        )
+        val words = split(" ").toMutableList()
+        while (words.size > 2 && words.last().lowercase() in trailing) {
+            words.removeAt(words.lastIndex)
+        }
+        return words.joinToString(" ")
+    }
 
     private fun String?.requireNonBlank(fieldName: String): String =
         this?.trim()?.takeIf { it.isNotBlank() }
