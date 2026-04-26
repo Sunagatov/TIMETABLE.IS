@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { REVIEW_VIEW_META, REVIEW_VIEW_ORDER, type ReviewView } from "../reviewViewMeta";
+import { REVIEW_LIST_SORT_OPTIONS } from "../reviewConstants";
 import type { ItemType, MemoraItem } from "../types/reviewTypes";
 
 type Props = {
@@ -17,7 +18,23 @@ type Props = {
   onViewChange: (next: ReviewView) => void;
   isLoading: boolean;
   errorMessage: string | null;
+  searchValue: string;
+  onSearchChange: (v: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (v: string) => void;
+  sortValue: string;
+  onSortChange: (v: string) => void;
+  hasSecondaryFilters: boolean;
 };
+
+const TYPE_CHIP_OPTIONS = [
+  { value: "ALL", label: "All" },
+  { value: "IDEA", label: "Idea" },
+  { value: "THOUGHT", label: "Thought" },
+  { value: "QUESTION", label: "Question" },
+  { value: "REMINDER", label: "Reminder" },
+  { value: "OTHER", label: "Other" },
+] as const;
 
 export function ReviewQueueList({
   items,
@@ -28,7 +45,14 @@ export function ReviewQueueList({
   counts,
   onViewChange,
   isLoading,
-  errorMessage
+  errorMessage,
+  searchValue,
+  onSearchChange,
+  typeFilter,
+  onTypeFilterChange,
+  sortValue,
+  onSortChange,
+  hasSecondaryFilters,
 }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const viewMeta = REVIEW_VIEW_META[view];
@@ -45,19 +69,23 @@ export function ReviewQueueList({
             <button
               type="button"
               onClick={() => setFiltersOpen((open) => !open)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+              className={`relative flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
                 filtersOpen
                   ? "border-stone-900 bg-stone-900 text-white"
                   : "border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50"
               }`}
             >
               <FilterIcon />
-              <span>{filtersOpen ? "Hide filters" : "Filters"}</span>
+              <span>{filtersOpen ? "Hide" : "More"}</span>
+              {hasSecondaryFilters && !filtersOpen && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-500" />
+              )}
             </button>
           ) : null}
         </div>
-        <div className="mt-4 rounded-[1.35rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,239,232,0.96))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-          <div className="grid grid-cols-3 gap-1.5">
+
+        <div className="mt-3 rounded-xl border border-stone-200 bg-stone-100/80 p-1">
+          <div className="grid grid-cols-3 gap-0.5">
             {REVIEW_VIEW_ORDER.map((reviewView) => (
               <ViewTab
                 key={reviewView}
@@ -69,9 +97,58 @@ export function ReviewQueueList({
             ))}
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-2.5">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${viewMeta.accentDotClass}`} />
-          <p className="text-sm text-stone-500">{viewMeta.description}</p>
+
+        <div className="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_1px_4px_rgba(28,25,23,0.04)]">
+          <div className="flex items-center gap-2 px-3.5 py-2.5">
+            <span className="shrink-0 text-stone-400"><SearchIcon /></span>
+            <input
+              type="search"
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search..."
+              className="min-w-0 flex-1 bg-transparent text-sm text-stone-900 outline-none placeholder:text-stone-400"
+            />
+            <div className="relative shrink-0">
+              <select
+                value={sortValue}
+                onChange={(e) => onSortChange(e.target.value)}
+                className="appearance-none cursor-pointer rounded-lg border border-stone-200 bg-stone-50 py-1 pl-2 pr-5 text-[11px] font-semibold text-stone-600 outline-none transition hover:bg-stone-100"
+              >
+                {REVIEW_LIST_SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-stone-400">
+                <ChevronDownIcon />
+              </span>
+            </div>
+          </div>
+          <div className="border-t border-stone-100 px-3 pb-3 pt-2.5">
+            <div
+              className="flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {TYPE_CHIP_OPTIONS.map((opt) => (
+                <button
+                  type="button"
+                  key={opt.value}
+                  onClick={() => onTypeFilterChange(opt.value)}
+                  className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                    typeFilter === opt.value
+                      ? typeChipActiveClass(opt.value)
+                      : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-2.5 flex items-center gap-2">
+          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${viewMeta.accentDotClass}`} />
+          <p className="text-xs text-stone-400">{viewMeta.description}</p>
         </div>
       </header>
 
@@ -107,6 +184,17 @@ export function ReviewQueueList({
   );
 }
 
+function typeChipActiveClass(value: string): string {
+  switch (value) {
+    case "IDEA": return "bg-indigo-500 text-white border-indigo-500";
+    case "THOUGHT": return "bg-amber-500 text-stone-950 border-amber-500";
+    case "QUESTION": return "bg-violet-500 text-white border-violet-500";
+    case "REMINDER": return "bg-sky-500 text-white border-sky-500";
+    case "OTHER": return "bg-stone-500 text-white border-stone-500";
+    default: return "bg-stone-900 text-white border-stone-900";
+  }
+}
+
 function ViewTab(props: {
   view: ReviewView;
   active: boolean;
@@ -119,28 +207,19 @@ function ViewTab(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className={`group relative flex min-h-[58px] flex-col justify-between overflow-hidden rounded-[1rem] border px-3 py-2.5 text-left transition ${
+      className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
         props.active
-          ? "border-white/90 bg-white text-stone-950 shadow-[0_12px_28px_rgba(28,25,23,0.10)]"
-          : "border-transparent bg-transparent text-stone-600 hover:border-white/70 hover:bg-white/72 hover:text-stone-900"
+          ? "bg-white text-stone-900 shadow-sm"
+          : "text-stone-500 hover:text-stone-700"
       }`}
     >
-      <span
-        className={`absolute inset-x-3 top-0 h-[3px] rounded-full transition ${
-          props.active ? meta.accentDotClass : "bg-transparent group-hover:bg-stone-200"
-        }`}
-      />
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold leading-tight">{shortViewLabel(props.view)}</p>
-        </div>
-        <span className={`h-2 w-2 rounded-full ${meta.accentDotClass}`} />
-      </div>
-      <div className="mt-2 flex items-center justify-end gap-2">
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${props.active ? "bg-stone-100 text-stone-700" : meta.countClass}`}>
-          {props.count}
-        </span>
-      </div>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.accentDotClass}`} />
+      <span className="truncate">{shortViewLabel(props.view)}</span>
+      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none ${
+        props.active ? "bg-stone-100 text-stone-600" : "bg-stone-200/70 text-stone-500"
+      }`}>
+        {props.count}
+      </span>
     </button>
   );
 }
@@ -287,6 +366,7 @@ function shortViewLabel(view: ReviewView): string {
   if (view === "failures") return "Failures";
   return "Approved";
 }
+
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-200 bg-white/60 p-10 text-center">
@@ -315,6 +395,23 @@ function FilterIcon() {
       <path d="M2 3.25H12" />
       <path d="M4.5 7H9.5" />
       <path d="M6 10.75H8" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      <circle cx="6.25" cy="6.25" r="4.25" />
+      <path d="m9.5 9.5 2.75 2.75" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="2 3.5 5 6.5 8 3.5" />
     </svg>
   );
 }

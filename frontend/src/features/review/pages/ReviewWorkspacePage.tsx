@@ -20,7 +20,7 @@ import {
   useReviewWorkspaceState
 } from "../hooks/useReviewWorkspaceState";
 import { REVIEW_VIEW_META, type ReviewView } from "../reviewViewMeta";
-import type { CategoryPathFilter, CreateCategoryRequest, RenameCategoryRequest } from "../types/reviewTypes";
+import type { ApprovedFilters, CategoryPathFilter, CreateCategoryRequest, FailuresFilters, NeedsReviewFilters, RenameCategoryRequest } from "../types/reviewTypes";
 
 type Props = {
   onLoggedOut: () => void | Promise<void>;
@@ -83,6 +83,31 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
   };
   const activeCount = countForView(state.view, counts);
 
+  const activeFilters =
+    state.view === "needs-review"
+      ? state.nrFilters
+      : state.view === "failures"
+        ? state.failFilters
+        : state.approvedFilters;
+
+  function patchActiveFilters(patch: Record<string, string>) {
+    if (state.view === "needs-review") {
+      state.setNrFilters({ ...state.nrFilters, ...patch } as NeedsReviewFilters);
+    } else if (state.view === "failures") {
+      state.setFailFilters({ ...state.failFilters, ...patch } as FailuresFilters);
+    } else {
+      state.setApprovedFilters({ ...state.approvedFilters, ...patch } as ApprovedFilters);
+    }
+  }
+
+  const hasSecondaryFilters =
+    activeFilters.category !== "" ||
+    activeFilters.subcategory !== "" ||
+    activeFilters.priority !== "ALL" ||
+    activeFilters.createdFrom !== "" ||
+    activeFilters.createdTo !== "" ||
+    ("status" in activeFilters && activeFilters.status !== "ALL");
+
   return (
     <main className="min-h-screen bg-[#f5f0e8] text-stone-900">
       {state.mobilePanel === "sidebar" ? (
@@ -120,6 +145,13 @@ export function ReviewWorkspacePage({ onLoggedOut }: Props) {
             onViewChange={(view) => state.setView(view)}
             isLoading={listQuery.isPending}
             errorMessage={listQuery.error instanceof Error ? listQuery.error.message : null}
+            searchValue={activeFilters.keyword}
+            onSearchChange={(v) => patchActiveFilters({ keyword: v })}
+            typeFilter={activeFilters.type}
+            onTypeFilterChange={(v) => patchActiveFilters({ type: v })}
+            sortValue={activeFilters.sort}
+            onSortChange={(v) => patchActiveFilters({ sort: v })}
+            hasSecondaryFilters={hasSecondaryFilters}
           />
         </WorkspaceColumn>
 
