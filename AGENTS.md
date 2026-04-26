@@ -53,6 +53,10 @@ Runtime, deployment, orchestration, and production operations belong in `Sunagat
 
 Use `.project/docs/ai/README.md` as the AI-docs index.
 
+Practical routing reminder:
+- local bootstrap, shell, env-loading, and Whisper/runtime-orchestration issues usually require Vault context after the source-level reality is known from `.project/docs/ai/env-runtime-reference.md`
+- do not assume raw source `./gradlew` commands load `.env.local`
+
 ## Structural Rule
 
 Prefer domain, feature, and area oriented structure.

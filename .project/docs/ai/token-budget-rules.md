@@ -47,6 +47,8 @@ Stop opening files once you know:
 - Spring Boot 4 uses `spring.mongodb.uri` / `SPRING_MONGODB_URI`, not `spring.data.mongodb.uri`.
 - deterministic AI is local/dev/test fallback only; real V1 polishing requires `MEMORA_AI_MODE=openai`
 - production-like runtime should enable `MEMORA_VALIDATE_PRODUCTION_CONFIG=true` and keep `MEMORA_AI_FALLBACK_TO_DETERMINISTIC=false`
+- direct source `./gradlew bootRun` does not auto-load `backend/.env.local`
+- local browser auth over plain HTTP needs `BACKEND_COOKIE_SECURE=false`
 - `frontend/src/features/review/api/reviewApi.ts` may still strip stale `subsubcategory` query params defensively; that compatibility behavior is acceptable unless the task explicitly removes legacy tolerance
 
 ## Editing Strategy

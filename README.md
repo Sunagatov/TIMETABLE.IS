@@ -111,3 +111,8 @@ Telegram bot:
 ## Runtime Boundary
 
 For deployment, local orchestration, production config, server operations, and Whisper runtime details, use Vault instead of this repository.
+
+For day-to-day local runs, prefer Vault task entrypoints rather than raw source commands:
+- `Vault/apps/memora/backend`
+- `Vault/apps/memora/frontend`
+- `Vault/apps/memora/telegrambot`

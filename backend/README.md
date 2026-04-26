@@ -38,6 +38,8 @@ For local voice transcription, open the SSH tunnel first with
 `task local:whisper:tunnel`. The local backend can then use the Hetzner whisper
 worker through `http://127.0.0.1:18083`, and the whisper-compatible
 `MEMORA_TRANSCRIPTION_API_KEY=placeholder` value is valid for that path.
+Current production Whisper model selection is Vault-owned; at the time of this
+doc it is `Systran/faster-whisper-medium`.
 
 If you run Gradle directly from the source repo, load `backend/.env.local` first so
 local auth and cookie settings are applied:
