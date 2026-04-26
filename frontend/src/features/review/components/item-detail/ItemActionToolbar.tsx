@@ -51,8 +51,10 @@ export function ItemHeaderActions(props: Props) {
           busy={props.busyAction === "edit-approve" && props.editOpen}
           disabled={busy && !props.editOpen}
           onClick={props.onToggleEdit}
+          active={props.editOpen}
+          shortcut="E"
         >
-          <PencilIcon /> {props.editOpen ? "Close editor" : "Edit"}
+          <PencilIcon /> {props.editOpen ? "Editing" : "Edit"}
         </HeaderActionBtn>
       )}
       <SecondaryActionsMenu {...props} busy={busy} includeCategory={props.view === "needs-review"} />
@@ -242,15 +244,30 @@ function HeaderActionBtn(props: {
   disabled: boolean;
   onClick: () => void;
   children: ReactNode;
+  active?: boolean;
+  shortcut?: string;
 }) {
   return (
     <button
       type="button"
       disabled={props.busy || props.disabled}
       onClick={props.onClick}
-      className="flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-stone-400 transition hover:bg-stone-100 hover:text-stone-700 disabled:opacity-50"
+      className={`flex h-10 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition disabled:opacity-50 ${
+        props.active
+          ? "border-stone-900 bg-stone-900 text-white shadow-[0_6px_18px_rgba(28,25,23,0.18)]"
+          : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50"
+      }`}
     >
       {props.busy ? "..." : props.children}
+      {props.shortcut && (
+        <span
+          className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+            props.active ? "bg-white/15 text-white" : "bg-stone-100 text-stone-400"
+          }`}
+        >
+          {props.shortcut}
+        </span>
+      )}
     </button>
   );
 }
