@@ -58,7 +58,19 @@ export function GhostBtn(props: { busy: boolean; disabled: boolean; onClick: () 
   );
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  AI_PROCESSED_UNREVIEWED: "Ready to review",
+  HUMAN_APPROVED: "Approved",
+  HUMAN_EDITED_APPROVED: "Edited & approved",
+  AI_PROCESSING_FAILED: "AI failed",
+  TRANSCRIPTION_FAILED: "Transcription failed",
+  REJECTED: "Rejected",
+  RECEIVED: "Received",
+  DELETED: "Deleted",
+};
+
 export function StatusPill({ status }: { status: string }) {
+  const label = STATUS_LABELS[status] ?? status.replace(/_/g, " ");
   const cls = status.includes("APPROVED")
     ? "bg-emerald-100 text-emerald-700"
     : status.includes("FAILED")
@@ -68,16 +80,16 @@ export function StatusPill({ status }: { status: string }) {
         : "bg-stone-100 text-stone-600";
   return (
     <span className={`rounded px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
-      {status.replace(/_/g, " ")}
+      {label}
     </span>
   );
 }
 
 export function Chip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{label}</span>
-      <span className="text-xs font-medium text-stone-700">{value}</span>
+    <div className="flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1">
+      <span className="text-[9px] font-semibold uppercase tracking-widest text-stone-400">{label}</span>
+      <span className="text-[10px] font-semibold text-stone-600">{value}</span>
     </div>
   );
 }

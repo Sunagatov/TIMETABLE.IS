@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { REVIEW_VIEW_META, REVIEW_VIEW_ORDER, type ReviewView } from "../reviewViewMeta";
-import type { MemoraItem } from "../types/reviewTypes";
+import type { ItemType, MemoraItem } from "../types/reviewTypes";
 
 type Props = {
   items: MemoraItem[];
@@ -94,7 +94,6 @@ export function ReviewQueueList({
                 item={item}
                 selected={item.id === selectedItemId}
                 view={view}
-                accentBorderClass={viewMeta.accentBorderClass}
                 onSelect={onSelect}
               />
             ))}
@@ -181,11 +180,40 @@ function QueueListState(props: {
   return props.children;
 }
 
+function typeAccentBorder(type: ItemType): string {
+  switch (type) {
+    case "IDEA": return "border-l-indigo-400";
+    case "THOUGHT": return "border-l-amber-400";
+    case "QUESTION": return "border-l-violet-500";
+    case "REMINDER": return "border-l-sky-400";
+    default: return "border-l-stone-300";
+  }
+}
+
+function typeColorClass(type: ItemType): string {
+  switch (type) {
+    case "IDEA": return "text-indigo-500";
+    case "THOUGHT": return "text-amber-500";
+    case "QUESTION": return "text-violet-500";
+    case "REMINDER": return "text-sky-500";
+    default: return "text-stone-400";
+  }
+}
+
+function humanType(type: ItemType): string {
+  switch (type) {
+    case "IDEA": return "Idea";
+    case "THOUGHT": return "Thought";
+    case "QUESTION": return "Question";
+    case "REMINDER": return "Reminder";
+    default: return type.replace(/_/g, " ");
+  }
+}
+
 function ReviewQueueItemCard(props: {
   item: MemoraItem;
   selected: boolean;
   view: ReviewView;
-  accentBorderClass: string;
   onSelect: (itemId: string) => void;
 }) {
   const preview = props.item.cleanedText || props.item.rawTranscript || props.item.rawInputText || "No content";
@@ -195,7 +223,7 @@ function ReviewQueueItemCard(props: {
       type="button"
       onClick={() => props.onSelect(props.item.id)}
       className={`block w-full rounded-[1.4rem] border border-stone-200 border-l-[3px] p-4 text-left transition ${
-        props.accentBorderClass
+        typeAccentBorder(props.item.type)
       } ${
         props.selected
           ? "border-stone-900 border-l-current bg-stone-900 shadow-[0_14px_34px_rgba(28,25,23,0.18)]"
@@ -204,8 +232,8 @@ function ReviewQueueItemCard(props: {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${props.selected ? "text-stone-400" : "text-stone-400"}`}>
-            {props.item.type.replace(/_/g, " ")}
+          <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${props.selected ? "text-stone-500" : typeColorClass(props.item.type)}`}>
+            {humanType(props.item.type)}
           </p>
           <h2 className={`mt-2 line-clamp-2 text-base font-semibold leading-snug ${props.selected ? "text-white" : "text-stone-950"}`}>
             {props.item.title || "Untitled"}
@@ -216,7 +244,7 @@ function ReviewQueueItemCard(props: {
         </span>
       </div>
 
-      <p className={`mt-3 line-clamp-3 text-sm leading-6 ${props.selected ? "text-stone-300" : "text-stone-600"}`}>
+      <p className={`mt-3 line-clamp-2 text-sm leading-6 ${props.selected ? "text-stone-300" : "text-stone-600"}`}>
         {preview}
       </p>
 
@@ -224,9 +252,6 @@ function ReviewQueueItemCard(props: {
         <InfoPill selected={props.selected}>{props.item.categoryPath.category || "No category"}</InfoPill>
         {props.item.categoryPath.subcategory ? (
           <InfoPill selected={props.selected}>{props.item.categoryPath.subcategory}</InfoPill>
-        ) : null}
-        {isQuestion(props.item) ? (
-          <InfoPill selected={props.selected}>Question</InfoPill>
         ) : null}
         {props.view === "failures" && props.item.failureStage ? (
           <InfoPill selected={props.selected}>{props.item.failureStage.replace(/_/g, " ")}</InfoPill>
@@ -262,11 +287,6 @@ function shortViewLabel(view: ReviewView): string {
   if (view === "failures") return "Failures";
   return "Approved";
 }
-
-function isQuestion(item: MemoraItem) {
-  return item.type === "QUESTION";
-}
-
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-200 bg-white/60 p-10 text-center">
