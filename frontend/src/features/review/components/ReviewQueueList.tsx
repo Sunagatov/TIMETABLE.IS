@@ -101,8 +101,6 @@ export function ReviewQueueList({
     <div className="min-h-screen bg-[#f5f0e8] text-stone-900">
       <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/92 backdrop-blur-sm">
         <div className="mx-auto max-w-[1480px] px-4 py-3 lg:px-6">
-
-          {/* Title row */}
           <div className="flex items-center justify-between gap-3">
             <p className="text-xl font-semibold tracking-[-0.02em] text-stone-950">Memora</p>
             {onLoggedOut && (
@@ -118,7 +116,6 @@ export function ReviewQueueList({
             )}
           </div>
 
-          {/* View tabs */}
           <div className="mt-3 flex gap-1.5">
             {REVIEW_VIEW_ORDER.map((rv) => {
               const count = countForView(rv, counts);
@@ -143,11 +140,8 @@ export function ReviewQueueList({
             })}
           </div>
 
-          {/* Filter bar */}
           <div className="mt-3 rounded-[1.5rem] border border-stone-200 bg-white p-3 shadow-[0_1px_4px_rgba(28,25,23,0.04)]">
-
-            {/* Search row: desktop always shown, mobile shown when open */}
-            <div className={`items-center gap-2 ${searchOpen ? "flex" : "hidden"} lg:flex`}>
+            <div className={`items-center gap-2 ${searchOpen ? "flex" : "hidden"} lg:hidden`}>
               <label className="relative min-w-0 flex-1">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
                   <SearchIcon />
@@ -171,10 +165,7 @@ export function ReviewQueueList({
               </button>
             </div>
 
-            {/* Controls row */}
-            <div className={`flex items-center gap-2 ${searchOpen ? "mt-2 border-t border-stone-100 pt-2" : ""}`}>
-
-              {/* Mobile: search toggle */}
+            <div className={`flex items-center gap-2 lg:hidden ${searchOpen ? "mt-2 border-t border-stone-100 pt-2" : ""}`}>
               <button
                 type="button"
                 aria-label="Toggle search"
@@ -187,8 +178,6 @@ export function ReviewQueueList({
               >
                 <SearchIcon />
               </button>
-
-              {/* Mobile: Filters button → bottom sheet */}
               <button
                 type="button"
                 onClick={() => setFiltersSheetOpen(true)}
@@ -206,36 +195,6 @@ export function ReviewQueueList({
                   </span>
                 )}
               </button>
-
-              {/* Desktop: inline selects */}
-              <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-2">
-                <div className="flex-1">
-                  <ToolbarSelect
-                    value={typeFilter}
-                    onChange={onTypeFilterChange}
-                    active={typeFilter !== "ALL"}
-                    options={typeOptions}
-                  />
-                </div>
-                <div className="flex-1">
-                  <ToolbarSelect
-                    value={categoryValue}
-                    onChange={onCategoryChange}
-                    active={categoryValue !== ""}
-                    options={categoryOptions2}
-                  />
-                </div>
-                <div className="flex-[0.8]">
-                  <ToolbarSelect
-                    value={sortValue}
-                    onChange={onSortChange}
-                    active={sortValue !== DEFAULT_LIST_SORT}
-                    options={REVIEW_LIST_SORT_OPTIONS}
-                  />
-                </div>
-              </div>
-
-              {/* Clear button — both mobile and desktop */}
               {hasActiveFilters && (
                 <button
                   type="button"
@@ -245,6 +204,56 @@ export function ReviewQueueList({
                   Clear
                 </button>
               )}
+            </div>
+
+            <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.35fr)_180px_220px_170px_auto] lg:items-center lg:gap-2">
+              <label className="relative min-w-0">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+                  <SearchIcon />
+                </span>
+                <input
+                  type="search"
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder="Search title, text, or category"
+                  className={`w-full rounded-xl border py-2.5 pl-9 pr-4 text-sm outline-none transition placeholder:text-stone-400 focus:bg-white ${
+                    searchValue
+                      ? "border-stone-800 bg-white text-stone-900"
+                      : "border-stone-200 bg-stone-50 text-stone-900 hover:border-stone-300 focus:border-stone-400"
+                  }`}
+                />
+              </label>
+              <ToolbarSelect
+                value={typeFilter}
+                onChange={onTypeFilterChange}
+                active={typeFilter !== "ALL"}
+                options={typeOptions}
+              />
+              <ToolbarSelect
+                value={categoryValue}
+                onChange={onCategoryChange}
+                active={categoryValue !== ""}
+                options={categoryOptions2}
+              />
+              <ToolbarSelect
+                value={sortValue}
+                onChange={onSortChange}
+                active={sortValue !== DEFAULT_LIST_SORT}
+                options={REVIEW_LIST_SORT_OPTIONS}
+              />
+              <div className="flex items-center justify-end gap-2">
+                {hasActiveFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                  >
+                    Clear all
+                  </button>
+                ) : (
+                  <span className="text-xs text-stone-400">{items.length} shown</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -475,10 +484,10 @@ function ReviewQueueItemCard(props: {
     <button
       type="button"
       onClick={() => props.onSelect(props.item.id)}
-      className={`block w-full rounded-[1.4rem] border border-l-[3px] bg-white p-4 text-left transition ${typeAccentBorder(props.item.type)} ${
+      className={`group block w-full rounded-[1.4rem] border border-l-[3px] bg-white p-4 text-left transition ${typeAccentBorder(props.item.type)} ${
         props.selected
-          ? "border-stone-900 shadow-[0_8px_24px_rgba(28,25,23,0.10)] ring-1 ring-stone-900/5"
-          : "border-stone-200 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-stone-300 hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)]"
+          ? "border-stone-900 bg-white shadow-[0_10px_28px_rgba(28,25,23,0.10)] ring-1 ring-stone-900/5"
+          : "border-stone-200 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-[0_8px_18px_rgba(28,25,23,0.08)]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -512,6 +521,14 @@ function ReviewQueueItemCard(props: {
         {props.view === "failures" && props.item.failureStage ? (
           <InfoPill>{props.item.failureStage.replace(/_/g, " ")}</InfoPill>
         ) : null}
+        <span className={`ml-auto hidden items-center gap-1 text-xs font-medium transition lg:inline-flex ${
+          props.selected
+            ? "text-stone-700"
+            : "text-stone-300 group-hover:text-stone-500"
+        }`}>
+          Open
+          <ArrowRightIcon />
+        </span>
       </div>
     </button>
   );
@@ -601,6 +618,15 @@ function ChevronDownIcon() {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="2 3.5 5 6.5 8 3.5" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 6h7" />
+      <path d="m6 2 4 4-4 4" />
     </svg>
   );
 }

@@ -97,6 +97,25 @@ export function StatusPill({ status }: { status: string }) {
   );
 }
 
+export function StatusMeta({ status }: { status: string }) {
+  const label = STATUS_LABELS[status] ?? status.replace(/_/g, " ");
+  const tone = status.includes("APPROVED")
+    ? "bg-emerald-500 text-emerald-700"
+    : status.includes("FAILED")
+      ? "bg-red-500 text-red-700"
+      : status.includes("PENDING")
+        ? "bg-amber-400 text-amber-700"
+        : "bg-stone-300 text-stone-600";
+
+  const [dot, text] = tone.split(" ");
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      {label}
+    </span>
+  );
+}
+
 export function TypeChip({ type }: { type: string }) {
   const { bg, text } = typeChipStyle(type);
   return (
