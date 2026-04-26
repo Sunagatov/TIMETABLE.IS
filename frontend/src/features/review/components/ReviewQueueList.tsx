@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { REVIEW_VIEW_META, REVIEW_VIEW_ORDER, type ReviewView } from "../reviewViewMeta";
 import { REVIEW_LIST_SORT_OPTIONS } from "../reviewConstants";
@@ -55,12 +55,18 @@ export function ReviewQueueList({
   hasSecondaryFilters,
 }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const viewMeta = REVIEW_VIEW_META[view];
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   return (
     <section className="flex h-full flex-col border-r border-stone-200 bg-[#faf8f4]">
       <header className="border-b border-stone-200 bg-white/88 px-4 py-4 backdrop-blur-sm lg:px-5">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xl font-semibold tracking-[-0.02em] text-stone-950">Memora</p>
             <p className="mt-1 text-sm text-stone-500">Private review workspace</p>
@@ -68,15 +74,15 @@ export function ReviewQueueList({
           {toolbar ? (
             <button
               type="button"
-              onClick={() => setFiltersOpen((open) => !open)}
-              className={`relative flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+              aria-label={filtersOpen ? "Hide filters" : "More filters"}
+              onClick={() => setFiltersOpen((o) => !o)}
+              className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${
                 filtersOpen
                   ? "border-stone-900 bg-stone-900 text-white"
-                  : "border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50"
+                  : "border-stone-300 bg-white text-stone-600 hover:border-stone-400 hover:bg-stone-50"
               }`}
             >
-              <FilterIcon />
-              <span>{filtersOpen ? "Hide" : "More"}</span>
+              <MenuIcon />
               {hasSecondaryFilters && !filtersOpen && (
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-500" />
               )}
@@ -99,16 +105,28 @@ export function ReviewQueueList({
         </div>
 
         <div className="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_1px_4px_rgba(28,25,23,0.04)]">
-          <div className="flex items-center gap-2 px-3.5 py-2.5">
+          {/* Search row: always on desktop; on mobile only when searchOpen */}
+          <div className={`items-center gap-2 px-3.5 py-2.5 ${searchOpen ? "flex" : "hidden"} lg:flex`}>
             <span className="shrink-0 text-stone-400"><SearchIcon /></span>
             <input
+              ref={searchInputRef}
               type="search"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search..."
               className="min-w-0 flex-1 bg-transparent text-sm text-stone-900 outline-none placeholder:text-stone-400"
             />
-            <div className="relative shrink-0">
+            {/* Close button — mobile only */}
+            <button
+              type="button"
+              aria-label="Close search"
+              onClick={() => { setSearchOpen(false); onSearchChange(""); }}
+              className="shrink-0 text-stone-400 transition hover:text-stone-700 lg:hidden"
+            >
+              <XIcon />
+            </button>
+            {/* Sort — desktop only (on mobile it lives in the chips row) */}
+            <div className="relative hidden shrink-0 lg:block">
               <select
                 value={sortValue}
                 onChange={(e) => onSortChange(e.target.value)}
@@ -123,9 +141,24 @@ export function ReviewQueueList({
               </span>
             </div>
           </div>
-          <div className="border-t border-stone-100 px-3 pb-3 pt-2.5">
+
+          {/* Chips row — always visible */}
+          <div className={`flex items-center gap-2 px-3 pb-3 pt-2.5 ${searchOpen ? "border-t border-stone-100" : "lg:border-t lg:border-stone-100"}`}>
+            {/* Search toggle — mobile only */}
+            <button
+              type="button"
+              aria-label="Search"
+              onClick={() => setSearchOpen((o) => !o)}
+              className={`shrink-0 rounded-full border p-1.5 transition lg:hidden ${
+                searchOpen || searchValue
+                  ? "border-stone-900 bg-stone-900 text-white"
+                  : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50"
+              }`}
+            >
+              <SearchIcon />
+            </button>
             <div
-              className="flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: "none" }}
             >
               {TYPE_CHIP_OPTIONS.map((opt) => (
@@ -142,6 +175,21 @@ export function ReviewQueueList({
                   {opt.label}
                 </button>
               ))}
+            </div>
+            {/* Sort — mobile only (on desktop it lives in the search row) */}
+            <div className="relative shrink-0 lg:hidden">
+              <select
+                value={sortValue}
+                onChange={(e) => onSortChange(e.target.value)}
+                className="appearance-none cursor-pointer rounded-lg border border-stone-200 bg-stone-50 py-1 pl-2 pr-5 text-[11px] font-semibold text-stone-600 outline-none transition hover:bg-stone-100"
+              >
+                {REVIEW_LIST_SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-stone-400">
+                <ChevronDownIcon />
+              </span>
             </div>
           </div>
         </div>
@@ -389,12 +437,10 @@ function LoadingDots() {
   );
 }
 
-function FilterIcon() {
+function MenuIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 3.25H12" />
-      <path d="M4.5 7H9.5" />
-      <path d="M6 10.75H8" />
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      <path d="M2 4h11M2 7.5h11M2 11h11" />
     </svg>
   );
 }
@@ -404,6 +450,14 @@ function SearchIcon() {
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
       <circle cx="6.25" cy="6.25" r="4.25" />
       <path d="m9.5 9.5 2.75 2.75" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M2 2l10 10M12 2 2 12" />
     </svg>
   );
 }
