@@ -59,13 +59,16 @@ export function ItemHeaderActions(props: Props) {
   );
 }
 
-export function ItemFooterActions(props: Props) {
+export function ItemFooterActions(props: Props & { embedded?: boolean }) {
   const busy = props.busyAction !== null;
 
   if (props.view === "approved" && !props.editOpen) return null;
 
   return (
-    <div className="sticky bottom-0 z-10 mt-auto bg-gradient-to-t from-white via-white/96 to-transparent px-6 pb-5 pt-8">
+    <div className={props.embedded
+      ? "flex items-center justify-end gap-2 border-t border-stone-100 px-6 py-4"
+      : "sticky bottom-0 z-10 mt-auto bg-gradient-to-t from-white via-white/96 to-transparent px-6 pb-5 pt-8"
+    }>
       <div className="flex items-center justify-end gap-2">
         {props.editOpen && props.view !== "failures" && (
           <ToolbarBtn tone="neutral" busy={false} disabled={busy} onClick={props.onToggleEdit}>

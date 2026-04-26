@@ -40,6 +40,7 @@ type Props = {
   onRegenerateCategoryProposal: (itemId: string) => Promise<void>;
   onRegenerateAll: (itemId: string) => Promise<void>;
   onMobileBack?: () => void;
+  embedded?: boolean;
 };
 
 export function ItemDetailPanel({
@@ -62,7 +63,8 @@ export function ItemDetailPanel({
   onRegenerateAnswer,
   onRegenerateCategoryProposal,
   onRegenerateAll,
-  onMobileBack
+  onMobileBack,
+  embedded
 }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [formState, setFormState] = useState<ItemDetailFormState>(EMPTY_FORM_STATE);
@@ -82,10 +84,12 @@ export function ItemDetailPanel({
   );
 
   if (isLoading) {
+    if (embedded) return <div className="flex items-center justify-center py-10 text-sm text-stone-400">Loading…</div>;
     return <PanelShell onMobileBack={onMobileBack}><CenterState icon=".  .  ." title="Loading" body="Fetching item..." /></PanelShell>;
   }
 
   if (errorMessage) {
+    if (embedded) return <div className="px-6 py-4 text-sm text-red-600">{errorMessage}</div>;
     return (
       <PanelShell onMobileBack={onMobileBack}>
         <div className="max-w-sm rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
@@ -97,6 +101,7 @@ export function ItemDetailPanel({
   }
 
   if (!item) {
+    if (embedded) return null;
     return <PanelShell onMobileBack={onMobileBack}><CenterState icon="□" title="Open the queue on the left" body="Choose one note, read the cleaned version, then approve or edit it." /></PanelShell>;
   }
 
@@ -124,44 +129,60 @@ export function ItemDetailPanel({
     onRegenerateAll
   } satisfies React.ComponentProps<typeof ItemHeaderActions>;
 
+  const sharedContent = (
+    <>
+      <ItemHeader item={item} isQuestion={isQuestion} actions={<ItemHeaderActions {...actionProps} />} />
+      <ItemMetadataChips item={item} />
+      <ItemMainContent item={item} isQuestion={isQuestion} />
+      <ItemFailureNotice item={item} />
+      <OriginalAiDraftSection item={item} isQuestion={isQuestion} />
+      <OriginalCaptureSection item={item} />
+      {view === "needs-review" && (
+        <CategoryProposalCard
+          item={item}
+          busy={busy}
+          busyAction={busyAction}
+          onApproveCategoryProposal={onApproveCategoryProposal}
+          onRejectCategoryProposal={onRejectCategoryProposal}
+        />
+      )}
+      {editOpen && (
+        <ItemEditForm
+          view={view}
+          item={item}
+          categories={categories}
+          busy={busy}
+          busyAction={busyAction}
+          isQuestion={isQuestion}
+          answerFailureMessage={answerFailureMessage}
+          validationError={validationError}
+          formState={formState}
+          setFormState={setFormState}
+          request={request}
+          onEditAndApprove={onEditAndApprove}
+          onRegenerateAnswer={onRegenerateAnswer}
+        />
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div>
+        <ItemActionAlerts actionError={actionError} validationError={validationError} editOpen={editOpen} />
+        <div className="px-6 py-5">{sharedContent}</div>
+        <ItemFooterActions {...actionProps} embedded />
+      </div>
+    );
+  }
+
   return (
     <section className="flex h-full flex-col bg-white">
       {onMobileBack && <MobileBack onClick={onMobileBack} />}
       <ItemActionAlerts actionError={actionError} validationError={validationError} editOpen={editOpen} />
       <div className="flex-1 overflow-y-auto">
         <div className="px-8 py-7 pb-32">
-          <ItemHeader item={item} isQuestion={isQuestion} actions={<ItemHeaderActions {...actionProps} />} />
-          <ItemMetadataChips item={item} />
-          <ItemMainContent item={item} isQuestion={isQuestion} />
-          <ItemFailureNotice item={item} />
-          <OriginalAiDraftSection item={item} isQuestion={isQuestion} />
-          <OriginalCaptureSection item={item} />
-          {view === "needs-review" && (
-            <CategoryProposalCard
-              item={item}
-              busy={busy}
-              busyAction={busyAction}
-              onApproveCategoryProposal={onApproveCategoryProposal}
-              onRejectCategoryProposal={onRejectCategoryProposal}
-            />
-          )}
-          {editOpen && (
-            <ItemEditForm
-              view={view}
-              item={item}
-              categories={categories}
-              busy={busy}
-              busyAction={busyAction}
-              isQuestion={isQuestion}
-              answerFailureMessage={answerFailureMessage}
-              validationError={validationError}
-              formState={formState}
-              setFormState={setFormState}
-              request={request}
-              onEditAndApprove={onEditAndApprove}
-              onRegenerateAnswer={onRegenerateAnswer}
-            />
-          )}
+          {sharedContent}
         </div>
       </div>
       <ItemFooterActions {...actionProps} />

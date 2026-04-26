@@ -75,12 +75,13 @@ Approved remains approved-only by default. Capture is Telegram-only in V1. Do no
 
 Desktop priority is review-first, not admin-first:
 
-- desktop should prefer a two-column queue + detail layout instead of spending permanent width on admin/navigation chrome
-- the list rail should make it obvious which queue the user is in; Needs Review, Failures, and Approved belong with list controls, not as a separate black navigation area
-- the detail pane should keep title, cleaned text, category, subcategory, type, and main review actions primary
+- mobile should keep the simpler one-column review feed mental model
+- desktop should use that same cleaner control language, but still behave like a real workspace: queue on the left, persistent detail reader on the right
+- Needs Review, Failures, and Approved belong with the main list controls in the sticky header area
+- title, cleaned text, category, subcategory, type, and main review actions stay primary inside the selected item reader
 - category browsing, category management, transcript/source inspection, original AI draft comparison, and other technical/debugging data should stay secondary or hidden behind explicit disclosure by default
 
-The mobile model is a simple three-panel flow: tools, list, detail. Do not introduce React Router unless a task has a strong reason.
+The mobile model should stay simple and avoid route-heavy navigation. Do not introduce React Router unless a task has a strong reason.
 
 ## Frontend Structure
 

@@ -26,7 +26,7 @@ Some areas remain intentionally starter-level or optional for V1, but Mongo pers
 - frontend session-aware login + review workspace
 - frontend review workspace includes Needs Review, Failures, and Approved areas with backend-backed queries for all three views
 - frontend search/filter/sort for all three views: keyword, type, priority, status, category path, date range (`createdFrom`/`createdTo`), sort
-- frontend review workspace now uses a wider queue + detail desktop layout; Needs Review, Failures, and Approved switch in the queue header, while category management lives as a secondary tool instead of a permanent desktop sidebar
+- frontend review workspace now uses a hybrid responsive layout: mobile stays a single stacked review feed with the selected item expanded inline, while desktop restores a true two-column workspace with the queue on the left, a persistent detail reader on the right, and a shared sticky top control surface
 - frontend item detail panel centered on cleaned user-facing content and review actions; original raw text and original AI draft stay secondary/on-demand, while Telegram/debug record metadata is removed from the normal review surface
 - frontend HTTP client normalizes backend JSON errors, 204 responses, non-JSON failures, network failures, and 401 unauthorized session expiry
 - frontend category UI supports selecting category or subcategory filters from a collapsible exact 2-level tree
