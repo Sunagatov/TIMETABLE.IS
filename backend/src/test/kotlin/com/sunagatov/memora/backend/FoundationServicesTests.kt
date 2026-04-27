@@ -37,16 +37,23 @@ import com.sunagatov.memora.backend.review.application.ReviewService
 import com.sunagatov.memora.backend.transcription.application.DisabledVoiceTranscriptionService
 import com.sunagatov.memora.backend.transcription.application.VoiceTranscriptionService
 import com.sunagatov.memora.backend.transcription.infrastructure.OpenAiAudioTranscriptionClient
+import java.io.IOException
+import java.time.Instant
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import java.io.IOException
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ExecutorService
+import org.springframework.core.MethodParameter
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.mock.http.MockHttpInputMessage
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 class FoundationServicesTests {
 
@@ -266,6 +273,40 @@ class FoundationServicesTests {
 
         assertEquals(500, response.statusCode.value())
         assertEquals("Unexpected backend error", response.body!!.message)
+    }
+
+    @Test
+    fun `unreadable request body returns bad request instead of unexpected backend error`() {
+        val response = GlobalExceptionHandler().handleUnreadableMessage(
+            HttpMessageNotReadableException(
+                "JSON parse error",
+                IllegalArgumentException("Exactly one of text or voice must be provided"),
+                MockHttpInputMessage(ByteArray(0))
+            )
+        )
+
+        assertEquals(400, response.statusCode.value())
+        assertEquals("Exactly one of text or voice must be provided", response.body!!.message)
+    }
+
+    @Test
+    fun `type mismatch request parameter returns bad request`() {
+        val response = GlobalExceptionHandler().handleTypeMismatch(
+            MethodArgumentTypeMismatchException(
+                "BAD_STATUS",
+                ItemStatus::class.java,
+                "status",
+                MethodParameter(
+                    TypeMismatchTarget::class.java.getDeclaredMethod("status", ItemStatus::class.java),
+                    0
+                ),
+                IllegalArgumentException("No enum constant")
+            )
+        )
+
+        assertEquals(400, response.statusCode.value())
+        assertContains(response.body!!.message, "status")
+        assertContains(response.body!!.message, "BAD_STATUS")
     }
 
     @Test
@@ -638,7 +679,7 @@ class FoundationServicesTests {
 
     // T8: failure notification shows incremented retry counter after retry and re-fail
     @Test
-    fun `failure notification shows incremented retry counter after retry and re-fail`() {
+    fun `failure notification retry and re-fail within the same second is not suppressed`() {
         val itemStore = InMemoryItemStore()
         val categoryService = createCategoryService(itemStore)
         val processingService = createProcessingService(itemStore, categoryService)
@@ -656,6 +697,7 @@ class FoundationServicesTests {
                 voice = TelegramVoicePayload(fileId = "f-rd", fileUniqueId = "u-rd")
             )
         )
+        val initialFailure = itemStore.findById(ingested.id)!!
 
         val firstPoll = notificationService.listPending()
         assertEquals(1, firstPoll.size)
@@ -663,6 +705,7 @@ class FoundationServicesTests {
             "manualTranscriptionRetries=0, manualAiRetries=0, autoTranscriptionAttempts=3, autoAiAttempts=2",
             firstPoll.single().retryContext
         )
+        notificationService.markDelivered(firstPoll.single().notificationId)
 
         // Retry — re-processes and re-fails — retryCountTranscription becomes 1
         reviewService.retry(ingested.id)
@@ -671,20 +714,21 @@ class FoundationServicesTests {
         assertEquals(ItemStatus.TRANSCRIPTION_FAILED, afterRetry.status)
         assertEquals(1, afterRetry.retryCountTranscription)
 
-        // The notificationId may be the same or different depending on timing;
-        // what matters is the retry context reflects the incremented counter.
-        // Use a fresh notificationStore so we get the current notification regardless.
-        val freshNotificationService = TelegramFailureNotificationService(
-            itemStore = itemStore,
-            notificationStore = InMemoryFailureNotificationStore(),
-            properties = testProperties()
+        val sameSecondUpdatedAt = Instant.ofEpochSecond(
+            initialFailure.updatedAt.epochSecond,
+            987_000_000
         )
-        val secondPoll = freshNotificationService.listPending()
+        itemStore.save(
+            afterRetry.copy(updatedAt = sameSecondUpdatedAt)
+        )
+
+        val secondPoll = notificationService.listPending()
         assertEquals(1, secondPoll.size)
         assertEquals(
             "manualTranscriptionRetries=1, manualAiRetries=0, autoTranscriptionAttempts=3, autoAiAttempts=2",
             secondPoll.single().retryContext
         )
+        assertNotEquals(firstPoll.single().notificationId, secondPoll.single().notificationId)
     }
 
     // T9: query filters by category path level
@@ -1181,4 +1225,9 @@ class FoundationServicesTests {
                 aiAutoRetryAttempts = 2
             )
         )
+
+    private class TypeMismatchTarget {
+        @Suppress("unused")
+        fun status(status: ItemStatus) = status
+    }
 }

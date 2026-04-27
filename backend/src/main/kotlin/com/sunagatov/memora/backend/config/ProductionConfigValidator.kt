@@ -29,6 +29,30 @@ class ProductionConfigValidator(
             if (properties.ownerTelegramUserId.isBlank()) {
                 add("MEMORA_OWNER_TELEGRAM_USER_ID must be set")
             }
+            if (properties.telegramBotToken.isBlank()) {
+                add("MEMORA_TELEGRAM_BOT_TOKEN must be set when production validation is enabled")
+            }
+            if (properties.telegramApiBaseUrl.isBlank()) {
+                add("MEMORA_TELEGRAM_API_BASE_URL must be set when production validation is enabled")
+            }
+            if (properties.transcriptionApiKey.isBlank()) {
+                add("MEMORA_TRANSCRIPTION_API_KEY must be set when production validation is enabled")
+            }
+            if (properties.transcriptionApiBaseUrl.isBlank()) {
+                add("MEMORA_TRANSCRIPTION_API_BASE_URL must be set when production validation is enabled")
+            }
+            if (properties.transcriptionModel.isBlank()) {
+                add("MEMORA_TRANSCRIPTION_MODEL must be set when production validation is enabled")
+            }
+            if (properties.transcriptionTimeoutSeconds <= 0) {
+                add("MEMORA_TRANSCRIPTION_TIMEOUT_SECONDS must be greater than 0")
+            }
+            if (properties.transcriptionMaxAudioBytes <= 0) {
+                add("MEMORA_TRANSCRIPTION_MAX_AUDIO_BYTES must be greater than 0")
+            }
+            if (properties.transcriptionMaxDurationSeconds <= 0) {
+                add("MEMORA_TRANSCRIPTION_MAX_DURATION_SECONDS must be greater than 0")
+            }
             if (properties.aiMode != OPENAI_MODE) {
                 add("MEMORA_AI_MODE must be set to openai when production validation is enabled")
             }

@@ -1,7 +1,5 @@
 package com.sunagatov.memora.backend
 
-import com.sunagatov.memora.backend.capture.api.TELEGRAM_BOT_TOKEN_HEADER
-import com.sunagatov.memora.backend.capture.api.TELEGRAM_CAPTURE_INGEST_PATH
 import com.sunagatov.memora.backend.capture.security.BotIngestTokenFilter
 import com.sunagatov.memora.backend.config.MemoraProperties
 import com.sunagatov.memora.backend.config.ProductionConfigValidator
@@ -16,6 +14,11 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 
 class BackendHardeningTests {
+
+    private companion object {
+        const val TELEGRAM_CAPTURE_INGEST_PATH = "/api/capture/telegram/ingest"
+        const val TELEGRAM_BOT_TOKEN_HEADER = "X-Memora-Bot-Token"
+    }
 
     @Test
     fun `bot ingest filter does not accept blank configured token`() {
@@ -71,6 +74,31 @@ class BackendHardeningTests {
         )
 
         validator.run(DefaultApplicationArguments())
+    }
+
+    @Test
+    fun `production config rejects missing telegram and transcription configuration`() {
+        val validator = ProductionConfigValidator(
+            properties = testProperties(
+                appPasswordHash = "non-default-hash",
+                validateProductionConfig = true,
+                aiMode = "openai",
+                aiApiKey = "ai-key",
+                aiApiBaseUrl = "https://api.openai.com",
+                aiModel = "gpt-4o-mini",
+                aiFallbackToDeterministic = false,
+                telegramBotToken = "",
+                transcriptionApiKey = ""
+            ),
+            environment = MockEnvironment()
+        )
+
+        val exception = assertFailsWith<IllegalStateException> {
+            validator.run(DefaultApplicationArguments())
+        }
+
+        assertContains(exception.message!!, "MEMORA_TELEGRAM_BOT_TOKEN")
+        assertContains(exception.message!!, "MEMORA_TRANSCRIPTION_API_KEY")
     }
 
     @Test
@@ -160,11 +188,20 @@ class BackendHardeningTests {
         appPassword: String? = null,
         appPasswordHash: String = "\$2y\$10\$xH.zhKTca6J1u513ef0STe7Y5Jc1ZuxVyNszPWV/lOMysTGwsukza",
         botIngestToken: String = "bot-token",
+        ownerTelegramUserId: String = "owner-1",
         aiMode: String = "deterministic",
         aiApiKey: String = "",
         aiApiBaseUrl: String = "https://api.openai.com",
         aiModel: String = "gpt-4o-mini",
         aiFallbackToDeterministic: Boolean = true,
+        telegramBotToken: String = "telegram-bot-token",
+        telegramApiBaseUrl: String = "https://api.telegram.org",
+        transcriptionApiKey: String = "transcription-key",
+        transcriptionApiBaseUrl: String = "https://api.openai.com",
+        transcriptionModel: String = "gpt-4o-mini-transcribe",
+        transcriptionTimeoutSeconds: Long = 120,
+        transcriptionMaxAudioBytes: Long = 25L * 1024L * 1024L,
+        transcriptionMaxDurationSeconds: Int = 600,
         validateProductionConfig: Boolean = false
     ): MemoraProperties =
         MemoraProperties(
@@ -178,7 +215,7 @@ class BackendHardeningTests {
             ),
             capture = MemoraProperties.Capture(
                 botIngestToken = botIngestToken,
-                ownerTelegramUserId = "owner-1"
+                ownerTelegramUserId = ownerTelegramUserId
             ),
             category = MemoraProperties.Category(
                 defaultPath = "Default/General"
@@ -186,6 +223,18 @@ class BackendHardeningTests {
             processing = MemoraProperties.Processing(
                 transcriptionAutoRetryAttempts = 3,
                 aiAutoRetryAttempts = 2
+            ),
+            telegram = MemoraProperties.Telegram(
+                botToken = telegramBotToken,
+                apiBaseUrl = telegramApiBaseUrl
+            ),
+            transcription = MemoraProperties.Transcription(
+                apiKey = transcriptionApiKey,
+                apiBaseUrl = transcriptionApiBaseUrl,
+                model = transcriptionModel,
+                timeoutSeconds = transcriptionTimeoutSeconds,
+                maxAudioBytes = transcriptionMaxAudioBytes,
+                maxDurationSeconds = transcriptionMaxDurationSeconds
             ),
             ai = MemoraProperties.Ai(
                 mode = aiMode,

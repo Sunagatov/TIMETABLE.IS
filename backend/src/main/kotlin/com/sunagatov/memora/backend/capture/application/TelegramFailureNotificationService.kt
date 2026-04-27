@@ -26,7 +26,7 @@ class TelegramFailureNotificationService(
 
     private fun toNotification(item: MemoraItem): TelegramFailureNotificationResponse? {
         val telegramChatId = item.telegramTrace?.telegramChatId ?: return null
-        val notificationId = "${item.id}:${item.updatedAt.epochSecond}"
+        val notificationId = notificationIdFor(item)
         val retryContext = buildList {
             add("manualTranscriptionRetries=${item.retryCountTranscription}")
             add("manualAiRetries=${item.retryCountAi}")
@@ -43,4 +43,14 @@ class TelegramFailureNotificationService(
             retryContext = retryContext
         )
     }
+
+    private fun notificationIdFor(item: MemoraItem): String =
+        listOf(
+            item.id,
+            item.status.name,
+            item.failureStage?.name ?: "UNKNOWN",
+            "transcriptionRetries=${item.retryCountTranscription}",
+            "aiRetries=${item.retryCountAi}",
+            item.updatedAt.toString()
+        ).joinToString(":")
 }
